@@ -18,8 +18,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 24 85% 53%;
+    --primary-foreground: 0 0% 98%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -27,33 +27,45 @@
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 24 85% 53%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 24 85% 53%;
 
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Construction company brand colors */
+    --brand-50: 31 100% 97%;
+    --brand-100: 31 100% 92%;
+    --brand-200: 31 100% 85%;
+    --brand-300: 30 100% 74%;
+    --brand-400: 27 96% 63%;
+    --brand-500: 24 85% 53%;
+    --brand-600: 20 85% 45%;
+    --brand-700: 17 85% 37%;
+    --brand-800: 15 79% 31%;
+    --brand-900: 15 75% 28%;
+    --brand-950: 13 88% 14%;
+
+    /* Construction specific colors */
+    --construction-orange: 24 85% 53%;
+    --construction-orange-dark: 20 85% 45%;
+    --construction-steel: 210 11% 35%;
+    --construction-steel-light: 210 11% 71%;
   }
 
   .dark {
