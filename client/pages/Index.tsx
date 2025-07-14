@@ -291,7 +291,15 @@ export default function Index() {
   const handleEditItem = (item: EstimateItem) => {
     setEditingItem(item);
     setSelectedType(item.type);
-    setFormData(item.dimensions);
+    setFormData({
+      description: item.description,
+      length: item.dimensions.length || "",
+      width: item.dimensions.width || "",
+      height: item.dimensions.height || "",
+      diameter: item.dimensions.diameter || "",
+      quantity: item.dimensions.quantity || "1",
+      reinforcementCount: item.dimensions.reinforcementCount || "6",
+    });
     setIsDialogOpen(true);
   };
 
@@ -939,7 +947,7 @@ export default function Index() {
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total Project Cost</span>
                       <span className="text-brand-600">
-                        ৳{totals.totalCost.toLocaleString()}
+                        ���{totals.totalCost.toLocaleString()}
                       </span>
                     </div>
                   </div>
