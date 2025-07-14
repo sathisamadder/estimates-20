@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,132 +20,200 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Textarea } from "@/components/ui/textarea";
+import {
   Calculator,
   Building2,
   FileText,
-  History,
-  Settings,
-  Hammer,
-  Ruler,
-  DollarSign,
+  Save,
+  Download,
+  Printer,
+  Plus,
+  Edit,
+  Trash2,
+  MoreHorizontal,
+  Eye,
+  Copy,
 } from "lucide-react";
 
-interface CalculationResult {
-  cement: number;
-  sand: number;
-  stoneChips: number;
-  reinforcement: number;
-  totalCost: number;
-  volume: number;
+interface EstimateItem {
+  id: string;
+  itemId: string; // C1, C2, P1, B1, etc.
+  type: "pile" | "foundation" | "beam" | "column" | "slab" | "wall";
+  description: string;
+  dimensions: Record<string, string>;
+  results: {
+    cement: number;
+    sand: number;
+    stoneChips: number;
+    reinforcement: number;
+    totalCost: number;
+    volume: number;
+  };
+  unit: string;
+  quantity: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  description: string;
+  items: EstimateItem[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function Index() {
-  const [activeTab, setActiveTab] = useState("pile");
-  const [results, setResults] = useState<CalculationResult | null>(null);
-  const [savedCalculations, setSavedCalculations] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState("items");
+  const [currentProject, setCurrentProject] = useState<Project>({
+    id: "1",
+    name: "Untitled Project",
+    description: "",
+    items: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
 
-  // Pile Work Calculation
-  const [pileData, setPileData] = useState({
+  const [editingItem, setEditingItem] = useState<EstimateItem | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedType, setSelectedType] =
+    useState<EstimateItem["type"]>("column");
+
+  // Form states
+  const [formData, setFormData] = useState({
+    description: "",
+    length: "",
+    width: "",
+    height: "",
     diameter: "",
-    length: "",
-    quantity: "",
-    reinforcementCount: "7",
-  });
-
-  // Foundation Calculation
-  const [foundationData, setFoundationData] = useState({
-    length: "",
-    width: "",
-    height: "",
-    type: "mat",
-  });
-
-  // Beam Calculation
-  const [beamData, setBeamData] = useState({
-    length: "",
-    width: "",
-    height: "",
-    reinforcementCount: "5",
-  });
-
-  // Column Calculation
-  const [columnData, setColumnData] = useState({
-    length: "",
-    width: "",
-    height: "",
+    quantity: "1",
     reinforcementCount: "6",
   });
 
-  const calculatePile = () => {
-    const diameter = parseFloat(pileData.diameter);
-    const length = parseFloat(pileData.length);
-    const quantity = parseFloat(pileData.quantity);
-    const reinforcementCount = parseFloat(pileData.reinforcementCount);
-
-    if (!diameter || !length || !quantity) return;
-
-    // Convert diameter from inches to feet
-    const diameterFt = diameter / 12;
-
-    // Calculate volume (πD²h/4)
-    const volume =
-      ((Math.PI * Math.pow(diameterFt, 2) * length) / 4) * quantity;
-    const dryVolume = volume * 1.5;
-
-    // Concrete ratio 1:1.5:3 (Cement:Sand:Stone)
-    const totalRatio = 1 + 1.5 + 3;
-    const cement = ((dryVolume * 1) / totalRatio) * 1.25; // bags
-    const sand = (dryVolume * 1.5) / totalRatio; // cft
-    const stoneChips = (dryVolume * 3) / totalRatio; // cft
-
-    // Reinforcement calculation
-    const reinforcementLength = length + 2.5; // with lap length
-    const reinforcement =
-      reinforcementCount * reinforcementLength * 0.75 * quantity; // kg
-
-    // Cost estimation (sample rates)
-    const cementRate = 450; // per bag
-    const sandRate = 45; // per cft
-    const stoneRate = 55; // per cft
-    const reinforcementRate = 75; // per kg
-
-    const totalCost =
-      cement * cementRate +
-      sand * sandRate +
-      stoneChips * stoneRate +
-      reinforcement * reinforcementRate;
-
-    const result: CalculationResult = {
-      cement: Math.round(cement * 100) / 100,
-      sand: Math.round(sand * 100) / 100,
-      stoneChips: Math.round(stoneChips * 100) / 100,
-      reinforcement: Math.round(reinforcement * 100) / 100,
-      volume: Math.round(volume * 100) / 100,
-      totalCost: Math.round(totalCost),
+  // Generate next item ID based on type
+  const generateItemId = (type: EstimateItem["type"]): string => {
+    const typePrefix = {
+      pile: "P",
+      foundation: "F",
+      beam: "B",
+      column: "C",
+      slab: "S",
+      wall: "W",
     };
 
-    setResults(result);
+    const existingItems = currentProject.items.filter(
+      (item) => item.type === type,
+    );
+    const nextNumber = existingItems.length + 1;
+    return `${typePrefix[type]}${nextNumber}`;
   };
 
-  const calculateFoundation = () => {
-    const length = parseFloat(foundationData.length);
-    const width = parseFloat(foundationData.width);
-    const height = parseFloat(foundationData.height);
+  // Calculation functions based on type
+  const calculateEstimate = (
+    type: EstimateItem["type"],
+    dimensions: Record<string, string>,
+  ) => {
+    const {
+      length = "0",
+      width = "0",
+      height = "0",
+      diameter = "0",
+      quantity = "1",
+      reinforcementCount = "6",
+    } = dimensions;
 
-    if (!length || !width || !height) return;
+    const qty = parseFloat(quantity);
+    let volume = 0;
+    let reinforcement = 0;
 
-    const volume = length * width * height;
+    switch (type) {
+      case "pile":
+        const pileLength = parseFloat(length);
+        const pileDiameter = parseFloat(diameter) / 12; // inches to feet
+        volume = ((Math.PI * Math.pow(pileDiameter, 2) * pileLength) / 4) * qty;
+        reinforcement =
+          parseFloat(reinforcementCount) * (pileLength + 2.5) * 0.75 * qty;
+        break;
+
+      case "column":
+        const colLength = parseFloat(length) / 12; // inches to feet
+        const colWidth = parseFloat(width) / 12; // inches to feet
+        const colHeight = parseFloat(height);
+        volume = colLength * colWidth * colHeight * qty;
+        reinforcement =
+          parseFloat(reinforcementCount) * (colHeight + 2.5) * 0.75 * qty;
+        break;
+
+      case "beam":
+        const beamLength = parseFloat(length);
+        const beamWidth = parseFloat(width) / 12; // inches to feet
+        const beamHeight = parseFloat(height) / 12; // inches to feet
+        volume = beamLength * beamWidth * beamHeight * qty;
+        reinforcement =
+          parseFloat(reinforcementCount) * beamLength * 0.48 * qty;
+        break;
+
+      case "foundation":
+        volume =
+          parseFloat(length) * parseFloat(width) * parseFloat(height) * qty;
+        reinforcement = volume * 80; // kg per cubic foot
+        break;
+
+      case "slab":
+        volume =
+          parseFloat(length) *
+          parseFloat(width) *
+          (parseFloat(height) / 12) *
+          qty;
+        reinforcement = volume * 60; // kg per cubic foot
+        break;
+
+      case "wall":
+        volume =
+          parseFloat(length) *
+          (parseFloat(width) / 12) *
+          parseFloat(height) *
+          qty;
+        reinforcement = volume * 50; // kg per cubic foot
+        break;
+
+      default:
+        volume = 0;
+        reinforcement = 0;
+    }
+
     const dryVolume = volume * 1.5;
+    const totalRatio = type === "beam" ? 7 : 5.5; // Different ratios for different elements
 
-    // Concrete ratio 1:1.5:3
-    const totalRatio = 5.5;
     const cement = ((dryVolume * 1) / totalRatio) * 1.25;
-    const sand = (dryVolume * 1.5) / totalRatio;
-    const stoneChips = (dryVolume * 3) / totalRatio;
+    const sand = (dryVolume * (type === "beam" ? 2 : 1.5)) / totalRatio;
+    const stoneChips = (dryVolume * (type === "beam" ? 4 : 3)) / totalRatio;
 
-    // Reinforcement estimation
-    const reinforcement = volume * 80; // kg per cubic foot
-
+    // Cost calculation
     const cementRate = 450;
     const sandRate = 45;
     const stoneRate = 55;
@@ -157,7 +225,7 @@ export default function Index() {
       stoneChips * stoneRate +
       reinforcement * reinforcementRate;
 
-    const result: CalculationResult = {
+    return {
       cement: Math.round(cement * 100) / 100,
       sand: Math.round(sand * 100) / 100,
       stoneChips: Math.round(stoneChips * 100) / 100,
@@ -165,116 +233,402 @@ export default function Index() {
       volume: Math.round(volume * 100) / 100,
       totalCost: Math.round(totalCost),
     };
-
-    setResults(result);
   };
 
-  const calculateBeam = () => {
-    const length = parseFloat(beamData.length);
-    const width = parseFloat(beamData.width) / 12; // convert inches to feet
-    const height = parseFloat(beamData.height) / 12; // convert inches to feet
-    const reinforcementCount = parseFloat(beamData.reinforcementCount);
+  const handleAddItem = () => {
+    const results = calculateEstimate(selectedType, formData);
+    const itemId = editingItem
+      ? editingItem.itemId
+      : generateItemId(selectedType);
 
-    if (!length || !width || !height) return;
-
-    const volume = length * width * height;
-    const dryVolume = volume * 1.5;
-
-    // Concrete ratio 1:2:4 for beams
-    const totalRatio = 7;
-    const cement = ((dryVolume * 1) / totalRatio) * 1.25;
-    const sand = (dryVolume * 2) / totalRatio;
-    const stoneChips = (dryVolume * 4) / totalRatio;
-
-    // Reinforcement calculation
-    const reinforcement = reinforcementCount * length * 0.48; // kg
-
-    const cementRate = 450;
-    const sandRate = 45;
-    const stoneRate = 55;
-    const reinforcementRate = 75;
-
-    const totalCost =
-      cement * cementRate +
-      sand * sandRate +
-      stoneChips * stoneRate +
-      reinforcement * reinforcementRate;
-
-    const result: CalculationResult = {
-      cement: Math.round(cement * 100) / 100,
-      sand: Math.round(sand * 100) / 100,
-      stoneChips: Math.round(stoneChips * 100) / 100,
-      reinforcement: Math.round(reinforcement * 100) / 100,
-      volume: Math.round(volume * 100) / 100,
-      totalCost: Math.round(totalCost),
-    };
-
-    setResults(result);
-  };
-
-  const calculateColumn = () => {
-    const length = parseFloat(columnData.length) / 12; // convert inches to feet
-    const width = parseFloat(columnData.width) / 12; // convert inches to feet
-    const height = parseFloat(columnData.height);
-    const reinforcementCount = parseFloat(columnData.reinforcementCount);
-
-    if (!length || !width || !height) return;
-
-    const volume = length * width * height;
-    const dryVolume = volume * 1.5;
-
-    // Concrete ratio 1:1.5:3
-    const totalRatio = 5.5;
-    const cement = ((dryVolume * 1) / totalRatio) * 1.25;
-    const sand = (dryVolume * 1.5) / totalRatio;
-    const stoneChips = (dryVolume * 3) / totalRatio;
-
-    // Reinforcement calculation
-    const reinforcement = reinforcementCount * (height + 2.5) * 0.75; // kg
-
-    const cementRate = 450;
-    const sandRate = 45;
-    const stoneRate = 55;
-    const reinforcementRate = 75;
-
-    const totalCost =
-      cement * cementRate +
-      sand * sandRate +
-      stoneChips * stoneRate +
-      reinforcement * reinforcementRate;
-
-    const result: CalculationResult = {
-      cement: Math.round(cement * 100) / 100,
-      sand: Math.round(sand * 100) / 100,
-      stoneChips: Math.round(stoneChips * 100) / 100,
-      reinforcement: Math.round(reinforcement * 100) / 100,
-      volume: Math.round(volume * 100) / 100,
-      totalCost: Math.round(totalCost),
-    };
-
-    setResults(result);
-  };
-
-  const saveCalculation = () => {
-    if (!results) return;
-
-    const calculation = {
-      id: Date.now(),
-      type: activeTab,
-      data:
-        activeTab === "pile"
-          ? pileData
-          : activeTab === "foundation"
-            ? foundationData
-            : activeTab === "beam"
-              ? beamData
-              : columnData,
+    const newItem: EstimateItem = {
+      id: editingItem ? editingItem.id : Date.now().toString(),
+      itemId,
+      type: selectedType,
+      description:
+        formData.description ||
+        `${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} ${itemId}`,
+      dimensions: { ...formData },
       results,
-      date: new Date().toLocaleDateString(),
+      unit: selectedType === "pile" ? "each" : "cft",
+      quantity: parseFloat(formData.quantity),
+      createdAt: editingItem ? editingItem.createdAt : new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
-    setSavedCalculations([calculation, ...savedCalculations]);
+    if (editingItem) {
+      // Update existing item
+      setCurrentProject((prev) => ({
+        ...prev,
+        items: prev.items.map((item) =>
+          item.id === editingItem.id ? newItem : item,
+        ),
+        updatedAt: new Date().toISOString(),
+      }));
+    } else {
+      // Add new item
+      setCurrentProject((prev) => ({
+        ...prev,
+        items: [...prev.items, newItem],
+        updatedAt: new Date().toISOString(),
+      }));
+    }
+
+    // Reset form
+    setFormData({
+      description: "",
+      length: "",
+      width: "",
+      height: "",
+      diameter: "",
+      quantity: "1",
+      reinforcementCount: "6",
+    });
+    setEditingItem(null);
+    setIsDialogOpen(false);
   };
+
+  const handleEditItem = (item: EstimateItem) => {
+    setEditingItem(item);
+    setSelectedType(item.type);
+    setFormData(item.dimensions);
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteItem = (itemId: string) => {
+    setCurrentProject((prev) => ({
+      ...prev,
+      items: prev.items.filter((item) => item.id !== itemId),
+      updatedAt: new Date().toISOString(),
+    }));
+  };
+
+  const handleDuplicateItem = (item: EstimateItem) => {
+    const newItemId = generateItemId(item.type);
+    const duplicatedItem: EstimateItem = {
+      ...item,
+      id: Date.now().toString(),
+      itemId: newItemId,
+      description: `${item.description} (Copy)`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    setCurrentProject((prev) => ({
+      ...prev,
+      items: [...prev.items, duplicatedItem],
+      updatedAt: new Date().toISOString(),
+    }));
+  };
+
+  const getTotalEstimate = () => {
+    return currentProject.items.reduce(
+      (totals, item) => ({
+        cement: totals.cement + item.results.cement,
+        sand: totals.sand + item.results.sand,
+        stoneChips: totals.stoneChips + item.results.stoneChips,
+        reinforcement: totals.reinforcement + item.results.reinforcement,
+        totalCost: totals.totalCost + item.results.totalCost,
+        volume: totals.volume + item.results.volume,
+      }),
+      {
+        cement: 0,
+        sand: 0,
+        stoneChips: 0,
+        reinforcement: 0,
+        totalCost: 0,
+        volume: 0,
+      },
+    );
+  };
+
+  const renderDimensionFields = () => {
+    switch (selectedType) {
+      case "pile":
+        return (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="diameter">Diameter (inches)</Label>
+                <Input
+                  id="diameter"
+                  placeholder="e.g., 20"
+                  value={formData.diameter}
+                  onChange={(e) =>
+                    setFormData({ ...formData, diameter: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="length">Length (feet)</Label>
+                <Input
+                  id="length"
+                  placeholder="e.g., 60"
+                  value={formData.length}
+                  onChange={(e) =>
+                    setFormData({ ...formData, length: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="quantity">Quantity</Label>
+                <Input
+                  id="quantity"
+                  placeholder="e.g., 7"
+                  value={formData.quantity}
+                  onChange={(e) =>
+                    setFormData({ ...formData, quantity: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="reinforcement">Reinforcement Bars</Label>
+                <Select
+                  value={formData.reinforcementCount}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, reinforcementCount: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="6">6 bars</SelectItem>
+                    <SelectItem value="7">7 bars</SelectItem>
+                    <SelectItem value="8">8 bars</SelectItem>
+                    <SelectItem value="10">10 bars</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </>
+        );
+
+      case "column":
+        return (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="length">Length (inches)</Label>
+                <Input
+                  id="length"
+                  placeholder="e.g., 12"
+                  value={formData.length}
+                  onChange={(e) =>
+                    setFormData({ ...formData, length: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="width">Width (inches)</Label>
+                <Input
+                  id="width"
+                  placeholder="e.g., 15"
+                  value={formData.width}
+                  onChange={(e) =>
+                    setFormData({ ...formData, width: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="height">Height (feet)</Label>
+                <Input
+                  id="height"
+                  placeholder="e.g., 10"
+                  value={formData.height}
+                  onChange={(e) =>
+                    setFormData({ ...formData, height: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="reinforcement">Main Reinforcement</Label>
+                <Select
+                  value={formData.reinforcementCount}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, reinforcementCount: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="4">4 bars</SelectItem>
+                    <SelectItem value="6">6 bars</SelectItem>
+                    <SelectItem value="8">8 bars</SelectItem>
+                    <SelectItem value="10">10 bars</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </>
+        );
+
+      case "beam":
+        return (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="length">Length (feet)</Label>
+                <Input
+                  id="length"
+                  placeholder="e.g., 28"
+                  value={formData.length}
+                  onChange={(e) =>
+                    setFormData({ ...formData, length: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="width">Width (inches)</Label>
+                <Input
+                  id="width"
+                  placeholder="e.g., 10"
+                  value={formData.width}
+                  onChange={(e) =>
+                    setFormData({ ...formData, width: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="height">Height (inches)</Label>
+                <Input
+                  id="height"
+                  placeholder="e.g., 18"
+                  value={formData.height}
+                  onChange={(e) =>
+                    setFormData({ ...formData, height: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="reinforcement">Main Reinforcement</Label>
+                <Select
+                  value={formData.reinforcementCount}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, reinforcementCount: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="4">4 bars</SelectItem>
+                    <SelectItem value="5">5 bars</SelectItem>
+                    <SelectItem value="6">6 bars</SelectItem>
+                    <SelectItem value="8">8 bars</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </>
+        );
+
+      case "foundation":
+        return (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="length">Length (feet)</Label>
+                <Input
+                  id="length"
+                  placeholder="e.g., 100"
+                  value={formData.length}
+                  onChange={(e) =>
+                    setFormData({ ...formData, length: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="width">Width (feet)</Label>
+                <Input
+                  id="width"
+                  placeholder="e.g., 46.5"
+                  value={formData.width}
+                  onChange={(e) =>
+                    setFormData({ ...formData, width: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="height">Height (feet)</Label>
+                <Input
+                  id="height"
+                  placeholder="e.g., 1.5"
+                  value={formData.height}
+                  onChange={(e) =>
+                    setFormData({ ...formData, height: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="quantity">Quantity</Label>
+                <Input
+                  id="quantity"
+                  placeholder="e.g., 1"
+                  value={formData.quantity}
+                  onChange={(e) =>
+                    setFormData({ ...formData, quantity: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+          </>
+        );
+
+      default:
+        return (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="length">Length (feet)</Label>
+              <Input
+                id="length"
+                placeholder="Length"
+                value={formData.length}
+                onChange={(e) =>
+                  setFormData({ ...formData, length: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="width">Width (feet)</Label>
+              <Input
+                id="width"
+                placeholder="Width"
+                value={formData.width}
+                onChange={(e) =>
+                  setFormData({ ...formData, width: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="height">Height (feet)</Label>
+              <Input
+                id="height"
+                placeholder="Height"
+                value={formData.height}
+                onChange={(e) =>
+                  setFormData({ ...formData, height: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="quantity">Quantity</Label>
+              <Input
+                id="quantity"
+                placeholder="e.g., 1"
+                value={formData.quantity}
+                onChange={(e) =>
+                  setFormData({ ...formData, quantity: e.target.value })
+                }
+              />
+            </div>
+          </div>
+        );
+    }
+  };
+
+  const totals = getTotalEstimate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-amber-50">
@@ -288,20 +642,25 @@ export default function Index() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">
-                  Construction Cost Calculator
+                  Professional Estimator
                 </h1>
                 <p className="text-sm text-gray-600">
-                  Personal Estimation Tool
+                  {currentProject.name} • {currentProject.items.length} items
                 </p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Badge variant="outline" className="text-xs">
-                {savedCalculations.length} Saved
-              </Badge>
               <Button variant="outline" size="sm">
-                <History className="h-4 w-4 mr-2" />
-                History
+                <Save className="h-4 w-4 mr-2" />
+                Save Project
+              </Button>
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+              <Button variant="outline" size="sm">
+                <Printer className="h-4 w-4 mr-2" />
+                Print
               </Button>
             </div>
           </div>
@@ -309,445 +668,388 @@ export default function Index() {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Input Section */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Ruler className="h-5 w-5" />
-                  <span>Project Calculator</span>
-                </CardTitle>
-                <CardDescription>
-                  Enter dimensions and specifications for your construction
-                  project
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="pile">Pile Work</TabsTrigger>
-                    <TabsTrigger value="foundation">Foundation</TabsTrigger>
-                    <TabsTrigger value="beam">Beam Work</TabsTrigger>
-                    <TabsTrigger value="column">Column</TabsTrigger>
-                  </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="items">Project Items</TabsTrigger>
+            <TabsTrigger value="summary">Cost Summary</TabsTrigger>
+            <TabsTrigger value="details">Detailed Report</TabsTrigger>
+          </TabsList>
 
-                  <TabsContent value="pile" className="space-y-4 mt-6">
+          <TabsContent value="items" className="space-y-6 mt-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Project Items
+                </h2>
+                <p className="text-gray-600">
+                  Manage construction elements and their estimates
+                </p>
+              </div>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-brand-500 hover:bg-brand-600">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Item
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingItem ? "Edit Item" : "Add New Item"}
+                    </DialogTitle>
+                    <DialogDescription>
+                      {editingItem
+                        ? "Update the item details and calculations"
+                        : "Add a new construction element to your estimate"}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="pile-diameter">
-                          Pile Diameter (inches)
+                        <Label htmlFor="item-type">Item Type</Label>
+                        <Select
+                          value={selectedType}
+                          onValueChange={(value: EstimateItem["type"]) =>
+                            setSelectedType(value)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="column">Column</SelectItem>
+                            <SelectItem value="beam">Beam</SelectItem>
+                            <SelectItem value="pile">Pile</SelectItem>
+                            <SelectItem value="foundation">
+                              Foundation
+                            </SelectItem>
+                            <SelectItem value="slab">Slab</SelectItem>
+                            <SelectItem value="wall">Wall</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="description">
+                          Description (Optional)
                         </Label>
                         <Input
-                          id="pile-diameter"
-                          placeholder="e.g., 20"
-                          value={pileData.diameter}
+                          id="description"
+                          placeholder="e.g., Main structural column"
+                          value={formData.description}
                           onChange={(e) =>
-                            setPileData({
-                              ...pileData,
-                              diameter: e.target.value,
+                            setFormData({
+                              ...formData,
+                              description: e.target.value,
                             })
                           }
                         />
-                      </div>
-                      <div>
-                        <Label htmlFor="pile-length">Pile Length (feet)</Label>
-                        <Input
-                          id="pile-length"
-                          placeholder="e.g., 60"
-                          value={pileData.length}
-                          onChange={(e) =>
-                            setPileData({ ...pileData, length: e.target.value })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="pile-quantity">Number of Piles</Label>
-                        <Input
-                          id="pile-quantity"
-                          placeholder="e.g., 7"
-                          value={pileData.quantity}
-                          onChange={(e) =>
-                            setPileData({
-                              ...pileData,
-                              quantity: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="pile-rein">Reinforcement Bars</Label>
-                        <Select
-                          value={pileData.reinforcementCount}
-                          onValueChange={(value) =>
-                            setPileData({
-                              ...pileData,
-                              reinforcementCount: value,
-                            })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="6">6 bars</SelectItem>
-                            <SelectItem value="7">7 bars</SelectItem>
-                            <SelectItem value="8">8 bars</SelectItem>
-                            <SelectItem value="10">10 bars</SelectItem>
-                          </SelectContent>
-                        </Select>
                       </div>
                     </div>
+                    {renderDimensionFields()}
+                  </div>
+                  <DialogFooter>
                     <Button
-                      onClick={calculatePile}
-                      className="w-full bg-brand-500 hover:bg-brand-600"
-                    >
-                      <Calculator className="h-4 w-4 mr-2" />
-                      Calculate Pile Work
-                    </Button>
-                  </TabsContent>
-
-                  <TabsContent value="foundation" className="space-y-4 mt-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="foundation-length">Length (feet)</Label>
-                        <Input
-                          id="foundation-length"
-                          placeholder="e.g., 100"
-                          value={foundationData.length}
-                          onChange={(e) =>
-                            setFoundationData({
-                              ...foundationData,
-                              length: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="foundation-width">Width (feet)</Label>
-                        <Input
-                          id="foundation-width"
-                          placeholder="e.g., 46.5"
-                          value={foundationData.width}
-                          onChange={(e) =>
-                            setFoundationData({
-                              ...foundationData,
-                              width: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="foundation-height">Height (feet)</Label>
-                        <Input
-                          id="foundation-height"
-                          placeholder="e.g., 1.5"
-                          value={foundationData.height}
-                          onChange={(e) =>
-                            setFoundationData({
-                              ...foundationData,
-                              height: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="foundation-type">Foundation Type</Label>
-                        <Select
-                          value={foundationData.type}
-                          onValueChange={(value) =>
-                            setFoundationData({
-                              ...foundationData,
-                              type: value,
-                            })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="mat">Mat Foundation</SelectItem>
-                            <SelectItem value="pile-cap">Pile Cap</SelectItem>
-                            <SelectItem value="footing">
-                              Isolated Footing
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={calculateFoundation}
-                      className="w-full bg-brand-500 hover:bg-brand-600"
-                    >
-                      <Calculator className="h-4 w-4 mr-2" />
-                      Calculate Foundation
-                    </Button>
-                  </TabsContent>
-
-                  <TabsContent value="beam" className="space-y-4 mt-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="beam-length">Length (feet)</Label>
-                        <Input
-                          id="beam-length"
-                          placeholder="e.g., 28"
-                          value={beamData.length}
-                          onChange={(e) =>
-                            setBeamData({ ...beamData, length: e.target.value })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="beam-width">Width (inches)</Label>
-                        <Input
-                          id="beam-width"
-                          placeholder="e.g., 10"
-                          value={beamData.width}
-                          onChange={(e) =>
-                            setBeamData({ ...beamData, width: e.target.value })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="beam-height">Height (inches)</Label>
-                        <Input
-                          id="beam-height"
-                          placeholder="e.g., 18"
-                          value={beamData.height}
-                          onChange={(e) =>
-                            setBeamData({ ...beamData, height: e.target.value })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="beam-rein">Main Reinforcement</Label>
-                        <Select
-                          value={beamData.reinforcementCount}
-                          onValueChange={(value) =>
-                            setBeamData({
-                              ...beamData,
-                              reinforcementCount: value,
-                            })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="4">4 bars</SelectItem>
-                            <SelectItem value="5">5 bars</SelectItem>
-                            <SelectItem value="6">6 bars</SelectItem>
-                            <SelectItem value="8">8 bars</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={calculateBeam}
-                      className="w-full bg-brand-500 hover:bg-brand-600"
-                    >
-                      <Calculator className="h-4 w-4 mr-2" />
-                      Calculate Beam Work
-                    </Button>
-                  </TabsContent>
-
-                  <TabsContent value="column" className="space-y-4 mt-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="column-length">Length (inches)</Label>
-                        <Input
-                          id="column-length"
-                          placeholder="e.g., 12"
-                          value={columnData.length}
-                          onChange={(e) =>
-                            setColumnData({
-                              ...columnData,
-                              length: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="column-width">Width (inches)</Label>
-                        <Input
-                          id="column-width"
-                          placeholder="e.g., 15"
-                          value={columnData.width}
-                          onChange={(e) =>
-                            setColumnData({
-                              ...columnData,
-                              width: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="column-height">Height (feet)</Label>
-                        <Input
-                          id="column-height"
-                          placeholder="e.g., 10"
-                          value={columnData.height}
-                          onChange={(e) =>
-                            setColumnData({
-                              ...columnData,
-                              height: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="column-rein">Main Reinforcement</Label>
-                        <Select
-                          value={columnData.reinforcementCount}
-                          onValueChange={(value) =>
-                            setColumnData({
-                              ...columnData,
-                              reinforcementCount: value,
-                            })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="4">4 bars</SelectItem>
-                            <SelectItem value="6">6 bars</SelectItem>
-                            <SelectItem value="8">8 bars</SelectItem>
-                            <SelectItem value="10">10 bars</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={calculateColumn}
-                      className="w-full bg-brand-500 hover:bg-brand-600"
-                    >
-                      <Calculator className="h-4 w-4 mr-2" />
-                      Calculate Column Work
-                    </Button>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Results Section */}
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <DollarSign className="h-5 w-5" />
-                  <span>Calculation Results</span>
-                </CardTitle>
-                <CardDescription>
-                  Material quantities and cost estimation
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {results ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Volume:</span>
-                          <span className="font-medium">
-                            {results.volume} cft
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Cement:</span>
-                          <span className="font-medium">
-                            {results.cement} bags
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Sand:</span>
-                          <span className="font-medium">
-                            {results.sand} cft
-                          </span>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Stone Chips:</span>
-                          <span className="font-medium">
-                            {results.stoneChips} cft
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Steel:</span>
-                          <span className="font-medium">
-                            {results.reinforcement} kg
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    <div className="bg-brand-50 p-4 rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <span className="font-semibold text-gray-900">
-                          Total Cost:
-                        </span>
-                        <span className="text-2xl font-bold text-brand-600">
-                          ৳{results.totalCost.toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-
-                    <Button
-                      onClick={saveCalculation}
                       variant="outline"
-                      className="w-full"
+                      onClick={() => setIsDialogOpen(false)}
                     >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Save Calculation
+                      Cancel
                     </Button>
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Calculator className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">
-                      Enter dimensions and click calculate to see results
-                    </p>
-                  </div>
-                )}
+                    <Button
+                      onClick={handleAddItem}
+                      className="bg-brand-500 hover:bg-brand-600"
+                    >
+                      {editingItem ? "Update Item" : "Add Item"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Item ID</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Dimensions</TableHead>
+                      <TableHead>Volume</TableHead>
+                      <TableHead className="text-right">Cost</TableHead>
+                      <TableHead className="w-[50px]"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {currentProject.items.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>
+                          <Badge variant="outline" className="font-mono">
+                            {item.itemId}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="capitalize">
+                          {item.type}
+                        </TableCell>
+                        <TableCell>{item.description}</TableCell>
+                        <TableCell className="text-sm text-gray-600">
+                          {item.type === "pile"
+                            ? `∅${item.dimensions.diameter}" × ${item.dimensions.length}' × ${item.dimensions.quantity}`
+                            : item.type === "column"
+                              ? `${item.dimensions.length}" × ${item.dimensions.width}" × ${item.dimensions.height}'`
+                              : `${item.dimensions.length}' × ${item.dimensions.width}' × ${item.dimensions.height}'`}
+                        </TableCell>
+                        <TableCell>{item.results.volume} cft</TableCell>
+                        <TableCell className="text-right font-medium">
+                          ৳{item.results.totalCost.toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => handleEditItem(item)}
+                              >
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleDuplicateItem(item)}
+                              >
+                                <Copy className="mr-2 h-4 w-4" />
+                                Duplicate
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteItem(item.id)}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {currentProject.items.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8">
+                          <div className="flex flex-col items-center">
+                            <Building2 className="h-12 w-12 text-gray-300 mb-4" />
+                            <p className="text-gray-500">No items added yet</p>
+                            <p className="text-sm text-gray-400">
+                              Click "Add Item" to start building your estimate
+                            </p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
+          </TabsContent>
 
-            {/* Saved Calculations */}
-            {savedCalculations.length > 0 && (
-              <Card className="mt-6">
+          <TabsContent value="summary" className="space-y-6 mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <History className="h-5 w-5" />
-                    <span>Recent Calculations</span>
-                  </CardTitle>
+                  <CardTitle>Material Summary</CardTitle>
+                  <CardDescription>
+                    Total material requirements for the project
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {savedCalculations.slice(0, 3).map((calc) => (
-                      <div key={calc.id} className="p-3 bg-gray-50 rounded-lg">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <Badge variant="outline" className="text-xs mb-1">
-                              {calc.type}
-                            </Badge>
-                            <p className="text-sm font-medium">
-                              ৳{calc.results.totalCost.toLocaleString()}
-                            </p>
-                            <p className="text-xs text-gray-500">{calc.date}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <p className="text-sm text-blue-600">Cement</p>
+                      <p className="text-2xl font-bold text-blue-900">
+                        {totals.cement.toFixed(2)}
+                      </p>
+                      <p className="text-sm text-blue-600">bags</p>
+                    </div>
+                    <div className="p-4 bg-amber-50 rounded-lg">
+                      <p className="text-sm text-amber-600">Sand</p>
+                      <p className="text-2xl font-bold text-amber-900">
+                        {totals.sand.toFixed(2)}
+                      </p>
+                      <p className="text-sm text-amber-600">cft</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-600">Stone Chips</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {totals.stoneChips.toFixed(2)}
+                      </p>
+                      <p className="text-sm text-gray-600">cft</p>
+                    </div>
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <p className="text-sm text-green-600">Steel</p>
+                      <p className="text-2xl font-bold text-green-900">
+                        {totals.reinforcement.toFixed(2)}
+                      </p>
+                      <p className="text-sm text-green-600">kg</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            )}
-          </div>
-        </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Cost Breakdown</CardTitle>
+                  <CardDescription>
+                    Estimated costs by material type
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span>
+                        Cement ({totals.cement.toFixed(1)} bags @ ৳450)
+                      </span>
+                      <span className="font-medium">
+                        ৳{(totals.cement * 450).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Sand ({totals.sand.toFixed(1)} cft @ ৳45)</span>
+                      <span className="font-medium">
+                        ৳{(totals.sand * 45).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>
+                        Stone Chips ({totals.stoneChips.toFixed(1)} cft @ ৳55)
+                      </span>
+                      <span className="font-medium">
+                        ৳{(totals.stoneChips * 55).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>
+                        Steel ({totals.reinforcement.toFixed(1)} kg @ ৳75)
+                      </span>
+                      <span className="font-medium">
+                        ৳{(totals.reinforcement * 75).toLocaleString()}
+                      </span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>Total Project Cost</span>
+                      <span className="text-brand-600">
+                        ৳{totals.totalCost.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="details" className="space-y-6 mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Detailed Estimate Report</CardTitle>
+                <CardDescription>
+                  Comprehensive breakdown of all project items
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {currentProject.items.map((item) => (
+                    <div key={item.id} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h4 className="font-semibold text-lg">
+                            {item.itemId} - {item.description}
+                          </h4>
+                          <p className="text-gray-600 capitalize">
+                            {item.type} Work
+                          </p>
+                        </div>
+                        <Badge variant="outline">{item.itemId}</Badge>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <h5 className="font-medium mb-2">
+                            Dimensions & Specifications
+                          </h5>
+                          <div className="text-sm space-y-1">
+                            {Object.entries(item.dimensions).map(
+                              ([key, value]) => (
+                                <div key={key} className="flex justify-between">
+                                  <span className="capitalize text-gray-600">
+                                    {key.replace(/([A-Z])/g, " $1")}:
+                                  </span>
+                                  <span>
+                                    {value}{" "}
+                                    {key.includes("diameter") ||
+                                    key.includes("width") ||
+                                    key.includes("length")
+                                      ? key.includes("diameter") ||
+                                        (key.includes("width") &&
+                                          item.type !== "foundation")
+                                        ? '"'
+                                        : "'"
+                                      : key === "quantity" ||
+                                          key === "reinforcementCount"
+                                        ? "nos"
+                                        : ""}
+                                  </span>
+                                </div>
+                              ),
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h5 className="font-medium mb-2">
+                            Material Requirements
+                          </h5>
+                          <div className="text-sm space-y-1">
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">
+                                Concrete Volume:
+                              </span>
+                              <span>{item.results.volume} cft</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Cement:</span>
+                              <span>{item.results.cement} bags</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Sand:</span>
+                              <span>{item.results.sand} cft</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">
+                                Stone Chips:
+                              </span>
+                              <span>{item.results.stoneChips} cft</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Steel:</span>
+                              <span>{item.results.reinforcement} kg</span>
+                            </div>
+                            <div className="flex justify-between font-medium pt-2 border-t">
+                              <span>Item Cost:</span>
+                              <span className="text-brand-600">
+                                ৳{item.results.totalCost.toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
