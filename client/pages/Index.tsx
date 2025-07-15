@@ -445,7 +445,7 @@ export default function Index() {
     let reinforcementDetails: ReinforcementDetails = {};
 
     switch (type) {
-      case "pile":
+      case "pile": {
         // Formula: πD²h/4 with dry volume = 1.50
         const pileLength = parseFloat(length);
         const pileDiameter = parseFloat(diameter) / 12; // inches to feet
@@ -489,6 +489,7 @@ export default function Index() {
         };
         reinforcement = longReinforcement + spiralReinforcement;
         break;
+      }
 
       case "pile_cap":
         // Pile cap calculation
