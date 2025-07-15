@@ -71,7 +71,7 @@ import {
   Triangle,
   Zap,
   Droplets,
-  Stairs,
+  Navigation,
   Grid3X3,
   Package,
   Paintbrush2,
