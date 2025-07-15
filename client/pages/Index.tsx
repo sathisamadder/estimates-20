@@ -718,20 +718,42 @@ export default function Index() {
         sand = (dryVolume * beamRatios[1]) / beamTotalRatio;
         stoneChips = (dryVolume * beamRatios[2]) / beamTotalRatio;
 
-        // Detailed beam reinforcement
-        const beamMainReinforcement =
-          parseFloat(reinforcementCount) * beamLength * 0.48;
-        const beamExtraTopReinforcement = 3 * (beamLength / 4) * 0.48; // L/4 length at supports
+        // Enhanced beam reinforcement with variable bar sizes
+        const beamMainBarWeight =
+          parseFloat(barDiameter) === 10
+            ? 0.19
+            : parseFloat(barDiameter) === 12
+              ? 0.27
+              : parseFloat(barDiameter) === 16
+                ? 0.48
+                : parseFloat(barDiameter) === 20
+                  ? 0.75
+                  : parseFloat(barDiameter) === 25
+                    ? 1.17
+                    : 1.88;
+        const beamStirrupBarWeight =
+          parseFloat(stirrupDiameter) === 8 ? 0.12 : 0.19;
 
-        // Beam stirrups - different spacing zones
-        const stirrupLength6inch = (beamLength * 0.5) / 0.5; // 6" c/c spacing
-        const stirrupLength8inch = (beamLength * 0.5) / 0.67; // 8" c/c spacing
+        const beamMainReinforcement =
+          parseFloat(reinforcementCount) * beamLength * beamMainBarWeight;
+        const beamExtraTopReinforcement =
+          3 * (beamLength / 4) * beamMainBarWeight; // L/4 length at supports
+
+        // Beam stirrups - different spacing zones with custom spacing
+        const customSpacing = parseFloat(stirrupSpacing);
+        const stirrupLength6inch = (beamLength * 0.5) / (customSpacing / 12); // Custom spacing
+        const stirrupLength8inch =
+          (beamLength * 0.5) / ((customSpacing + 2) / 12); // Custom spacing + 2
+        const clearCoverInches = parseFloat(clearCover);
         const beamStirrupPerimeter =
-          (2 * (parseFloat(width) + parseFloat(height) - 6)) / 12 + 4 / 12; // Add hooks
+          (2 *
+            (parseFloat(width) + parseFloat(height) - clearCoverInches * 2)) /
+            12 +
+          4 / 12; // Add hooks
         const beamStirrupReinforcement =
           (stirrupLength6inch + stirrupLength8inch) *
           beamStirrupPerimeter *
-          0.19;
+          beamStirrupBarWeight;
 
         reinforcementDetails = {
           mainReinforcement: beamMainReinforcement,
