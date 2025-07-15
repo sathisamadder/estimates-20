@@ -77,6 +77,8 @@ import {
   Paintbrush2,
   HardHat,
   User,
+  Activity,
+  Anchor,
 } from "lucide-react";
 
 type ItemType =
@@ -96,6 +98,18 @@ type ItemType =
   | "brick_work"
   | "plaster_work";
 
+interface ReinforcementDetails {
+  mainReinforcement: number;
+  distributionReinforcement?: number;
+  stirrups?: number;
+  spiralReinforcement?: number;
+  extraTopReinforcement?: number;
+  longDirection?: number;
+  shortDirection?: number;
+  topReinforcement?: number;
+  bottomReinforcement?: number;
+}
+
 interface EstimateItem {
   id: string;
   itemId: string; // P1, PC1, MF1, F1, RW1, WR1, LC1, ST1, C1, B1, S1, SL1, OT1, BW1, PL1
@@ -107,6 +121,7 @@ interface EstimateItem {
     sand: number;
     stoneChips: number;
     reinforcement: number;
+    reinforcementDetails: ReinforcementDetails;
     totalCost: number;
     volume: number;
     brickQuantity?: number;
@@ -189,6 +204,9 @@ export default function Index() {
     windowWidth: "",
     windowHeight: "",
     footingType: "",
+    stirrupSpacing: "4",
+    barDiameter: "20",
+    clearCover: "1.5",
   });
 
   const itemTypeConfig = {
@@ -221,7 +239,7 @@ export default function Index() {
       prefix: "F",
       name: "Footing",
       category: "Foundation",
-      icon: Square,
+      icon: Anchor,
       color: "text-blue-600",
       bgColor: "bg-blue-50",
     },
@@ -369,7 +387,7 @@ export default function Index() {
     return `${config.prefix}${nextNumber}`;
   };
 
-  // Advanced calculation functions based on original document formulas
+  // Enhanced calculation functions with detailed reinforcement
   const calculateEstimate = (
     type: ItemType,
     dimensions: Record<string, string>,
@@ -386,6 +404,9 @@ export default function Index() {
       plasterThickness = "0",
       wallHeight = "0",
       footingType = "isolated",
+      stirrupSpacing = "4",
+      barDiameter = "20",
+      clearCover = "1.5",
     } = dimensions;
 
     const qty = parseFloat(quantity);
@@ -398,6 +419,11 @@ export default function Index() {
     let sand = 0;
     let stoneChips = 0;
 
+    // Initialize reinforcement details
+    let reinforcementDetails: ReinforcementDetails = {
+      mainReinforcement: 0,
+    };
+
     switch (type) {
       case "pile":
         // Formula: πD²h/4 with dry volume = 1.50
@@ -409,10 +435,18 @@ export default function Index() {
         cement = ((dryVolume * 1) / 5.5) * 1.25;
         sand = (dryVolume * 1.5) / 5.5;
         stoneChips = (dryVolume * 3) / 5.5;
-        // Reinforcement: long + spiral
+
+        // Detailed reinforcement calculation for pile
         const longReinforcement =
           parseFloat(reinforcementCount) * (pileLength + 2.5) * 0.75 * qty;
-        const spiralReinforcement = ((pileLength / 0.33) * 4 * 0.19) / 40; // 10mm bars
+        const spiralLength = pileLength / (parseFloat(stirrupSpacing) / 12); // Number of spirals
+        const spiralPerimeter = (Math.PI * (parseFloat(diameter) - 3)) / 12; // Diameter minus clear cover
+        const spiralReinforcement = spiralLength * spiralPerimeter * 0.19; // 10mm bar weight
+
+        reinforcementDetails = {
+          mainReinforcement: longReinforcement,
+          spiralReinforcement: spiralReinforcement,
+        };
         reinforcement = longReinforcement + spiralReinforcement;
         break;
 
@@ -423,7 +457,18 @@ export default function Index() {
         cement = ((dryVolume * 1) / 10) * 1.25; // Ratio 1:3:6
         sand = (dryVolume * 3) / 10;
         stoneChips = (dryVolume * 6) / 10;
-        reinforcement = volume * 80; // kg per cft
+
+        // Pile cap reinforcement - both directions
+        const pcMainReinforcement =
+          (parseFloat(length) / 0.5) * parseFloat(width) * 0.48;
+        const pcDistributionReinforcement =
+          (parseFloat(width) / 0.5) * parseFloat(length) * 0.48;
+
+        reinforcementDetails = {
+          mainReinforcement: pcMainReinforcement,
+          distributionReinforcement: pcDistributionReinforcement,
+        };
+        reinforcement = pcMainReinforcement + pcDistributionReinforcement;
         break;
 
       case "mat_foundation":
@@ -433,14 +478,20 @@ export default function Index() {
         cement = ((dryVolume * 1) / 5.5) * 1.25; // Ratio 1:1.5:3
         sand = (dryVolume * 1.5) / 5.5;
         stoneChips = (dryVolume * 3) / 5.5;
-        // Two-way reinforcement
-        const longDirection = parseFloat(width) / 0.42; // 5" spacing
-        const shortDirection = parseFloat(length) / 0.58; // 7" spacing
-        reinforcement =
-          (longDirection * parseFloat(length) +
-            shortDirection * parseFloat(width)) *
-          0.48 *
-          2; // Top and bottom
+
+        // Mat foundation - two-way reinforcement system
+        const mfLongDirection =
+          (parseFloat(width) / 0.42) * parseFloat(length) * 0.48; // 5" spacing
+        const mfShortDirection =
+          (parseFloat(length) / 0.58) * parseFloat(width) * 0.48; // 7" spacing
+
+        reinforcementDetails = {
+          longDirection: mfLongDirection * 2, // Top and bottom
+          shortDirection: mfShortDirection * 2, // Top and bottom
+          topReinforcement: mfLongDirection + mfShortDirection,
+          bottomReinforcement: mfLongDirection + mfShortDirection,
+        };
+        reinforcement = (mfLongDirection + mfShortDirection) * 2;
         break;
 
       case "footing":
@@ -450,11 +501,17 @@ export default function Index() {
         cement = ((dryVolume * 1) / 5.5) * 1.25; // Ratio 1:1.5:3
         sand = (dryVolume * 1.5) / 5.5;
         stoneChips = (dryVolume * 3) / 5.5;
+
         // Footing reinforcement (both ways)
         const footingMainReinforcement =
           (parseFloat(length) / 0.5) * parseFloat(width) * 0.48;
         const footingDistributionReinforcement =
           (parseFloat(width) / 0.5) * parseFloat(length) * 0.48;
+
+        reinforcementDetails = {
+          mainReinforcement: footingMainReinforcement,
+          distributionReinforcement: footingDistributionReinforcement,
+        };
         reinforcement =
           footingMainReinforcement + footingDistributionReinforcement;
         break;
@@ -467,12 +524,21 @@ export default function Index() {
         cement = ((dryVolume * 1) / 5.5) * 1.25;
         sand = (dryVolume * 1.5) / 5.5;
         stoneChips = (dryVolume * 3) / 5.5;
-        // Main and distribution reinforcement
+
+        // Retaining wall reinforcement
         const rwMainReinforcement =
-          (parseFloat(length) / 0.42) * parseFloat(height) * 0.27 * 2;
-        const distributionReinforcement =
+          (parseFloat(length) / 0.42) * parseFloat(height) * 0.27 * 2; // Both faces
+        const rwDistributionReinforcement =
           (parseFloat(height) / 0.58) * parseFloat(length) * 0.19;
-        reinforcement = rwMainReinforcement + distributionReinforcement;
+        const rwExtraTop = (parseFloat(length) / 0.5) * 3.12 * 0.19; // Extra top bars
+
+        reinforcementDetails = {
+          mainReinforcement: rwMainReinforcement,
+          distributionReinforcement: rwDistributionReinforcement,
+          extraTopReinforcement: rwExtraTop,
+        };
+        reinforcement =
+          rwMainReinforcement + rwDistributionReinforcement + rwExtraTop;
         break;
 
       case "water_reservoir":
@@ -489,7 +555,32 @@ export default function Index() {
         cement = ((dryVolume * 1) / 5.5) * 1.25;
         sand = (dryVolume * 1.5) / 5.5;
         stoneChips = (dryVolume * 3) / 5.5;
-        reinforcement = volume * 70; // kg per cft
+
+        // Water reservoir reinforcement
+        const wrBottomSlabReinforcement =
+          ((parseFloat(width) / 0.42) * parseFloat(length) +
+            (parseFloat(length) / 0.58) * parseFloat(width)) *
+          0.27 *
+          2;
+        const wrWallReinforcement =
+          (parseFloat(length) / 0.83 + parseFloat(width) / 0.83) *
+          parseFloat(height) *
+          0.19 *
+          2;
+        const wrBinderReinforcement =
+          (parseFloat(height) / 0.67) *
+          (parseFloat(length) + parseFloat(width)) *
+          0.19;
+
+        reinforcementDetails = {
+          bottomReinforcement: wrBottomSlabReinforcement,
+          mainReinforcement: wrWallReinforcement,
+          distributionReinforcement: wrBinderReinforcement,
+        };
+        reinforcement =
+          wrBottomSlabReinforcement +
+          wrWallReinforcement +
+          wrBinderReinforcement;
         break;
 
       case "column":
@@ -501,11 +592,38 @@ export default function Index() {
         cement = ((dryVolume * 1) / 5.5) * 1.25;
         sand = (dryVolume * 1.5) / 5.5;
         stoneChips = (dryVolume * 3) / 5.5;
-        // Main reinforcement + stirrups
+
+        // Detailed column reinforcement with stirrups
         const colMainReinforcement =
           parseFloat(reinforcementCount) * (colHeight + 2.5) * 0.75 * qty;
-        const stirrupReinforcement = ((colHeight / 0.33) * 4 * 0.19) / 40;
-        reinforcement = colMainReinforcement + stirrupReinforcement;
+
+        // Stirrup calculation with three different strips
+        const stirrupSpacingFt = parseFloat(stirrupSpacing) / 12;
+        const numberOfStirups = colHeight / stirrupSpacingFt;
+
+        // Stirrup perimeters for different configurations
+        const stirrup1Perimeter =
+          (2 * (parseFloat(length) + parseFloat(width) - 6)) / 12; // 3" clear cover
+        const stirrup2Perimeter =
+          (2 * (parseFloat(length) + parseFloat(width) - 6)) / 12;
+        const stirrup3Perimeter =
+          (Math.sqrt(
+            Math.pow(parseFloat(length) - 3, 2) +
+              Math.pow(parseFloat(width) - 3, 2),
+          ) *
+            4) /
+          12;
+
+        const totalStirrups =
+          (stirrup1Perimeter + stirrup2Perimeter + stirrup3Perimeter) *
+          numberOfStirups *
+          0.19;
+
+        reinforcementDetails = {
+          mainReinforcement: colMainReinforcement,
+          stirrups: totalStirrups,
+        };
+        reinforcement = colMainReinforcement + totalStirrups;
         break;
 
       case "beam":
@@ -517,27 +635,70 @@ export default function Index() {
         cement = ((dryVolume * 1) / 7) * 1.25; // Ratio 1:2:4
         sand = (dryVolume * 2) / 7;
         stoneChips = (dryVolume * 4) / 7;
-        // Main + extra top + stirrups
+
+        // Detailed beam reinforcement
         const beamMainReinforcement =
           parseFloat(reinforcementCount) * beamLength * 0.48;
-        const extraTopReinforcement = 3 * (beamLength / 4) * 0.48;
-        const stirrupReinforcement2 = (beamLength / 0.5) * 4 * 0.19;
+        const beamExtraTopReinforcement = 3 * (beamLength / 4) * 0.48; // L/4 length at supports
+
+        // Beam stirrups - different spacing zones
+        const stirrupLength6inch = (beamLength * 0.5) / 0.5; // 6" c/c spacing
+        const stirrupLength8inch = (beamLength * 0.5) / 0.67; // 8" c/c spacing
+        const beamStirrupPerimeter =
+          (2 * (parseFloat(width) + parseFloat(height) - 6)) / 12 + 4 / 12; // Add hooks
+        const beamStirrupReinforcement =
+          (stirrupLength6inch + stirrupLength8inch) *
+          beamStirrupPerimeter *
+          0.19;
+
+        reinforcementDetails = {
+          mainReinforcement: beamMainReinforcement,
+          extraTopReinforcement: beamExtraTopReinforcement,
+          stirrups: beamStirrupReinforcement,
+        };
         reinforcement =
-          beamMainReinforcement + extraTopReinforcement + stirrupReinforcement2;
+          beamMainReinforcement +
+          beamExtraTopReinforcement +
+          beamStirrupReinforcement;
         break;
 
       case "stair":
         // Stair calculation with flight and landing
-        const flightVolume =
-          0.5 * (parseFloat(width) / 12) * parseFloat(height) * qty; // Triangle for steps
+        const treads = 10; // Number of treads
+        const riser = 5.5 / 12; // 5.5" riser in feet
+        const tread = 10 / 12; // 10" tread in feet
+        const flightLength = Math.sqrt(
+          Math.pow(treads * tread, 2) + Math.pow(treads * riser, 2),
+        );
+        const stairWidth = parseFloat(width);
+        const slabThickness = parseFloat(thickness) / 12;
+
+        const flightVolume = 0.5 * tread * riser * treads * stairWidth; // Triangular steps
         const landingVolume =
-          parseFloat(length) * parseFloat(width) * (parseFloat(thickness) / 12);
+          parseFloat(length) * stairWidth * slabThickness * 2; // Two landings
         volume = flightVolume + landingVolume;
         dryVolume = volume * 1.5;
         cement = ((dryVolume * 1) / 5.5) * 1.25;
         sand = (dryVolume * 1.5) / 5.5;
         stoneChips = (dryVolume * 3) / 5.5;
-        reinforcement = volume * 65; // kg per cft
+
+        // Stair reinforcement
+        const stairLongReinforcement =
+          (stairWidth / 0.42) * flightLength * 0.27;
+        const stairShortReinforcement =
+          (flightLength / 0.42) * stairWidth * 0.27;
+        const stairExtraTopReinforcement =
+          (stairWidth / 0.42) * (parseFloat(length) / 4) * 0.27 * 2; // At landings
+
+        reinforcementDetails = {
+          longDirection: stairLongReinforcement,
+          shortDirection: stairShortReinforcement,
+          extraTopReinforcement: stairExtraTopReinforcement,
+        };
+        reinforcement =
+          stairLongReinforcement +
+          stairShortReinforcement +
+          stairExtraTopReinforcement;
         break;
 
       case "slab":
@@ -550,11 +711,19 @@ export default function Index() {
         cement = ((dryVolume * 1) / 5.5) * 1.25;
         sand = (dryVolume * 1.5) / 5.5;
         stoneChips = (dryVolume * 3) / 5.5;
+
         // Two-way slab reinforcement
         const slabLongReinforcement =
           (parseFloat(width) / 0.42) * parseFloat(length) * 0.27;
         const slabShortReinforcement =
           (parseFloat(length) / 0.58) * parseFloat(width) * 0.19;
+
+        reinforcementDetails = {
+          longDirection: slabLongReinforcement,
+          shortDirection: slabShortReinforcement,
+          topReinforcement: slabLongReinforcement + slabShortReinforcement,
+          bottomReinforcement: slabLongReinforcement + slabShortReinforcement,
+        };
         reinforcement = (slabLongReinforcement + slabShortReinforcement) * 2; // Top and bottom
         break;
 
@@ -572,7 +741,24 @@ export default function Index() {
         cement = ((dryVolume * 1) / 5.5) * 1.25;
         sand = (dryVolume * 1.5) / 5.5;
         stoneChips = (dryVolume * 3) / 5.5;
-        reinforcement = volume * 75;
+
+        // Overhead tank reinforcement (similar to water reservoir)
+        const otBottomSlabReinforcement =
+          ((parseFloat(width) / 0.42) * parseFloat(length) +
+            (parseFloat(length) / 0.58) * parseFloat(width)) *
+          0.27 *
+          2;
+        const otWallReinforcement =
+          (parseFloat(length) / 0.83 + parseFloat(width) / 0.83) *
+          parseFloat(height) *
+          0.19 *
+          2;
+
+        reinforcementDetails = {
+          bottomReinforcement: otBottomSlabReinforcement,
+          mainReinforcement: otWallReinforcement,
+        };
+        reinforcement = otBottomSlabReinforcement + otWallReinforcement;
         break;
 
       case "septic_tank":
@@ -589,7 +775,22 @@ export default function Index() {
         cement = ((dryVolume * 1) / 5.5) * 1.25;
         sand = (dryVolume * 1.5) / 5.5;
         stoneChips = (dryVolume * 3) / 5.5;
-        reinforcement = volume * 60;
+
+        // Septic tank reinforcement
+        const stBottomSlabReinforcement =
+          ((parseFloat(width) / 0.42) * parseFloat(length) +
+            (parseFloat(length) / 0.58) * parseFloat(width)) *
+          0.27;
+        const stWallReinforcement =
+          (parseFloat(length) / 0.5 + parseFloat(width) / 0.5) *
+          parseFloat(height) *
+          0.19;
+
+        reinforcementDetails = {
+          bottomReinforcement: stBottomSlabReinforcement,
+          mainReinforcement: stWallReinforcement,
+        };
+        reinforcement = stBottomSlabReinforcement + stWallReinforcement;
         break;
 
       case "lift_core":
@@ -601,7 +802,18 @@ export default function Index() {
         cement = ((dryVolume * 1) / 5.5) * 1.25;
         sand = (dryVolume * 1.5) / 5.5;
         stoneChips = (dryVolume * 3) / 5.5;
-        reinforcement = volume * 85; // Higher reinforcement for lift core
+
+        // Lift core reinforcement (higher due to dynamic loads)
+        const lcMainReinforcement =
+          ((parseFloat(length) * 4) / 0.33) * parseFloat(height) * 0.48; // 4" spacing
+        const lcDistributionReinforcement =
+          (parseFloat(height) / 0.33) * parseFloat(length) * 4 * 0.19;
+
+        reinforcementDetails = {
+          mainReinforcement: lcMainReinforcement,
+          distributionReinforcement: lcDistributionReinforcement,
+        };
+        reinforcement = lcMainReinforcement + lcDistributionReinforcement;
         break;
 
       case "brick_work":
@@ -612,6 +824,8 @@ export default function Index() {
         cement = (volume * 1) / 7; // 1:6 mortar ratio
         sand = (volume * 6) / 7;
         stoneChips = 0; // No stone chips in brick work
+
+        reinforcementDetails = { mainReinforcement: 0 };
         reinforcement = 0; // No reinforcement in normal brick work
         break;
 
@@ -624,10 +838,13 @@ export default function Index() {
         cement = ((dryVolume * 1) / plasterRatio) * 1.25;
         sand = (dryVolume * (plasterRatio - 1)) / plasterRatio;
         stoneChips = 0;
+
+        reinforcementDetails = { mainReinforcement: 0 };
         reinforcement = 0;
         break;
 
       default:
+        reinforcementDetails = { mainReinforcement: 0 };
         break;
     }
 
@@ -652,6 +869,7 @@ export default function Index() {
       sand: Math.round(sand * 100) / 100,
       stoneChips: Math.round(stoneChips * 100) / 100,
       reinforcement: Math.round(reinforcement * 100) / 100,
+      reinforcementDetails,
       volume: Math.round(volume * 100) / 100,
       totalCost: Math.round(totalCost),
       brickQuantity: Math.round(brickQuantity),
@@ -723,6 +941,9 @@ export default function Index() {
       windowWidth: "",
       windowHeight: "",
       footingType: "",
+      stirrupSpacing: "4",
+      barDiameter: "20",
+      clearCover: "1.5",
     });
     setEditingItem(null);
     setIsDialogOpen(false);
@@ -749,6 +970,9 @@ export default function Index() {
       windowWidth: item.dimensions.windowWidth || "",
       windowHeight: item.dimensions.windowHeight || "",
       footingType: item.dimensions.footingType || "",
+      stirrupSpacing: item.dimensions.stirrupSpacing || "4",
+      barDiameter: item.dimensions.barDiameter || "20",
+      clearCover: item.dimensions.clearCover || "1.5",
     });
     setIsDialogOpen(true);
   };
@@ -835,6 +1059,60 @@ export default function Index() {
       </div>
     );
 
+    const reinforcementFields = (
+      <div className="grid grid-cols-3 gap-4 mt-4">
+        <div>
+          <Label htmlFor="stirrupSpacing">Stirrup Spacing (inches)</Label>
+          <Select
+            value={formData.stirrupSpacing}
+            onValueChange={(value) =>
+              setFormData({ ...formData, stirrupSpacing: value })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="3">3 inches</SelectItem>
+              <SelectItem value="4">4 inches</SelectItem>
+              <SelectItem value="6">6 inches</SelectItem>
+              <SelectItem value="8">8 inches</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="barDiameter">Bar Diameter (mm)</Label>
+          <Select
+            value={formData.barDiameter}
+            onValueChange={(value) =>
+              setFormData({ ...formData, barDiameter: value })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10mm</SelectItem>
+              <SelectItem value="12">12mm</SelectItem>
+              <SelectItem value="16">16mm</SelectItem>
+              <SelectItem value="20">20mm</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="clearCover">Clear Cover (inches)</Label>
+          <Input
+            id="clearCover"
+            placeholder="1.5"
+            value={formData.clearCover}
+            onChange={(e) =>
+              setFormData({ ...formData, clearCover: e.target.value })
+            }
+          />
+        </div>
+      </div>
+    );
+
     return (
       <div className="space-y-4">
         {/* Category Header */}
@@ -848,59 +1126,182 @@ export default function Index() {
 
         {/* Dynamic Form Fields */}
         {selectedType === "pile" && (
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="diameter">Diameter (inches)</Label>
-              <Input
-                id="diameter"
-                placeholder="e.g., 20"
-                value={formData.diameter}
-                onChange={(e) =>
-                  setFormData({ ...formData, diameter: e.target.value })
-                }
-              />
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="diameter">Diameter (inches)</Label>
+                <Input
+                  id="diameter"
+                  placeholder="e.g., 20"
+                  value={formData.diameter}
+                  onChange={(e) =>
+                    setFormData({ ...formData, diameter: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="length">Length (feet)</Label>
+                <Input
+                  id="length"
+                  placeholder="e.g., 60"
+                  value={formData.length}
+                  onChange={(e) =>
+                    setFormData({ ...formData, length: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="quantity">Quantity</Label>
+                <Input
+                  id="quantity"
+                  placeholder="e.g., 7"
+                  value={formData.quantity}
+                  onChange={(e) =>
+                    setFormData({ ...formData, quantity: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="reinforcement">Reinforcement Bars</Label>
+                <Select
+                  value={formData.reinforcementCount}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, reinforcementCount: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="6">6 bars</SelectItem>
+                    <SelectItem value="7">7 bars</SelectItem>
+                    <SelectItem value="8">8 bars</SelectItem>
+                    <SelectItem value="10">10 bars</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="length">Length (feet)</Label>
-              <Input
-                id="length"
-                placeholder="e.g., 60"
-                value={formData.length}
-                onChange={(e) =>
-                  setFormData({ ...formData, length: e.target.value })
-                }
-              />
+            {reinforcementFields}
+          </div>
+        )}
+
+        {selectedType === "column" && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="length">Length (inches)</Label>
+                <Input
+                  id="length"
+                  placeholder="e.g., 12"
+                  value={formData.length}
+                  onChange={(e) =>
+                    setFormData({ ...formData, length: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="width">Width (inches)</Label>
+                <Input
+                  id="width"
+                  placeholder="e.g., 15"
+                  value={formData.width}
+                  onChange={(e) =>
+                    setFormData({ ...formData, width: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="height">Height (feet)</Label>
+                <Input
+                  id="height"
+                  placeholder="e.g., 10"
+                  value={formData.height}
+                  onChange={(e) =>
+                    setFormData({ ...formData, height: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="reinforcement">Main Reinforcement</Label>
+                <Select
+                  value={formData.reinforcementCount}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, reinforcementCount: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="4">4 bars</SelectItem>
+                    <SelectItem value="6">6 bars</SelectItem>
+                    <SelectItem value="8">8 bars</SelectItem>
+                    <SelectItem value="10">10 bars</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="quantity">Quantity</Label>
-              <Input
-                id="quantity"
-                placeholder="e.g., 7"
-                value={formData.quantity}
-                onChange={(e) =>
-                  setFormData({ ...formData, quantity: e.target.value })
-                }
-              />
+            {reinforcementFields}
+          </div>
+        )}
+
+        {selectedType === "beam" && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="length">Length (feet)</Label>
+                <Input
+                  id="length"
+                  placeholder="e.g., 28"
+                  value={formData.length}
+                  onChange={(e) =>
+                    setFormData({ ...formData, length: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="width">Width (inches)</Label>
+                <Input
+                  id="width"
+                  placeholder="e.g., 10"
+                  value={formData.width}
+                  onChange={(e) =>
+                    setFormData({ ...formData, width: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="height">Height (inches)</Label>
+                <Input
+                  id="height"
+                  placeholder="e.g., 18"
+                  value={formData.height}
+                  onChange={(e) =>
+                    setFormData({ ...formData, height: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="reinforcement">Main Reinforcement</Label>
+                <Select
+                  value={formData.reinforcementCount}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, reinforcementCount: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="4">4 bars</SelectItem>
+                    <SelectItem value="5">5 bars</SelectItem>
+                    <SelectItem value="6">6 bars</SelectItem>
+                    <SelectItem value="8">8 bars</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="reinforcement">Reinforcement Bars</Label>
-              <Select
-                value={formData.reinforcementCount}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, reinforcementCount: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="6">6 bars</SelectItem>
-                  <SelectItem value="7">7 bars</SelectItem>
-                  <SelectItem value="8">8 bars</SelectItem>
-                  <SelectItem value="10">10 bars</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {reinforcementFields}
           </div>
         )}
 
@@ -938,6 +1339,7 @@ export default function Index() {
                 </Select>
               </div>
             </div>
+            {reinforcementFields}
           </div>
         )}
 
@@ -1014,63 +1416,6 @@ export default function Index() {
           </div>
         )}
 
-        {selectedType === "column" && (
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="length">Length (inches)</Label>
-              <Input
-                id="length"
-                placeholder="e.g., 12"
-                value={formData.length}
-                onChange={(e) =>
-                  setFormData({ ...formData, length: e.target.value })
-                }
-              />
-            </div>
-            <div>
-              <Label htmlFor="width">Width (inches)</Label>
-              <Input
-                id="width"
-                placeholder="e.g., 15"
-                value={formData.width}
-                onChange={(e) =>
-                  setFormData({ ...formData, width: e.target.value })
-                }
-              />
-            </div>
-            <div>
-              <Label htmlFor="height">Height (feet)</Label>
-              <Input
-                id="height"
-                placeholder="e.g., 10"
-                value={formData.height}
-                onChange={(e) =>
-                  setFormData({ ...formData, height: e.target.value })
-                }
-              />
-            </div>
-            <div>
-              <Label htmlFor="reinforcement">Main Reinforcement</Label>
-              <Select
-                value={formData.reinforcementCount}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, reinforcementCount: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="4">4 bars</SelectItem>
-                  <SelectItem value="6">6 bars</SelectItem>
-                  <SelectItem value="8">8 bars</SelectItem>
-                  <SelectItem value="10">10 bars</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        )}
-
         {(selectedType === "water_reservoir" ||
           selectedType === "septic_tank" ||
           selectedType === "overhead_tank") && (
@@ -1100,16 +1445,18 @@ export default function Index() {
                 />
               </div>
             </div>
+            {reinforcementFields}
           </div>
         )}
 
         {/* Default fields for other types */}
         {![
           "pile",
+          "column",
+          "beam",
           "footing",
           "brick_work",
           "plaster_work",
-          "column",
           "water_reservoir",
           "septic_tank",
           "overhead_tank",
@@ -1140,6 +1487,13 @@ export default function Index() {
                 />
               </div>
             </div>
+            {[
+              "mat_foundation",
+              "retaining_wall",
+              "stair",
+              "slab",
+              "lift_core",
+            ].includes(selectedType) && reinforcementFields}
           </div>
         )}
       </div>
@@ -1172,7 +1526,7 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-amber-50">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm">
+      <header className="border-b bg-white/80 backdrop-blur-sm shadow-lg">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -1193,9 +1547,9 @@ export default function Index() {
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-1 px-3 py-1 bg-gray-100 rounded-full">
-                <User className="h-4 w-4 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">
+              <div className="flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-brand-100 to-brand-200 rounded-full border">
+                <User className="h-4 w-4 text-brand-700" />
+                <span className="text-sm font-bold text-brand-800">
                   Developed by ROY SHAON
                 </span>
               </div>
@@ -1210,10 +1564,6 @@ export default function Index() {
               <Button variant="outline" size="sm">
                 <Printer className="h-4 w-4 mr-2" />
                 Print
-              </Button>
-              <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
               </Button>
             </div>
           </div>
@@ -1252,11 +1602,11 @@ export default function Index() {
 
           <TabsContent value="items" className="space-y-6 mt-6">
             {/* Category Selection */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
               <Card
                 className={`cursor-pointer transition-all duration-200 ${
                   selectedCategory === "all"
-                    ? "ring-2 ring-brand-500 bg-brand-50"
+                    ? "ring-2 ring-brand-500 bg-brand-50 shadow-lg"
                     : "hover:shadow-md"
                 }`}
                 onClick={() => setSelectedCategory("all")}
@@ -1279,7 +1629,7 @@ export default function Index() {
                     key={category.name}
                     className={`cursor-pointer transition-all duration-200 ${
                       selectedCategory === category.name
-                        ? `ring-2 ring-brand-500 ${category.bgColor}`
+                        ? `ring-2 ring-brand-500 ${category.bgColor} shadow-lg`
                         : "hover:shadow-md"
                     }`}
                     onClick={() => setSelectedCategory(category.name)}
@@ -1304,7 +1654,8 @@ export default function Index() {
                   Project Items
                 </h2>
                 <p className="text-gray-600">
-                  Manage all construction elements with professional tools
+                  Comprehensive construction estimation with detailed
+                  reinforcement calculations
                 </p>
               </div>
               <div className="flex items-center space-x-2">
@@ -1338,12 +1689,12 @@ export default function Index() {
                 </Select>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="bg-brand-500 hover:bg-brand-600">
+                    <Button className="bg-brand-500 hover:bg-brand-600 shadow-lg">
                       <Plus className="h-4 w-4 mr-2" />
                       Add Item
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-4xl">
+                  <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>
                         {editingItem ? "Edit Item" : "Add New Item"}
@@ -1351,7 +1702,7 @@ export default function Index() {
                       <DialogDescription>
                         {editingItem
                           ? "Update the item details and calculations"
-                          : "Add a new construction element to your estimate"}
+                          : "Add a new construction element with detailed reinforcement calculations"}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
@@ -1443,6 +1794,7 @@ export default function Index() {
                       <TableHead>Type</TableHead>
                       <TableHead>Description</TableHead>
                       <TableHead>Category</TableHead>
+                      <TableHead>Reinforcement</TableHead>
                       <TableHead>Volume/Area</TableHead>
                       <TableHead className="text-right">Cost</TableHead>
                       <TableHead className="w-[50px]"></TableHead>
@@ -1480,6 +1832,14 @@ export default function Index() {
                             >
                               {config.category}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-1">
+                              <Activity className="h-3 w-3 text-green-600" />
+                              <span className="text-sm font-medium">
+                                {item.results.reinforcement} kg
+                              </span>
+                            </div>
                           </TableCell>
                           <TableCell>
                             <div className="text-sm">
@@ -1533,7 +1893,7 @@ export default function Index() {
                     })}
                     {filteredItems.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8">
+                        <TableCell colSpan={8} className="text-center py-8">
                           <div className="flex flex-col items-center">
                             <Building2 className="h-12 w-12 text-gray-300 mb-4" />
                             <p className="text-gray-500">No items found</p>
@@ -1556,8 +1916,13 @@ export default function Index() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="lg:col-span-2 shadow-lg">
                 <CardHeader>
-                  <CardTitle>Material Summary</CardTitle>
-                  <CardDescription>Total material requirements</CardDescription>
+                  <CardTitle className="flex items-center space-x-2">
+                    <BarChart3 className="h-5 w-5" />
+                    <span>Material Summary</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Comprehensive material requirements analysis
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -1583,7 +1948,9 @@ export default function Index() {
                       <p className="text-sm text-gray-600">cft</p>
                     </div>
                     <div className="p-4 bg-green-50 rounded-lg border">
-                      <p className="text-sm text-green-600">Steel</p>
+                      <p className="text-sm text-green-600">
+                        Steel Reinforcement
+                      </p>
                       <p className="text-2xl font-bold text-green-900">
                         {totals.reinforcement.toFixed(2)}
                       </p>
@@ -1609,8 +1976,11 @@ export default function Index() {
 
               <Card className="shadow-lg">
                 <CardHeader>
-                  <CardTitle>Cost by Category</CardTitle>
-                  <CardDescription>Breakdown by work type</CardDescription>
+                  <CardTitle className="flex items-center space-x-2">
+                    <PieChart className="h-5 w-5" />
+                    <span>Cost by Category</span>
+                  </CardTitle>
+                  <CardDescription>Professional cost breakdown</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -1626,9 +1996,7 @@ export default function Index() {
                         >
                           <div className="flex items-center space-x-2">
                             <IconComponent
-                              className={`h-4 w-4 ${
-                                categoryConfig?.color || "text-gray-600"
-                              }`}
+                              className={`h-4 w-4 ${categoryConfig?.color || "text-gray-600"}`}
                             />
                             <span className="text-sm font-medium">
                               {category}
@@ -1641,7 +2009,7 @@ export default function Index() {
                       );
                     })}
                     <Separator />
-                    <div className="flex justify-between items-center text-lg font-bold bg-brand-50 p-3 rounded-lg">
+                    <div className="flex justify-between items-center text-lg font-bold bg-brand-50 p-3 rounded-lg border-2 border-brand-200">
                       <span>Total Project Cost</span>
                       <span className="text-brand-600">
                         ৳{totals.totalCost.toLocaleString()}
@@ -1651,98 +2019,17 @@ export default function Index() {
                 </CardContent>
               </Card>
             </div>
-
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle>Detailed Cost Breakdown</CardTitle>
-                <CardDescription>
-                  Material costs at current rates
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span>
-                        Cement ({totals.cement.toFixed(1)} bags @ ৳
-                        {materialRates.cement})
-                      </span>
-                      <span className="font-medium">
-                        ৳
-                        {(
-                          totals.cement * materialRates.cement
-                        ).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>
-                        Sand ({totals.sand.toFixed(1)} cft @ ৳
-                        {materialRates.sand})
-                      </span>
-                      <span className="font-medium">
-                        ৳{(totals.sand * materialRates.sand).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>
-                        Stone Chips ({totals.stoneChips.toFixed(1)} cft @ ৳
-                        {materialRates.stoneChips})
-                      </span>
-                      <span className="font-medium">
-                        ৳
-                        {(
-                          totals.stoneChips * materialRates.stoneChips
-                        ).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span>
-                        Steel ({totals.reinforcement.toFixed(1)} kg @ ৳
-                        {materialRates.reinforcement})
-                      </span>
-                      <span className="font-medium">
-                        ৳
-                        {(
-                          totals.reinforcement * materialRates.reinforcement
-                        ).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>
-                        Bricks ({totals.brickQuantity} nos @ ৳
-                        {materialRates.brick})
-                      </span>
-                      <span className="font-medium">
-                        ৳
-                        {(
-                          totals.brickQuantity * materialRates.brick
-                        ).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>
-                        Labor ({totals.volume.toFixed(1)} cft @ ৳
-                        {materialRates.labor})
-                      </span>
-                      <span className="font-medium">
-                        ৳
-                        {(totals.volume * materialRates.labor).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="details" className="space-y-6 mt-6">
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle>Comprehensive Project Report</CardTitle>
+                <CardTitle className="flex items-center space-x-2">
+                  <FileText className="h-5 w-5" />
+                  <span>Comprehensive Project Report</span>
+                </CardTitle>
                 <CardDescription>
-                  Detailed breakdown of all items by category
+                  Detailed breakdown with reinforcement analysis for all items
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1769,9 +2056,7 @@ export default function Index() {
                       >
                         <div className="flex items-center space-x-3 mb-4">
                           <IconComponent
-                            className={`h-6 w-6 ${
-                              categoryConfig?.color || "text-gray-600"
-                            }`}
+                            className={`h-6 w-6 ${categoryConfig?.color || "text-gray-600"}`}
                           />
                           <h3 className="text-xl font-bold">
                             {category} Works
@@ -1789,7 +2074,7 @@ export default function Index() {
                                 key={item.id}
                                 className="border-l-4 border-l-brand-500 pl-4 bg-gray-50 p-4 rounded-r-lg"
                               >
-                                <div className="flex justify-between items-start mb-2">
+                                <div className="flex justify-between items-start mb-3">
                                   <div className="flex items-center space-x-2">
                                     <ItemIcon
                                       className={`h-5 w-5 ${config.color}`}
@@ -1805,7 +2090,7 @@ export default function Index() {
                                   </div>
                                   <Badge variant="outline">{item.itemId}</Badge>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                                   <div>
                                     <h5 className="font-medium mb-1">
                                       Dimensions
@@ -1814,6 +2099,7 @@ export default function Index() {
                                       .filter(
                                         ([_, value]) => value && value !== "0",
                                       )
+                                      .slice(0, 4)
                                       .map(([key, value]) => (
                                         <div
                                           key={key}
@@ -1859,35 +2145,94 @@ export default function Index() {
                                           </span>
                                         </div>
                                       )}
-                                      {item.results.reinforcement > 0 && (
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <h5 className="font-medium mb-1 flex items-center space-x-1">
+                                      <Activity className="h-3 w-3 text-green-600" />
+                                      <span>Reinforcement Details</span>
+                                    </h5>
+                                    <div className="space-y-1">
+                                      {item.results.reinforcementDetails
+                                        .mainReinforcement > 0 && (
                                         <div className="flex justify-between">
                                           <span className="text-gray-600">
-                                            Steel:
+                                            Main:
                                           </span>
                                           <span>
-                                            {item.results.reinforcement} kg
+                                            {item.results.reinforcementDetails.mainReinforcement.toFixed(
+                                              1,
+                                            )}{" "}
+                                            kg
                                           </span>
                                         </div>
                                       )}
-                                      {(item.results.brickQuantity || 0) >
-                                        0 && (
+                                      {item.results.reinforcementDetails
+                                        .stirrups && (
                                         <div className="flex justify-between">
                                           <span className="text-gray-600">
-                                            Bricks:
+                                            Stirrups:
                                           </span>
                                           <span>
-                                            {item.results.brickQuantity} nos
+                                            {item.results.reinforcementDetails.stirrups.toFixed(
+                                              1,
+                                            )}{" "}
+                                            kg
+                                          </span>
+                                        </div>
+                                      )}
+                                      {item.results.reinforcementDetails
+                                        .distributionReinforcement && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">
+                                            Distribution:
+                                          </span>
+                                          <span>
+                                            {item.results.reinforcementDetails.distributionReinforcement.toFixed(
+                                              1,
+                                            )}{" "}
+                                            kg
+                                          </span>
+                                        </div>
+                                      )}
+                                      {item.results.reinforcementDetails
+                                        .spiralReinforcement && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">
+                                            Spiral:
+                                          </span>
+                                          <span>
+                                            {item.results.reinforcementDetails.spiralReinforcement.toFixed(
+                                              1,
+                                            )}{" "}
+                                            kg
                                           </span>
                                         </div>
                                       )}
                                     </div>
+                                    <div className="border-t pt-1 mt-1">
+                                      <div className="flex justify-between font-medium">
+                                        <span>Total Steel:</span>
+                                        <span>
+                                          {item.results.reinforcement.toFixed(
+                                            1,
+                                          )}{" "}
+                                          kg
+                                        </span>
+                                      </div>
+                                    </div>
                                   </div>
                                   <div>
-                                    <h5 className="font-medium mb-1">Cost</h5>
+                                    <h5 className="font-medium mb-1">
+                                      Cost Analysis
+                                    </h5>
                                     <div className="text-right">
                                       <p className="text-lg font-bold text-brand-600">
                                         ৳
                                         {item.results.totalCost.toLocaleString()}
+                                      </p>
+                                      <p className="text-xs text-gray-500">
+                                        Volume: {item.results.volume} cft
                                       </p>
                                     </div>
                                   </div>
@@ -1925,21 +2270,16 @@ export default function Index() {
               <Card className="shadow-lg">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    Avg Cost/Item
+                    Total Reinforcement
                   </CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  <Activity className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    ৳
-                    {currentProject.items.length > 0
-                      ? Math.round(
-                          totals.totalCost / currentProject.items.length,
-                        ).toLocaleString()
-                      : 0}
+                    {totals.reinforcement.toFixed(1)}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Per construction item
+                    Kilograms steel
                   </p>
                 </CardContent>
               </Card>
@@ -1977,9 +2317,13 @@ export default function Index() {
 
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle>Project Progress by Category</CardTitle>
+                <CardTitle className="flex items-center space-x-2">
+                  <TrendingUp className="h-5 w-5" />
+                  <span>Project Progress by Category</span>
+                </CardTitle>
                 <CardDescription>
-                  Cost distribution and completion status
+                  Cost distribution and completion status with reinforcement
+                  analysis
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1990,26 +2334,37 @@ export default function Index() {
                       (c) => c.name === category,
                     );
                     const IconComponent = categoryConfig?.icon || Building2;
+                    const categoryItems = currentProject.items.filter(
+                      (item) => itemTypeConfig[item.type].category === category,
+                    );
+                    const categoryReinforcement = categoryItems.reduce(
+                      (sum, item) => sum + item.results.reinforcement,
+                      0,
+                    );
                     return (
                       <div key={category} className="space-y-2">
                         <div className="flex justify-between items-center">
                           <div className="flex items-center space-x-2">
                             <IconComponent
-                              className={`h-4 w-4 ${
-                                categoryConfig?.color || "text-gray-600"
-                              }`}
+                              className={`h-4 w-4 ${categoryConfig?.color || "text-gray-600"}`}
                             />
                             <span className="text-sm font-medium">
                               {category}
                             </span>
+                            <Badge variant="outline" className="text-xs">
+                              {categoryItems.length} items
+                            </Badge>
                           </div>
                           <div className="text-right">
                             <span className="text-sm font-medium">
                               ৳{cost.toLocaleString()}
                             </span>
-                            <span className="text-sm text-gray-600 ml-2">
+                            <span className="text-xs text-gray-600 ml-2">
                               {percentage.toFixed(1)}%
                             </span>
+                            <div className="text-xs text-green-600">
+                              {categoryReinforcement.toFixed(1)} kg steel
+                            </div>
                           </div>
                         </div>
                         <Progress value={percentage} className="h-2" />
@@ -2020,16 +2375,28 @@ export default function Index() {
               </CardContent>
             </Card>
 
-            <div className="text-center p-6 bg-white rounded-lg shadow-lg">
-              <div className="flex items-center justify-center space-x-2 text-gray-600">
-                <User className="h-5 w-5" />
-                <span className="text-lg font-medium">
+            <div className="text-center p-6 bg-gradient-to-r from-brand-50 to-brand-100 rounded-lg shadow-lg border-2 border-brand-200">
+              <div className="flex items-center justify-center space-x-2 text-brand-800">
+                <User className="h-6 w-6" />
+                <span className="text-xl font-bold">
                   Developed by ROY SHAON
                 </span>
               </div>
-              <p className="text-sm text-gray-500 mt-2">
-                Professional Construction Estimation Software
+              <p className="text-sm text-brand-600 mt-2">
+                Professional Construction Estimation Software with Advanced
+                Reinforcement Calculations
               </p>
+              <div className="flex items-center justify-center space-x-4 mt-3 text-xs text-brand-600">
+                <span className="flex items-center">
+                  <Activity className="h-3 w-3 mr-1" />
+                  Detailed Reinforcement Analysis
+                </span>
+                <span>•</span>
+                <span className="flex items-center">
+                  <Calculator className="h-3 w-3 mr-1" />
+                  Professional Engineering Calculations
+                </span>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
