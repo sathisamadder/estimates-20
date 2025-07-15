@@ -724,6 +724,8 @@ export default function Index() {
           (parseFloat(length) / 0.58) * parseFloat(width) * 0.19;
 
         reinforcementDetails = {
+          mainReinforcement:
+            (slabLongReinforcement + slabShortReinforcement) * 2,
           longDirection: slabLongReinforcement,
           shortDirection: slabShortReinforcement,
           topReinforcement: slabLongReinforcement + slabShortReinforcement,
