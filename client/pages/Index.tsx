@@ -1095,6 +1095,8 @@ export default function Index() {
       stirrupSpacing: item.dimensions.stirrupSpacing || "4",
       barDiameter: item.dimensions.barDiameter || "20",
       clearCover: item.dimensions.clearCover || "1.5",
+      stirrupDiameter: item.dimensions.stirrupDiameter || "8",
+      mixingRatio: item.dimensions.mixingRatio || "1:1.5:3",
     });
     setIsDialogOpen(true);
   };
