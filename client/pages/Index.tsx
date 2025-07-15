@@ -708,9 +708,15 @@ export default function Index() {
         const beamHeight = parseFloat(height) / 12;
         volume = beamLength * beamWidth * beamHeight * qty;
         dryVolume = volume * 1.5;
-        cement = ((dryVolume * 1) / 7) * 1.25; // Ratio 1:2:4
-        sand = (dryVolume * 2) / 7;
-        stoneChips = (dryVolume * 4) / 7;
+        // Dynamic concrete ratio based on mixing ratio
+        const beamRatios = mixingRatio.split(":").map(Number);
+        const beamTotalRatio = beamRatios.reduce(
+          (sum, ratio) => sum + ratio,
+          0,
+        );
+        cement = ((dryVolume * beamRatios[0]) / beamTotalRatio) * 1.25;
+        sand = (dryVolume * beamRatios[1]) / beamTotalRatio;
+        stoneChips = (dryVolume * beamRatios[2]) / beamTotalRatio;
 
         // Detailed beam reinforcement
         const beamMainReinforcement =
