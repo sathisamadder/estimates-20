@@ -1913,7 +1913,7 @@ export default function Index() {
 
           <TabsContent value="items" className="space-y-6 mt-6">
             {/* Category Selection */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6">
               <Card
                 className={`cursor-pointer transition-all duration-200 ${
                   selectedCategory === "all"
