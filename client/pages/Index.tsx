@@ -486,6 +486,7 @@ export default function Index() {
           (parseFloat(length) / 0.58) * parseFloat(width) * 0.48; // 7" spacing
 
         reinforcementDetails = {
+          mainReinforcement: (mfLongDirection + mfShortDirection) * 2,
           longDirection: mfLongDirection * 2, // Top and bottom
           shortDirection: mfShortDirection * 2, // Top and bottom
           topReinforcement: mfLongDirection + mfShortDirection,
