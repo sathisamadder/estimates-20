@@ -494,9 +494,12 @@ export default function Index() {
         // Pile cap calculation
         volume = parseFloat(length) * parseFloat(width) * parseFloat(height);
         dryVolume = volume * 1.5;
-        cement = ((dryVolume * 1) / 10) * 1.25; // Ratio 1:3:6
-        sand = (dryVolume * 3) / 10;
-        stoneChips = (dryVolume * 6) / 10;
+        // Dynamic concrete ratio based on mixing ratio
+        const pcRatios = mixingRatio.split(":").map(Number);
+        const pcTotalRatio = pcRatios.reduce((sum, ratio) => sum + ratio, 0);
+        cement = ((dryVolume * pcRatios[0]) / pcTotalRatio) * 1.25;
+        sand = (dryVolume * pcRatios[1]) / pcTotalRatio;
+        stoneChips = (dryVolume * pcRatios[2]) / pcTotalRatio;
 
         // Pile cap reinforcement - both directions
         const pcMainReinforcement =
