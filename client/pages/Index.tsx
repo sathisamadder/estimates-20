@@ -704,7 +704,7 @@ export default function Index() {
         break;
       }
 
-      case "beam":
+      case "beam": {
         const beamLength = parseFloat(length);
         const beamWidth = parseFloat(width) / 12;
         const beamHeight = parseFloat(height) / 12;
@@ -767,6 +767,7 @@ export default function Index() {
           beamExtraTopReinforcement +
           beamStirrupReinforcement;
         break;
+      }
 
       case "stair":
         // Stair calculation with flight and landing
