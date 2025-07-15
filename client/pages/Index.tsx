@@ -99,7 +99,7 @@ type ItemType =
   | "plaster_work";
 
 interface ReinforcementDetails {
-  mainReinforcement: number;
+  mainReinforcement?: number;
   distributionReinforcement?: number;
   stirrups?: number;
   spiralReinforcement?: number;
