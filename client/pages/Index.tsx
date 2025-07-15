@@ -545,9 +545,15 @@ export default function Index() {
         // Isolated/Combined footing calculation
         volume = parseFloat(length) * parseFloat(width) * parseFloat(height);
         dryVolume = volume * 1.5;
-        cement = ((dryVolume * 1) / 5.5) * 1.25; // Ratio 1:1.5:3
-        sand = (dryVolume * 1.5) / 5.5;
-        stoneChips = (dryVolume * 3) / 5.5;
+        // Dynamic concrete ratio based on mixing ratio
+        const footingRatios = mixingRatio.split(":").map(Number);
+        const footingTotalRatio = footingRatios.reduce(
+          (sum, ratio) => sum + ratio,
+          0,
+        );
+        cement = ((dryVolume * footingRatios[0]) / footingTotalRatio) * 1.25;
+        sand = (dryVolume * footingRatios[1]) / footingTotalRatio;
+        stoneChips = (dryVolume * footingRatios[2]) / footingTotalRatio;
 
         // Footing reinforcement (both ways)
         const footingMainReinforcement =
