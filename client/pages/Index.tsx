@@ -844,7 +844,7 @@ export default function Index() {
         sand = (dryVolume * (plasterRatio - 1)) / plasterRatio;
         stoneChips = 0;
 
-        reinforcementDetails = { mainReinforcement: 0 };
+        reinforcementDetails = {};
         reinforcement = 0;
         break;
 
