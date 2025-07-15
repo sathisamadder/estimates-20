@@ -1924,7 +1924,9 @@ export default function Index() {
               >
                 <CardContent className="p-3 sm:p-4 text-center">
                   <HardHat className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-gray-600" />
-                  <h3 className="font-medium text-sm">All Categories</h3>
+                  <h3 className="font-medium text-xs sm:text-sm">
+                    All Categories
+                  </h3>
                   <p className="text-xs text-gray-500">
                     {currentProject.items.length} items
                   </p>
