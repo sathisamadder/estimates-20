@@ -1095,55 +1095,108 @@ export default function Index() {
     );
 
     const reinforcementFields = (
-      <div className="grid grid-cols-3 gap-4 mt-4">
-        <div>
-          <Label htmlFor="stirrupSpacing">Stirrup Spacing (inches)</Label>
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <Label htmlFor="stirrupSpacing" className="text-sm font-medium">
+              Stirrup Spacing (inches)
+            </Label>
+            <Select
+              value={formData.stirrupSpacing}
+              onValueChange={(value) =>
+                setFormData({ ...formData, stirrupSpacing: value })
+              }
+            >
+              <SelectTrigger className="h-10">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="3">3 inches</SelectItem>
+                <SelectItem value="4">4 inches</SelectItem>
+                <SelectItem value="6">6 inches</SelectItem>
+                <SelectItem value="8">8 inches</SelectItem>
+                <SelectItem value="10">10 inches</SelectItem>
+                <SelectItem value="12">12 inches</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="barDiameter" className="text-sm font-medium">
+              Main Bar Diameter (mm)
+            </Label>
+            <Select
+              value={formData.barDiameter}
+              onValueChange={(value) =>
+                setFormData({ ...formData, barDiameter: value })
+              }
+            >
+              <SelectTrigger className="h-10">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10mm</SelectItem>
+                <SelectItem value="12">12mm</SelectItem>
+                <SelectItem value="16">16mm</SelectItem>
+                <SelectItem value="20">20mm</SelectItem>
+                <SelectItem value="25">25mm</SelectItem>
+                <SelectItem value="32">32mm</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="stirrupDiameter" className="text-sm font-medium">
+              Stirrup Diameter (mm)
+            </Label>
+            <Select
+              value={formData.stirrupDiameter}
+              onValueChange={(value) =>
+                setFormData({ ...formData, stirrupDiameter: value })
+              }
+            >
+              <SelectTrigger className="h-10">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="8">8mm</SelectItem>
+                <SelectItem value="10">10mm</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="clearCover" className="text-sm font-medium">
+              Clear Cover (inches)
+            </Label>
+            <Input
+              id="clearCover"
+              placeholder="1.5"
+              value={formData.clearCover}
+              onChange={(e) =>
+                setFormData({ ...formData, clearCover: e.target.value })
+              }
+              className="h-10"
+            />
+          </div>
+        </div>
+        <div className="border-t pt-4">
+          <Label htmlFor="mixingRatio" className="text-sm font-medium">
+            Concrete Mixing Ratio
+          </Label>
           <Select
-            value={formData.stirrupSpacing}
+            value={formData.mixingRatio}
             onValueChange={(value) =>
-              setFormData({ ...formData, stirrupSpacing: value })
+              setFormData({ ...formData, mixingRatio: value })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-10 mt-1">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="3">3 inches</SelectItem>
-              <SelectItem value="4">4 inches</SelectItem>
-              <SelectItem value="6">6 inches</SelectItem>
-              <SelectItem value="8">8 inches</SelectItem>
+              <SelectItem value="1:1.5:3">1:1.5:3 (High Strength)</SelectItem>
+              <SelectItem value="1:2:4">1:2:4 (Medium Strength)</SelectItem>
+              <SelectItem value="1:3:6">1:3:6 (Standard)</SelectItem>
+              <SelectItem value="1:4:8">1:4:8 (Economy)</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-        <div>
-          <Label htmlFor="barDiameter">Bar Diameter (mm)</Label>
-          <Select
-            value={formData.barDiameter}
-            onValueChange={(value) =>
-              setFormData({ ...formData, barDiameter: value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10">10mm</SelectItem>
-              <SelectItem value="12">12mm</SelectItem>
-              <SelectItem value="16">16mm</SelectItem>
-              <SelectItem value="20">20mm</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="clearCover">Clear Cover (inches)</Label>
-          <Input
-            id="clearCover"
-            placeholder="1.5"
-            value={formData.clearCover}
-            onChange={(e) =>
-              setFormData({ ...formData, clearCover: e.target.value })
-            }
-          />
         </div>
       </div>
     );
