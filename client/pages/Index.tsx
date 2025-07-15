@@ -1947,11 +1947,13 @@ export default function Index() {
                     }`}
                     onClick={() => setSelectedCategory(category.name)}
                   >
-                    <CardContent className="p-4 text-center">
+                    <CardContent className="p-3 sm:p-4 text-center">
                       <IconComponent
-                        className={`h-8 w-8 mx-auto mb-2 ${category.color}`}
+                        className={`h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 ${category.color}`}
                       />
-                      <h3 className="font-medium text-sm">{category.name}</h3>
+                      <h3 className="font-medium text-xs sm:text-sm">
+                        {category.name}
+                      </h3>
                       <p className="text-xs text-gray-500">
                         {categoryItems.length} items
                       </p>
