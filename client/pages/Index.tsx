@@ -337,10 +337,10 @@ export default function Index() {
         sand = (dryVolume * 1.5) / 5.5;
         stoneChips = (dryVolume * 3) / 5.5;
         // Main reinforcement + stirrups
-        const mainReinforcement =
+        const colMainReinforcement =
           parseFloat(reinforcementCount) * (colHeight + 2.5) * 0.75 * qty;
         const stirrupReinforcement = ((colHeight / 0.33) * 4 * 0.19) / 40;
-        reinforcement = mainReinforcement + stirrupReinforcement;
+        reinforcement = colMainReinforcement + stirrupReinforcement;
         break;
 
       case "beam":
