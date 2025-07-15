@@ -79,6 +79,8 @@ import {
   User,
   Activity,
   Anchor,
+  DollarSign,
+  Cog,
 } from "lucide-react";
 
 type ItemType =
@@ -141,6 +143,7 @@ interface Project {
   location: string;
   items: EstimateItem[];
   totalBudget: number;
+  customRates?: MaterialRates;
   createdAt: string;
   updatedAt: string;
 }
@@ -179,10 +182,12 @@ export default function Index() {
 
   const [editingItem, setEditingItem] = useState<EstimateItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isPricingDialogOpen, setIsPricingDialogOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<ItemType>("column");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<ItemType | "all">("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [tempRates, setTempRates] = useState<MaterialRates>(materialRates);
 
   // Form states
   const [formData, setFormData] = useState({
@@ -208,6 +213,11 @@ export default function Index() {
     barDiameter: "20",
     clearCover: "1.5",
   });
+
+  // Format currency to BDT
+  const formatBDT = (amount: number): string => {
+    return `BDT ${amount.toLocaleString()}`;
+  };
 
   const itemTypeConfig = {
     // Foundation Works
@@ -376,6 +386,14 @@ export default function Index() {
       items: ["plaster_work"],
     },
   ];
+
+  // Load custom rates if available
+  useEffect(() => {
+    if (currentProject.customRates) {
+      setMaterialRates(currentProject.customRates);
+      setTempRates(currentProject.customRates);
+    }
+  }, [currentProject.customRates]);
 
   // Generate next item ID based on type
   const generateItemId = (type: ItemType): string => {
@@ -925,6 +943,16 @@ export default function Index() {
     }
 
     resetForm();
+  };
+
+  const handleSavePricingSettings = () => {
+    setMaterialRates(tempRates);
+    setCurrentProject((prev) => ({
+      ...prev,
+      customRates: tempRates,
+      updatedAt: new Date().toISOString(),
+    }));
+    setIsPricingDialogOpen(false);
   };
 
   const resetForm = () => {
@@ -1547,17 +1575,11 @@ export default function Index() {
                   <span>•</span>
                   <span>{currentProject.items.length} items</span>
                   <span>•</span>
-                  <span>৳{totals.totalCost.toLocaleString()}</span>
+                  <span>{formatBDT(totals.totalCost)}</span>
                 </div>
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-brand-100 to-brand-200 rounded-full border">
-                <User className="h-4 w-4 text-brand-700" />
-                <span className="text-sm font-bold text-brand-800">
-                  Developed by ROY SHAON
-                </span>
-              </div>
               <Button variant="outline" size="sm">
                 <Save className="h-4 w-4 mr-2" />
                 Save
@@ -1570,6 +1592,139 @@ export default function Index() {
                 <Printer className="h-4 w-4 mr-2" />
                 Print
               </Button>
+              <Dialog
+                open={isPricingDialogOpen}
+                onOpenChange={setIsPricingDialogOpen}
+              >
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Pricing
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center space-x-2">
+                      <Cog className="h-5 w-5" />
+                      <span>Custom Material Pricing</span>
+                    </DialogTitle>
+                    <DialogDescription>
+                      Set custom material rates for this project. These rates
+                      will be used for all cost calculations.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="cement-rate">
+                        Cement Rate (BDT per bag)
+                      </Label>
+                      <Input
+                        id="cement-rate"
+                        placeholder="450"
+                        value={tempRates.cement}
+                        onChange={(e) =>
+                          setTempRates({
+                            ...tempRates,
+                            cement: parseFloat(e.target.value) || 0,
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="sand-rate">Sand Rate (BDT per cft)</Label>
+                      <Input
+                        id="sand-rate"
+                        placeholder="45"
+                        value={tempRates.sand}
+                        onChange={(e) =>
+                          setTempRates({
+                            ...tempRates,
+                            sand: parseFloat(e.target.value) || 0,
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="stone-rate">
+                        Stone Chips Rate (BDT per cft)
+                      </Label>
+                      <Input
+                        id="stone-rate"
+                        placeholder="55"
+                        value={tempRates.stoneChips}
+                        onChange={(e) =>
+                          setTempRates({
+                            ...tempRates,
+                            stoneChips: parseFloat(e.target.value) || 0,
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="steel-rate">
+                        Steel Rate (BDT per kg)
+                      </Label>
+                      <Input
+                        id="steel-rate"
+                        placeholder="75"
+                        value={tempRates.reinforcement}
+                        onChange={(e) =>
+                          setTempRates({
+                            ...tempRates,
+                            reinforcement: parseFloat(e.target.value) || 0,
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="brick-rate">
+                        Brick Rate (BDT per piece)
+                      </Label>
+                      <Input
+                        id="brick-rate"
+                        placeholder="12"
+                        value={tempRates.brick}
+                        onChange={(e) =>
+                          setTempRates({
+                            ...tempRates,
+                            brick: parseFloat(e.target.value) || 0,
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="labor-rate">
+                        Labor Rate (BDT per cft)
+                      </Label>
+                      <Input
+                        id="labor-rate"
+                        placeholder="300"
+                        value={tempRates.labor}
+                        onChange={(e) =>
+                          setTempRates({
+                            ...tempRates,
+                            labor: parseFloat(e.target.value) || 0,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsPricingDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleSavePricingSettings}
+                      className="bg-brand-500 hover:bg-brand-600"
+                    >
+                      Save Pricing Settings
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>
@@ -1801,7 +1956,7 @@ export default function Index() {
                       <TableHead>Category</TableHead>
                       <TableHead>Reinforcement</TableHead>
                       <TableHead>Volume/Area</TableHead>
-                      <TableHead className="text-right">Cost</TableHead>
+                      <TableHead className="text-right">Cost (BDT)</TableHead>
                       <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -1861,7 +2016,7 @@ export default function Index() {
                             </div>
                           </TableCell>
                           <TableCell className="text-right font-medium">
-                            ৳{item.results.totalCost.toLocaleString()}
+                            {formatBDT(item.results.totalCost)}
                           </TableCell>
                           <TableCell>
                             <DropdownMenu>
@@ -2007,9 +2162,7 @@ export default function Index() {
                               {category}
                             </span>
                           </div>
-                          <span className="font-bold">
-                            ৳{cost.toLocaleString()}
-                          </span>
+                          <span className="font-bold">{formatBDT(cost)}</span>
                         </div>
                       );
                     })}
@@ -2017,13 +2170,91 @@ export default function Index() {
                     <div className="flex justify-between items-center text-lg font-bold bg-brand-50 p-3 rounded-lg border-2 border-brand-200">
                       <span>Total Project Cost</span>
                       <span className="text-brand-600">
-                        ৳{totals.totalCost.toLocaleString()}
+                        {formatBDT(totals.totalCost)}
                       </span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
+
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <DollarSign className="h-5 w-5" />
+                  <span>Detailed Cost Breakdown</span>
+                </CardTitle>
+                <CardDescription>
+                  Material costs at current rates (BDT)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span>
+                        Cement ({totals.cement.toFixed(1)} bags @ BDT{" "}
+                        {materialRates.cement})
+                      </span>
+                      <span className="font-medium">
+                        {formatBDT(totals.cement * materialRates.cement)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>
+                        Sand ({totals.sand.toFixed(1)} cft @ BDT{" "}
+                        {materialRates.sand})
+                      </span>
+                      <span className="font-medium">
+                        {formatBDT(totals.sand * materialRates.sand)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>
+                        Stone Chips ({totals.stoneChips.toFixed(1)} cft @ BDT{" "}
+                        {materialRates.stoneChips})
+                      </span>
+                      <span className="font-medium">
+                        {formatBDT(
+                          totals.stoneChips * materialRates.stoneChips,
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span>
+                        Steel ({totals.reinforcement.toFixed(1)} kg @ BDT{" "}
+                        {materialRates.reinforcement})
+                      </span>
+                      <span className="font-medium">
+                        {formatBDT(
+                          totals.reinforcement * materialRates.reinforcement,
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>
+                        Bricks ({totals.brickQuantity} nos @ BDT{" "}
+                        {materialRates.brick})
+                      </span>
+                      <span className="font-medium">
+                        {formatBDT(totals.brickQuantity * materialRates.brick)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>
+                        Labor ({totals.volume.toFixed(1)} cft @ BDT{" "}
+                        {materialRates.labor})
+                      </span>
+                      <span className="font-medium">
+                        {formatBDT(totals.volume * materialRates.labor)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="details" className="space-y-6 mt-6">
@@ -2159,7 +2390,7 @@ export default function Index() {
                                     </h5>
                                     <div className="space-y-1">
                                       {item.results.reinforcementDetails
-                                        .mainReinforcement > 0 && (
+                                        .mainReinforcement && (
                                         <div className="flex justify-between">
                                           <span className="text-gray-600">
                                             Main:
@@ -2233,8 +2464,7 @@ export default function Index() {
                                     </h5>
                                     <div className="text-right">
                                       <p className="text-lg font-bold text-brand-600">
-                                        ৳
-                                        {item.results.totalCost.toLocaleString()}
+                                        {formatBDT(item.results.totalCost)}
                                       </p>
                                       <p className="text-xs text-gray-500">
                                         Volume: {item.results.volume} cft
@@ -2311,7 +2541,7 @@ export default function Index() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    ৳{totals.totalCost.toLocaleString()}
+                    {formatBDT(totals.totalCost)}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Total estimate
@@ -2362,7 +2592,7 @@ export default function Index() {
                           </div>
                           <div className="text-right">
                             <span className="text-sm font-medium">
-                              ৳{cost.toLocaleString()}
+                              {formatBDT(cost)}
                             </span>
                             <span className="text-xs text-gray-600 ml-2">
                               {percentage.toFixed(1)}%
@@ -2379,33 +2609,54 @@ export default function Index() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
 
-            <div className="text-center p-6 bg-gradient-to-r from-brand-50 to-brand-100 rounded-lg shadow-lg border-2 border-brand-200">
-              <div className="flex items-center justify-center space-x-2 text-brand-800">
-                <User className="h-6 w-6" />
-                <span className="text-xl font-bold">
+      {/* Footer with Developer Credit */}
+      <footer className="bg-white border-t shadow-lg mt-12">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col md:flex-row items-center justify-between">
+            <div className="flex items-center space-x-3 mb-4 md:mb-0">
+              <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg">
+                <Calculator className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">
+                  Professional Construction Estimator
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Advanced Construction Cost Calculation Software
+                </p>
+              </div>
+            </div>
+            <div className="text-center md:text-right">
+              <div className="flex items-center space-x-2 text-brand-700 mb-2">
+                <User className="h-5 w-5" />
+                <span className="text-lg font-bold">
                   Developed by ROY SHAON
                 </span>
               </div>
-              <p className="text-sm text-brand-600 mt-2">
-                Professional Construction Estimation Software with Advanced
-                Reinforcement Calculations
-              </p>
-              <div className="flex items-center justify-center space-x-4 mt-3 text-xs text-brand-600">
+              <div className="flex items-center justify-center md:justify-end space-x-4 text-xs text-gray-500">
                 <span className="flex items-center">
                   <Activity className="h-3 w-3 mr-1" />
-                  Detailed Reinforcement Analysis
+                  Professional Engineering Calculations
                 </span>
                 <span>•</span>
                 <span className="flex items-center">
                   <Calculator className="h-3 w-3 mr-1" />
-                  Professional Engineering Calculations
+                  BDT Currency Support
+                </span>
+                <span>•</span>
+                <span className="flex items-center">
+                  <Settings className="h-3 w-3 mr-1" />
+                  Custom Pricing Options
                 </span>
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
-      </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
