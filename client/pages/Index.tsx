@@ -63,12 +63,27 @@ import {
   Search,
   TrendingUp,
   PieChart,
+  Home,
+  Hammer,
+  Wrench,
+  Layers,
+  Square,
+  Triangle,
+  Zap,
+  Droplets,
+  Stairs,
+  Grid3X3,
+  Package,
+  Paintbrush2,
+  HardHat,
+  User,
 } from "lucide-react";
 
 type ItemType =
   | "pile"
   | "pile_cap"
   | "mat_foundation"
+  | "footing"
   | "retaining_wall"
   | "water_reservoir"
   | "lift_core"
@@ -83,7 +98,7 @@ type ItemType =
 
 interface EstimateItem {
   id: string;
-  itemId: string; // P1, PC1, MF1, RW1, WR1, LC1, ST1, C1, B1, S1, SL1, OT1, BW1, PL1
+  itemId: string; // P1, PC1, MF1, F1, RW1, WR1, LC1, ST1, C1, B1, S1, SL1, OT1, BW1, PL1
   type: ItemType;
   description: string;
   dimensions: Record<string, string>;
@@ -128,8 +143,8 @@ export default function Index() {
   const [activeTab, setActiveTab] = useState("items");
   const [currentProject, setCurrentProject] = useState<Project>({
     id: "1",
-    name: "Untitled Project",
-    description: "",
+    name: "Construction Project",
+    description: "Professional estimation project",
     client: "",
     location: "",
     items: [],
@@ -152,6 +167,7 @@ export default function Index() {
   const [selectedType, setSelectedType] = useState<ItemType>("column");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<ItemType | "all">("all");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   // Form states
   const [formData, setFormData] = useState({
@@ -172,44 +188,176 @@ export default function Index() {
     doorHeight: "",
     windowWidth: "",
     windowHeight: "",
+    footingType: "",
   });
 
   const itemTypeConfig = {
-    pile: { prefix: "P", name: "Pile Work", category: "Foundation" },
-    pile_cap: { prefix: "PC", name: "Pile Cap", category: "Foundation" },
+    // Foundation Works
+    pile: {
+      prefix: "P",
+      name: "Pile Work",
+      category: "Foundation",
+      icon: Triangle,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+    },
+    pile_cap: {
+      prefix: "PC",
+      name: "Pile Cap",
+      category: "Foundation",
+      icon: Square,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+    },
     mat_foundation: {
       prefix: "MF",
       name: "Mat Foundation",
       category: "Foundation",
+      icon: Layers,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+    },
+    footing: {
+      prefix: "F",
+      name: "Footing",
+      category: "Foundation",
+      icon: Square,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+    },
+
+    // Structural Works
+    column: {
+      prefix: "C",
+      name: "Column",
+      category: "Structure",
+      icon: Building2,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+    },
+    beam: {
+      prefix: "B",
+      name: "Beam",
+      category: "Structure",
+      icon: Hammer,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+    },
+    slab: {
+      prefix: "SL",
+      name: "Slab",
+      category: "Structure",
+      icon: Grid3X3,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+    },
+    stair: {
+      prefix: "S",
+      name: "Stair",
+      category: "Structure",
+      icon: Stairs,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
     },
     retaining_wall: {
       prefix: "RW",
       name: "Retaining Wall",
       category: "Structure",
+      icon: Layers,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
     },
+
+    // Utility Works
     water_reservoir: {
       prefix: "WR",
       name: "Water Reservoir",
       category: "Utility",
+      icon: Droplets,
+      color: "text-cyan-600",
+      bgColor: "bg-cyan-50",
     },
-    lift_core: { prefix: "LC", name: "Lift Core", category: "Structure" },
-    septic_tank: { prefix: "ST", name: "Septic Tank", category: "Utility" },
-    column: { prefix: "C", name: "Column", category: "Structure" },
-    beam: { prefix: "B", name: "Beam", category: "Structure" },
-    stair: { prefix: "S", name: "Stair", category: "Structure" },
-    slab: { prefix: "SL", name: "Slab", category: "Structure" },
+    septic_tank: {
+      prefix: "ST",
+      name: "Septic Tank",
+      category: "Utility",
+      icon: Package,
+      color: "text-cyan-600",
+      bgColor: "bg-cyan-50",
+    },
     overhead_tank: {
       prefix: "OT",
       name: "Overhead Tank",
       category: "Utility",
+      icon: Droplets,
+      color: "text-cyan-600",
+      bgColor: "bg-cyan-50",
     },
-    brick_work: { prefix: "BW", name: "Brick Work", category: "Masonry" },
+    lift_core: {
+      prefix: "LC",
+      name: "Lift Core",
+      category: "Utility",
+      icon: Zap,
+      color: "text-cyan-600",
+      bgColor: "bg-cyan-50",
+    },
+
+    // Masonry & Finishing
+    brick_work: {
+      prefix: "BW",
+      name: "Brick Work",
+      category: "Masonry",
+      icon: Home,
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
+    },
     plaster_work: {
       prefix: "PL",
       name: "Plaster Work",
       category: "Finishing",
+      icon: Paintbrush2,
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
     },
   };
+
+  const categories = [
+    {
+      name: "Foundation",
+      icon: Triangle,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      items: ["pile", "pile_cap", "mat_foundation", "footing"],
+    },
+    {
+      name: "Structure",
+      icon: Building2,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+      items: ["column", "beam", "slab", "stair", "retaining_wall"],
+    },
+    {
+      name: "Utility",
+      icon: Droplets,
+      color: "text-cyan-600",
+      bgColor: "bg-cyan-50",
+      items: ["water_reservoir", "septic_tank", "overhead_tank", "lift_core"],
+    },
+    {
+      name: "Masonry",
+      icon: Home,
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
+      items: ["brick_work"],
+    },
+    {
+      name: "Finishing",
+      icon: Paintbrush2,
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+      items: ["plaster_work"],
+    },
+  ];
 
   // Generate next item ID based on type
   const generateItemId = (type: ItemType): string => {
@@ -237,6 +385,7 @@ export default function Index() {
       spacing = "0",
       plasterThickness = "0",
       wallHeight = "0",
+      footingType = "isolated",
     } = dimensions;
 
     const qty = parseFloat(quantity);
@@ -292,6 +441,22 @@ export default function Index() {
             shortDirection * parseFloat(width)) *
           0.48 *
           2; // Top and bottom
+        break;
+
+      case "footing":
+        // Isolated/Combined footing calculation
+        volume = parseFloat(length) * parseFloat(width) * parseFloat(height);
+        dryVolume = volume * 1.5;
+        cement = ((dryVolume * 1) / 5.5) * 1.25; // Ratio 1:1.5:3
+        sand = (dryVolume * 1.5) / 5.5;
+        stoneChips = (dryVolume * 3) / 5.5;
+        // Footing reinforcement (both ways)
+        const footingMainReinforcement =
+          (parseFloat(length) / 0.5) * parseFloat(width) * 0.48;
+        const footingDistributionReinforcement =
+          (parseFloat(width) / 0.5) * parseFloat(length) * 0.48;
+        reinforcement =
+          footingMainReinforcement + footingDistributionReinforcement;
         break;
 
       case "retaining_wall":
@@ -557,6 +722,7 @@ export default function Index() {
       doorHeight: "",
       windowWidth: "",
       windowHeight: "",
+      footingType: "",
     });
     setEditingItem(null);
     setIsDialogOpen(false);
@@ -582,6 +748,7 @@ export default function Index() {
       doorHeight: item.dimensions.doorHeight || "",
       windowWidth: item.dimensions.windowWidth || "",
       windowHeight: item.dimensions.windowHeight || "",
+      footingType: item.dimensions.footingType || "",
     });
     setIsDialogOpen(true);
   };
@@ -638,10 +805,13 @@ export default function Index() {
   };
 
   const renderDimensionFields = () => {
+    const config = itemTypeConfig[selectedType];
+    const IconComponent = config.icon;
+
     const commonFields = (
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="length">Length</Label>
+          <Label htmlFor="length">Length (feet)</Label>
           <Input
             id="length"
             placeholder="Length"
@@ -652,7 +822,7 @@ export default function Index() {
           />
         </div>
         <div>
-          <Label htmlFor="width">Width</Label>
+          <Label htmlFor="width">Width (feet)</Label>
           <Input
             id="width"
             placeholder="Width"
@@ -665,69 +835,113 @@ export default function Index() {
       </div>
     );
 
-    switch (selectedType) {
-      case "pile":
-        return (
+    return (
+      <div className="space-y-4">
+        {/* Category Header */}
+        <div className={`p-3 rounded-lg ${config.bgColor} border`}>
+          <div className="flex items-center space-x-2">
+            <IconComponent className={`h-5 w-5 ${config.color}`} />
+            <span className="font-medium text-gray-900">{config.name}</span>
+            <Badge variant="secondary">{config.category}</Badge>
+          </div>
+        </div>
+
+        {/* Dynamic Form Fields */}
+        {selectedType === "pile" && (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="diameter">Diameter (inches)</Label>
+              <Input
+                id="diameter"
+                placeholder="e.g., 20"
+                value={formData.diameter}
+                onChange={(e) =>
+                  setFormData({ ...formData, diameter: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="length">Length (feet)</Label>
+              <Input
+                id="length"
+                placeholder="e.g., 60"
+                value={formData.length}
+                onChange={(e) =>
+                  setFormData({ ...formData, length: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="quantity">Quantity</Label>
+              <Input
+                id="quantity"
+                placeholder="e.g., 7"
+                value={formData.quantity}
+                onChange={(e) =>
+                  setFormData({ ...formData, quantity: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="reinforcement">Reinforcement Bars</Label>
+              <Select
+                value={formData.reinforcementCount}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, reinforcementCount: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="6">6 bars</SelectItem>
+                  <SelectItem value="7">7 bars</SelectItem>
+                  <SelectItem value="8">8 bars</SelectItem>
+                  <SelectItem value="10">10 bars</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+
+        {selectedType === "footing" && (
           <div className="space-y-4">
+            {commonFields}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="diameter">Diameter (inches)</Label>
+                <Label htmlFor="height">Height (feet)</Label>
                 <Input
-                  id="diameter"
-                  placeholder="e.g., 20"
-                  value={formData.diameter}
+                  id="height"
+                  placeholder="e.g., 1.5"
+                  value={formData.height}
                   onChange={(e) =>
-                    setFormData({ ...formData, diameter: e.target.value })
+                    setFormData({ ...formData, height: e.target.value })
                   }
                 />
               </div>
               <div>
-                <Label htmlFor="length">Length (feet)</Label>
-                <Input
-                  id="length"
-                  placeholder="e.g., 60"
-                  value={formData.length}
-                  onChange={(e) =>
-                    setFormData({ ...formData, length: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="quantity">Quantity</Label>
-                <Input
-                  id="quantity"
-                  placeholder="e.g., 7"
-                  value={formData.quantity}
-                  onChange={(e) =>
-                    setFormData({ ...formData, quantity: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="reinforcement">Reinforcement Bars</Label>
+                <Label htmlFor="footingType">Footing Type</Label>
                 <Select
-                  value={formData.reinforcementCount}
+                  value={formData.footingType}
                   onValueChange={(value) =>
-                    setFormData({ ...formData, reinforcementCount: value })
+                    setFormData({ ...formData, footingType: value })
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="6">6 bars</SelectItem>
-                    <SelectItem value="7">7 bars</SelectItem>
-                    <SelectItem value="8">8 bars</SelectItem>
-                    <SelectItem value="10">10 bars</SelectItem>
+                    <SelectItem value="isolated">Isolated Footing</SelectItem>
+                    <SelectItem value="combined">Combined Footing</SelectItem>
+                    <SelectItem value="strip">Strip Footing</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
           </div>
-        );
+        )}
 
-      case "brick_work":
-        return (
+        {selectedType === "brick_work" && (
           <div className="space-y-4">
             {commonFields}
             <div className="grid grid-cols-2 gap-4">
@@ -761,10 +975,9 @@ export default function Index() {
               </div>
             </div>
           </div>
-        );
+        )}
 
-      case "plaster_work":
-        return (
+        {selectedType === "plaster_work" && (
           <div className="space-y-4">
             {commonFields}
             <div className="grid grid-cols-2 gap-4">
@@ -799,72 +1012,68 @@ export default function Index() {
               </div>
             </div>
           </div>
-        );
+        )}
 
-      case "column":
-        return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="length">Length (inches)</Label>
-                <Input
-                  id="length"
-                  placeholder="e.g., 12"
-                  value={formData.length}
-                  onChange={(e) =>
-                    setFormData({ ...formData, length: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="width">Width (inches)</Label>
-                <Input
-                  id="width"
-                  placeholder="e.g., 15"
-                  value={formData.width}
-                  onChange={(e) =>
-                    setFormData({ ...formData, width: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="height">Height (feet)</Label>
-                <Input
-                  id="height"
-                  placeholder="e.g., 10"
-                  value={formData.height}
-                  onChange={(e) =>
-                    setFormData({ ...formData, height: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="reinforcement">Main Reinforcement</Label>
-                <Select
-                  value={formData.reinforcementCount}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, reinforcementCount: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="4">4 bars</SelectItem>
-                    <SelectItem value="6">6 bars</SelectItem>
-                    <SelectItem value="8">8 bars</SelectItem>
-                    <SelectItem value="10">10 bars</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+        {selectedType === "column" && (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="length">Length (inches)</Label>
+              <Input
+                id="length"
+                placeholder="e.g., 12"
+                value={formData.length}
+                onChange={(e) =>
+                  setFormData({ ...formData, length: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="width">Width (inches)</Label>
+              <Input
+                id="width"
+                placeholder="e.g., 15"
+                value={formData.width}
+                onChange={(e) =>
+                  setFormData({ ...formData, width: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="height">Height (feet)</Label>
+              <Input
+                id="height"
+                placeholder="e.g., 10"
+                value={formData.height}
+                onChange={(e) =>
+                  setFormData({ ...formData, height: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="reinforcement">Main Reinforcement</Label>
+              <Select
+                value={formData.reinforcementCount}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, reinforcementCount: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="4">4 bars</SelectItem>
+                  <SelectItem value="6">6 bars</SelectItem>
+                  <SelectItem value="8">8 bars</SelectItem>
+                  <SelectItem value="10">10 bars</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        );
+        )}
 
-      case "water_reservoir":
-      case "septic_tank":
-      case "overhead_tank":
-        return (
+        {(selectedType === "water_reservoir" ||
+          selectedType === "septic_tank" ||
+          selectedType === "overhead_tank") && (
           <div className="space-y-4">
             {commonFields}
             <div className="grid grid-cols-2 gap-4">
@@ -892,10 +1101,19 @@ export default function Index() {
               </div>
             </div>
           </div>
-        );
+        )}
 
-      default:
-        return (
+        {/* Default fields for other types */}
+        {![
+          "pile",
+          "footing",
+          "brick_work",
+          "plaster_work",
+          "column",
+          "water_reservoir",
+          "septic_tank",
+          "overhead_tank",
+        ].includes(selectedType) && (
           <div className="space-y-4">
             {commonFields}
             <div className="grid grid-cols-2 gap-4">
@@ -923,8 +1141,9 @@ export default function Index() {
               </div>
             </div>
           </div>
-        );
-    }
+        )}
+      </div>
+    );
   };
 
   const filteredItems = currentProject.items.filter((item) => {
@@ -932,7 +1151,10 @@ export default function Index() {
       item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.itemId.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterType === "all" || item.type === filterType;
-    return matchesSearch && matchesFilter;
+    const matchesCategory =
+      selectedCategory === "all" ||
+      itemTypeConfig[item.type].category === selectedCategory;
+    return matchesSearch && matchesFilter && matchesCategory;
   });
 
   const totals = getTotalEstimate();
@@ -954,20 +1176,29 @@ export default function Index() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg">
-                <Calculator className="h-6 w-6 text-white" />
+              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl shadow-lg">
+                <Calculator className="h-7 w-7 text-white" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">
                   Professional Construction Estimator
                 </h1>
-                <p className="text-sm text-gray-600">
-                  {currentProject.name} • {currentProject.items.length} items •
-                  ৳{totals.totalCost.toLocaleString()}
-                </p>
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <span>{currentProject.name}</span>
+                  <span>•</span>
+                  <span>{currentProject.items.length} items</span>
+                  <span>•</span>
+                  <span>৳{totals.totalCost.toLocaleString()}</span>
+                </div>
               </div>
             </div>
             <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1 px-3 py-1 bg-gray-100 rounded-full">
+                <User className="h-4 w-4 text-gray-600" />
+                <span className="text-sm font-medium text-gray-700">
+                  Developed by ROY SHAON
+                </span>
+              </div>
               <Button variant="outline" size="sm">
                 <Save className="h-4 w-4 mr-2" />
                 Save
@@ -992,20 +1223,88 @@ export default function Index() {
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="items">Project Items</TabsTrigger>
-            <TabsTrigger value="summary">Cost Analysis</TabsTrigger>
-            <TabsTrigger value="details">Detailed Report</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="items" className="flex items-center space-x-2">
+              <Building2 className="h-4 w-4" />
+              <span>Project Items</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="summary"
+              className="flex items-center space-x-2"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span>Cost Analysis</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="details"
+              className="flex items-center space-x-2"
+            >
+              <FileText className="h-4 w-4" />
+              <span>Detailed Report</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="analytics"
+              className="flex items-center space-x-2"
+            >
+              <PieChart className="h-4 w-4" />
+              <span>Analytics</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="items" className="space-y-6 mt-6">
+            {/* Category Selection */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+              <Card
+                className={`cursor-pointer transition-all duration-200 ${
+                  selectedCategory === "all"
+                    ? "ring-2 ring-brand-500 bg-brand-50"
+                    : "hover:shadow-md"
+                }`}
+                onClick={() => setSelectedCategory("all")}
+              >
+                <CardContent className="p-4 text-center">
+                  <HardHat className="h-8 w-8 mx-auto mb-2 text-gray-600" />
+                  <h3 className="font-medium text-sm">All Categories</h3>
+                  <p className="text-xs text-gray-500">
+                    {currentProject.items.length} items
+                  </p>
+                </CardContent>
+              </Card>
+              {categories.map((category) => {
+                const IconComponent = category.icon;
+                const categoryItems = currentProject.items.filter((item) =>
+                  category.items.includes(item.type),
+                );
+                return (
+                  <Card
+                    key={category.name}
+                    className={`cursor-pointer transition-all duration-200 ${
+                      selectedCategory === category.name
+                        ? `ring-2 ring-brand-500 ${category.bgColor}`
+                        : "hover:shadow-md"
+                    }`}
+                    onClick={() => setSelectedCategory(category.name)}
+                  >
+                    <CardContent className="p-4 text-center">
+                      <IconComponent
+                        className={`h-8 w-8 mx-auto mb-2 ${category.color}`}
+                      />
+                      <h3 className="font-medium text-sm">{category.name}</h3>
+                      <p className="text-xs text-gray-500">
+                        {categoryItems.length} items
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">
                   Project Items
                 </h2>
                 <p className="text-gray-600">
-                  Manage all construction elements
+                  Manage all construction elements with professional tools
                 </p>
               </div>
               <div className="flex items-center space-x-2">
@@ -1044,7 +1343,7 @@ export default function Index() {
                       Add Item
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-3xl">
+                  <DialogContent className="max-w-4xl">
                     <DialogHeader>
                       <DialogTitle>
                         {editingItem ? "Edit Item" : "Add New Item"}
@@ -1069,13 +1368,31 @@ export default function Index() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {Object.entries(itemTypeConfig).map(
-                                ([key, config]) => (
-                                  <SelectItem key={key} value={key}>
-                                    {config.name} ({config.category})
-                                  </SelectItem>
-                                ),
-                              )}
+                              {categories.map((category) => (
+                                <div key={category.name}>
+                                  <div className="px-2 py-1.5 text-sm font-semibold text-gray-500 bg-gray-100">
+                                    {category.name} Works
+                                  </div>
+                                  {category.items.map((itemType) => {
+                                    const config =
+                                      itemTypeConfig[itemType as ItemType];
+                                    const IconComponent = config.icon;
+                                    return (
+                                      <SelectItem
+                                        key={itemType}
+                                        value={itemType}
+                                      >
+                                        <div className="flex items-center space-x-2">
+                                          <IconComponent
+                                            className={`h-4 w-4 ${config.color}`}
+                                          />
+                                          <span>{config.name}</span>
+                                        </div>
+                                      </SelectItem>
+                                    );
+                                  })}
+                                </div>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -1117,11 +1434,11 @@ export default function Index() {
               </div>
             </div>
 
-            <Card>
+            <Card className="shadow-lg">
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
-                    <TableRow>
+                    <TableRow className="bg-gray-50">
                       <TableHead>Item ID</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Description</TableHead>
@@ -1132,78 +1449,88 @@ export default function Index() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredItems.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>
-                          <Badge variant="outline" className="font-mono">
-                            {item.itemId}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">
-                              {itemTypeConfig[item.type].name}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {item.type.replace("_", " ")}
-                            </p>
-                          </div>
-                        </TableCell>
-                        <TableCell>{item.description}</TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">
-                            {itemTypeConfig[item.type].category}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">
-                            {item.type === "brick_work" ||
-                            item.type === "plaster_work" ? (
-                              <p>
-                                {item.results.plasterArea ||
-                                  item.results.brickQuantity}{" "}
-                                {item.unit}
-                              </p>
-                            ) : (
-                              <p>{item.results.volume} cft</p>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          ৳{item.results.totalCost.toLocaleString()}
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={() => handleEditItem(item)}
-                              >
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleDuplicateItem(item)}
-                              >
-                                <Copy className="mr-2 h-4 w-4" />
-                                Duplicate
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleDeleteItem(item.id)}
-                                className="text-red-600"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {filteredItems.map((item) => {
+                      const config = itemTypeConfig[item.type];
+                      const IconComponent = config.icon;
+                      return (
+                        <TableRow key={item.id} className="hover:bg-gray-50">
+                          <TableCell>
+                            <Badge variant="outline" className="font-mono">
+                              {item.itemId}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-2">
+                              <IconComponent
+                                className={`h-4 w-4 ${config.color}`}
+                              />
+                              <div>
+                                <p className="font-medium">{config.name}</p>
+                                <p className="text-xs text-gray-500">
+                                  {item.type.replace("_", " ")}
+                                </p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>{item.description}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="secondary"
+                              className={`${config.bgColor} ${config.color}`}
+                            >
+                              {config.category}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">
+                              {item.type === "brick_work" ||
+                              item.type === "plaster_work" ? (
+                                <p>
+                                  {item.results.plasterArea ||
+                                    item.results.brickQuantity}{" "}
+                                  {item.unit}
+                                </p>
+                              ) : (
+                                <p>{item.results.volume} cft</p>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right font-medium">
+                            ৳{item.results.totalCost.toLocaleString()}
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  onClick={() => handleEditItem(item)}
+                                >
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleDuplicateItem(item)}
+                                >
+                                  <Copy className="mr-2 h-4 w-4" />
+                                  Duplicate
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleDeleteItem(item.id)}
+                                  className="text-red-600"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                     {filteredItems.length === 0 && (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center py-8">
@@ -1227,49 +1554,49 @@ export default function Index() {
 
           <TabsContent value="summary" className="space-y-6 mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-2">
+              <Card className="lg:col-span-2 shadow-lg">
                 <CardHeader>
                   <CardTitle>Material Summary</CardTitle>
                   <CardDescription>Total material requirements</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <div className="p-4 bg-blue-50 rounded-lg">
+                    <div className="p-4 bg-blue-50 rounded-lg border">
                       <p className="text-sm text-blue-600">Cement</p>
                       <p className="text-2xl font-bold text-blue-900">
                         {totals.cement.toFixed(2)}
                       </p>
                       <p className="text-sm text-blue-600">bags</p>
                     </div>
-                    <div className="p-4 bg-amber-50 rounded-lg">
+                    <div className="p-4 bg-amber-50 rounded-lg border">
                       <p className="text-sm text-amber-600">Sand</p>
                       <p className="text-2xl font-bold text-amber-900">
                         {totals.sand.toFixed(2)}
                       </p>
                       <p className="text-sm text-amber-600">cft</p>
                     </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="p-4 bg-gray-50 rounded-lg border">
                       <p className="text-sm text-gray-600">Stone Chips</p>
                       <p className="text-2xl font-bold text-gray-900">
                         {totals.stoneChips.toFixed(2)}
                       </p>
                       <p className="text-sm text-gray-600">cft</p>
                     </div>
-                    <div className="p-4 bg-green-50 rounded-lg">
+                    <div className="p-4 bg-green-50 rounded-lg border">
                       <p className="text-sm text-green-600">Steel</p>
                       <p className="text-2xl font-bold text-green-900">
                         {totals.reinforcement.toFixed(2)}
                       </p>
                       <p className="text-sm text-green-600">kg</p>
                     </div>
-                    <div className="p-4 bg-red-50 rounded-lg">
+                    <div className="p-4 bg-red-50 rounded-lg border">
                       <p className="text-sm text-red-600">Bricks</p>
                       <p className="text-2xl font-bold text-red-900">
                         {totals.brickQuantity.toFixed(0)}
                       </p>
                       <p className="text-sm text-red-600">nos</p>
                     </div>
-                    <div className="p-4 bg-purple-50 rounded-lg">
+                    <div className="p-4 bg-purple-50 rounded-lg border">
                       <p className="text-sm text-purple-600">Plaster Area</p>
                       <p className="text-2xl font-bold text-purple-900">
                         {totals.plasterArea.toFixed(2)}
@@ -1280,27 +1607,42 @@ export default function Index() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle>Cost by Category</CardTitle>
                   <CardDescription>Breakdown by work type</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {categoryTotals.map(([category, cost]) => (
-                      <div
-                        key={category}
-                        className="flex justify-between items-center"
-                      >
-                        <span className="text-sm font-medium">{category}</span>
-                        <span className="font-bold">
-                          ৳{cost.toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
+                    {categoryTotals.map(([category, cost]) => {
+                      const categoryConfig = categories.find(
+                        (c) => c.name === category,
+                      );
+                      const IconComponent = categoryConfig?.icon || Building2;
+                      return (
+                        <div
+                          key={category}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <IconComponent
+                              className={`h-4 w-4 ${
+                                categoryConfig?.color || "text-gray-600"
+                              }`}
+                            />
+                            <span className="text-sm font-medium">
+                              {category}
+                            </span>
+                          </div>
+                          <span className="font-bold">
+                            ৳{cost.toLocaleString()}
+                          </span>
+                        </div>
+                      );
+                    })}
                     <Separator />
-                    <div className="flex justify-between items-center text-lg font-bold">
-                      <span>Total</span>
+                    <div className="flex justify-between items-center text-lg font-bold bg-brand-50 p-3 rounded-lg">
+                      <span>Total Project Cost</span>
                       <span className="text-brand-600">
                         ৳{totals.totalCost.toLocaleString()}
                       </span>
@@ -1310,7 +1652,7 @@ export default function Index() {
               </Card>
             </div>
 
-            <Card>
+            <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle>Detailed Cost Breakdown</CardTitle>
                 <CardDescription>
@@ -1396,11 +1738,11 @@ export default function Index() {
           </TabsContent>
 
           <TabsContent value="details" className="space-y-6 mt-6">
-            <Card>
+            <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle>Comprehensive Project Report</CardTitle>
                 <CardDescription>
-                  Detailed breakdown of all items
+                  Detailed breakdown of all items by category
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1415,110 +1757,148 @@ export default function Index() {
                       },
                       {} as Record<string, EstimateItem[]>,
                     ),
-                  ).map(([category, items]) => (
-                    <div key={category} className="border rounded-lg p-6">
-                      <h3 className="text-xl font-bold mb-4">
-                        {category} Works
-                      </h3>
-                      <div className="space-y-4">
-                        {items.map((item) => (
-                          <div
-                            key={item.id}
-                            className="border-l-4 border-l-brand-500 pl-4"
-                          >
-                            <div className="flex justify-between items-start mb-2">
-                              <div>
-                                <h4 className="font-semibold">
-                                  {item.itemId} - {item.description}
-                                </h4>
-                                <p className="text-sm text-gray-600">
-                                  {itemTypeConfig[item.type].name}
-                                </p>
-                              </div>
-                              <Badge variant="outline">{item.itemId}</Badge>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                              <div>
-                                <h5 className="font-medium mb-1">Dimensions</h5>
-                                {Object.entries(item.dimensions)
-                                  .filter(
-                                    ([_, value]) => value && value !== "0",
-                                  )
-                                  .map(([key, value]) => (
-                                    <div
-                                      key={key}
-                                      className="flex justify-between"
-                                    >
-                                      <span className="text-gray-600">
-                                        {key}:
-                                      </span>
-                                      <span>{value}</span>
+                  ).map(([category, items]) => {
+                    const categoryConfig = categories.find(
+                      (c) => c.name === category,
+                    );
+                    const IconComponent = categoryConfig?.icon || Building2;
+                    return (
+                      <div
+                        key={category}
+                        className="border rounded-lg p-6 shadow-sm"
+                      >
+                        <div className="flex items-center space-x-3 mb-4">
+                          <IconComponent
+                            className={`h-6 w-6 ${
+                              categoryConfig?.color || "text-gray-600"
+                            }`}
+                          />
+                          <h3 className="text-xl font-bold">
+                            {category} Works
+                          </h3>
+                          <Badge variant="secondary">
+                            {items.length} items
+                          </Badge>
+                        </div>
+                        <div className="space-y-4">
+                          {items.map((item) => {
+                            const config = itemTypeConfig[item.type];
+                            const ItemIcon = config.icon;
+                            return (
+                              <div
+                                key={item.id}
+                                className="border-l-4 border-l-brand-500 pl-4 bg-gray-50 p-4 rounded-r-lg"
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <div className="flex items-center space-x-2">
+                                    <ItemIcon
+                                      className={`h-5 w-5 ${config.color}`}
+                                    />
+                                    <div>
+                                      <h4 className="font-semibold">
+                                        {item.itemId} - {item.description}
+                                      </h4>
+                                      <p className="text-sm text-gray-600">
+                                        {config.name}
+                                      </p>
                                     </div>
-                                  ))}
-                              </div>
-                              <div>
-                                <h5 className="font-medium mb-1">Materials</h5>
-                                <div className="space-y-1">
-                                  {item.results.cement > 0 && (
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">
-                                        Cement:
-                                      </span>
-                                      <span>{item.results.cement} bags</span>
+                                  </div>
+                                  <Badge variant="outline">{item.itemId}</Badge>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                  <div>
+                                    <h5 className="font-medium mb-1">
+                                      Dimensions
+                                    </h5>
+                                    {Object.entries(item.dimensions)
+                                      .filter(
+                                        ([_, value]) => value && value !== "0",
+                                      )
+                                      .map(([key, value]) => (
+                                        <div
+                                          key={key}
+                                          className="flex justify-between"
+                                        >
+                                          <span className="text-gray-600">
+                                            {key}:
+                                          </span>
+                                          <span>{value}</span>
+                                        </div>
+                                      ))}
+                                  </div>
+                                  <div>
+                                    <h5 className="font-medium mb-1">
+                                      Materials
+                                    </h5>
+                                    <div className="space-y-1">
+                                      {item.results.cement > 0 && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">
+                                            Cement:
+                                          </span>
+                                          <span>
+                                            {item.results.cement} bags
+                                          </span>
+                                        </div>
+                                      )}
+                                      {item.results.sand > 0 && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">
+                                            Sand:
+                                          </span>
+                                          <span>{item.results.sand} cft</span>
+                                        </div>
+                                      )}
+                                      {item.results.stoneChips > 0 && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">
+                                            Stone:
+                                          </span>
+                                          <span>
+                                            {item.results.stoneChips} cft
+                                          </span>
+                                        </div>
+                                      )}
+                                      {item.results.reinforcement > 0 && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">
+                                            Steel:
+                                          </span>
+                                          <span>
+                                            {item.results.reinforcement} kg
+                                          </span>
+                                        </div>
+                                      )}
+                                      {(item.results.brickQuantity || 0) >
+                                        0 && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">
+                                            Bricks:
+                                          </span>
+                                          <span>
+                                            {item.results.brickQuantity} nos
+                                          </span>
+                                        </div>
+                                      )}
                                     </div>
-                                  )}
-                                  {item.results.sand > 0 && (
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">
-                                        Sand:
-                                      </span>
-                                      <span>{item.results.sand} cft</span>
+                                  </div>
+                                  <div>
+                                    <h5 className="font-medium mb-1">Cost</h5>
+                                    <div className="text-right">
+                                      <p className="text-lg font-bold text-brand-600">
+                                        ৳
+                                        {item.results.totalCost.toLocaleString()}
+                                      </p>
                                     </div>
-                                  )}
-                                  {item.results.stoneChips > 0 && (
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">
-                                        Stone:
-                                      </span>
-                                      <span>{item.results.stoneChips} cft</span>
-                                    </div>
-                                  )}
-                                  {item.results.reinforcement > 0 && (
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">
-                                        Steel:
-                                      </span>
-                                      <span>
-                                        {item.results.reinforcement} kg
-                                      </span>
-                                    </div>
-                                  )}
-                                  {(item.results.brickQuantity || 0) > 0 && (
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">
-                                        Bricks:
-                                      </span>
-                                      <span>
-                                        {item.results.brickQuantity} nos
-                                      </span>
-                                    </div>
-                                  )}
+                                  </div>
                                 </div>
                               </div>
-                              <div>
-                                <h5 className="font-medium mb-1">Cost</h5>
-                                <div className="text-right">
-                                  <p className="text-lg font-bold text-brand-600">
-                                    ৳{item.results.totalCost.toLocaleString()}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -1526,7 +1906,7 @@ export default function Index() {
 
           <TabsContent value="analytics" className="space-y-6 mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card>
+              <Card className="shadow-lg">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
                     Total Items
@@ -1542,7 +1922,7 @@ export default function Index() {
                   </p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="shadow-lg">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
                     Avg Cost/Item
@@ -1563,7 +1943,7 @@ export default function Index() {
                   </p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="shadow-lg">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
                     Total Volume
@@ -1577,7 +1957,7 @@ export default function Index() {
                   <p className="text-xs text-muted-foreground">Cubic feet</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="shadow-lg">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
                     Project Value
@@ -1595,26 +1975,42 @@ export default function Index() {
               </Card>
             </div>
 
-            <Card>
+            <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle>Project Progress</CardTitle>
+                <CardTitle>Project Progress by Category</CardTitle>
                 <CardDescription>
-                  Estimation completion by category
+                  Cost distribution and completion status
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {categoryTotals.map(([category, cost]) => {
                     const percentage = (cost / totals.totalCost) * 100;
+                    const categoryConfig = categories.find(
+                      (c) => c.name === category,
+                    );
+                    const IconComponent = categoryConfig?.icon || Building2;
                     return (
                       <div key={category} className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm font-medium">
-                            {category}
-                          </span>
-                          <span className="text-sm text-gray-600">
-                            {percentage.toFixed(1)}%
-                          </span>
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center space-x-2">
+                            <IconComponent
+                              className={`h-4 w-4 ${
+                                categoryConfig?.color || "text-gray-600"
+                              }`}
+                            />
+                            <span className="text-sm font-medium">
+                              {category}
+                            </span>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-sm font-medium">
+                              ৳{cost.toLocaleString()}
+                            </span>
+                            <span className="text-sm text-gray-600 ml-2">
+                              {percentage.toFixed(1)}%
+                            </span>
+                          </div>
                         </div>
                         <Progress value={percentage} className="h-2" />
                       </div>
@@ -1623,6 +2019,18 @@ export default function Index() {
                 </div>
               </CardContent>
             </Card>
+
+            <div className="text-center p-6 bg-white rounded-lg shadow-lg">
+              <div className="flex items-center justify-center space-x-2 text-gray-600">
+                <User className="h-5 w-5" />
+                <span className="text-lg font-medium">
+                  Developed by ROY SHAON
+                </span>
+              </div>
+              <p className="text-sm text-gray-500 mt-2">
+                Professional Construction Estimation Software
+              </p>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
