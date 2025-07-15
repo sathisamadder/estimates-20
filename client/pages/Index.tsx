@@ -518,9 +518,12 @@ export default function Index() {
         // Mat foundation calculation from document
         volume = parseFloat(length) * parseFloat(width) * parseFloat(height);
         dryVolume = volume * 1.5;
-        cement = ((dryVolume * 1) / 5.5) * 1.25; // Ratio 1:1.5:3
-        sand = (dryVolume * 1.5) / 5.5;
-        stoneChips = (dryVolume * 3) / 5.5;
+        // Dynamic concrete ratio based on mixing ratio
+        const mfRatios = mixingRatio.split(":").map(Number);
+        const mfTotalRatio = mfRatios.reduce((sum, ratio) => sum + ratio, 0);
+        cement = ((dryVolume * mfRatios[0]) / mfTotalRatio) * 1.25;
+        sand = (dryVolume * mfRatios[1]) / mfTotalRatio;
+        stoneChips = (dryVolume * mfRatios[2]) / mfTotalRatio;
 
         // Mat foundation - two-way reinforcement system
         const mfLongDirection =
