@@ -2005,7 +2005,7 @@ export default function Index() {
                       Add Item
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="max-w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-y-auto mx-4">
                     <DialogHeader>
                       <DialogTitle>
                         {editingItem ? "Edit Item" : "Add New Item"}
