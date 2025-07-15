@@ -459,11 +459,29 @@ export default function Index() {
         stoneChips = (dryVolume * ratios[2]) / totalRatio;
 
         // Detailed reinforcement calculation for pile
+        const mainBarWeight =
+          parseFloat(barDiameter) === 10
+            ? 0.19
+            : parseFloat(barDiameter) === 12
+              ? 0.27
+              : parseFloat(barDiameter) === 16
+                ? 0.48
+                : parseFloat(barDiameter) === 20
+                  ? 0.75
+                  : parseFloat(barDiameter) === 25
+                    ? 1.17
+                    : 1.88;
+        const stirrupBarWeight =
+          parseFloat(stirrupDiameter) === 8 ? 0.12 : 0.19;
         const longReinforcement =
-          parseFloat(reinforcementCount) * (pileLength + 2.5) * 0.75 * qty;
+          parseFloat(reinforcementCount) *
+          (pileLength + 2.5) *
+          mainBarWeight *
+          qty;
         const spiralLength = pileLength / (parseFloat(stirrupSpacing) / 12); // Number of spirals
         const spiralPerimeter = (Math.PI * (parseFloat(diameter) - 3)) / 12; // Diameter minus clear cover
-        const spiralReinforcement = spiralLength * spiralPerimeter * 0.19; // 10mm bar weight
+        const spiralReinforcement =
+          spiralLength * spiralPerimeter * stirrupBarWeight;
 
         reinforcementDetails = {
           mainReinforcement: longReinforcement,
