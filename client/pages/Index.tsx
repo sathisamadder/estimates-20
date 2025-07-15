@@ -646,23 +646,46 @@ export default function Index() {
         sand = (dryVolume * 1.5) / 5.5;
         stoneChips = (dryVolume * 3) / 5.5;
 
-        // Detailed column reinforcement with stirrups
-        const colMainReinforcement =
-          parseFloat(reinforcementCount) * (colHeight + 2.5) * 0.75 * qty;
+        // Enhanced column reinforcement with multiple bar sizes and stirrup options
+        const mainBarWeight =
+          parseFloat(barDiameter) === 10
+            ? 0.19
+            : parseFloat(barDiameter) === 12
+              ? 0.27
+              : parseFloat(barDiameter) === 16
+                ? 0.48
+                : parseFloat(barDiameter) === 20
+                  ? 0.75
+                  : parseFloat(barDiameter) === 25
+                    ? 1.17
+                    : 1.88;
+        const stirrupBarWeight =
+          parseFloat(stirrupDiameter) === 8 ? 0.12 : 0.19;
 
-        // Stirrup calculation with three different strips
+        const colMainReinforcement =
+          parseFloat(reinforcementCount) *
+          (colHeight + 2.5) *
+          mainBarWeight *
+          qty;
+
+        // Advanced stirrup calculation with three different strips
         const stirrupSpacingFt = parseFloat(stirrupSpacing) / 12;
         const numberOfStirups = colHeight / stirrupSpacingFt;
 
         // Stirrup perimeters for different configurations
+        const clearCoverInches = parseFloat(clearCover);
         const stirrup1Perimeter =
-          (2 * (parseFloat(length) + parseFloat(width) - 6)) / 12; // 3" clear cover
+          (2 *
+            (parseFloat(length) + parseFloat(width) - clearCoverInches * 2)) /
+          12;
         const stirrup2Perimeter =
-          (2 * (parseFloat(length) + parseFloat(width) - 6)) / 12;
+          (2 *
+            (parseFloat(length) + parseFloat(width) - clearCoverInches * 2)) /
+          12;
         const stirrup3Perimeter =
           (Math.sqrt(
-            Math.pow(parseFloat(length) - 3, 2) +
-              Math.pow(parseFloat(width) - 3, 2),
+            Math.pow(parseFloat(length) - clearCoverInches, 2) +
+              Math.pow(parseFloat(width) - clearCoverInches, 2),
           ) *
             4) /
           12;
@@ -670,7 +693,7 @@ export default function Index() {
         const totalStirrups =
           (stirrup1Perimeter + stirrup2Perimeter + stirrup3Perimeter) *
           numberOfStirups *
-          0.19;
+          stirrupBarWeight;
 
         reinforcementDetails = {
           mainReinforcement: colMainReinforcement,
