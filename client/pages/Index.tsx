@@ -692,6 +692,10 @@ export default function Index() {
           (stairWidth / 0.42) * (parseFloat(length) / 4) * 0.27 * 2; // At landings
 
         reinforcementDetails = {
+          mainReinforcement:
+            stairLongReinforcement +
+            stairShortReinforcement +
+            stairExtraTopReinforcement,
           longDirection: stairLongReinforcement,
           shortDirection: stairShortReinforcement,
           extraTopReinforcement: stairExtraTopReinforcement,
