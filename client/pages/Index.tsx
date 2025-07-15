@@ -849,7 +849,7 @@ export default function Index() {
         break;
 
       default:
-        reinforcementDetails = { mainReinforcement: 0 };
+        reinforcementDetails = {};
         break;
     }
 
