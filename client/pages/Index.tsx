@@ -830,7 +830,7 @@ export default function Index() {
         sand = (volume * 6) / 7;
         stoneChips = 0; // No stone chips in brick work
 
-        reinforcementDetails = { mainReinforcement: 0 };
+        reinforcementDetails = {};
         reinforcement = 0; // No reinforcement in normal brick work
         break;
 
