@@ -451,10 +451,12 @@ export default function Index() {
         const pileDiameter = parseFloat(diameter) / 12; // inches to feet
         volume = ((Math.PI * Math.pow(pileDiameter, 2) * pileLength) / 4) * qty;
         dryVolume = volume * 1.5;
-        // Concrete ratio 1:1.5:3
-        cement = ((dryVolume * 1) / 5.5) * 1.25;
-        sand = (dryVolume * 1.5) / 5.5;
-        stoneChips = (dryVolume * 3) / 5.5;
+        // Dynamic concrete ratio based on mixing ratio
+        const ratios = mixingRatio.split(":").map(Number);
+        const totalRatio = ratios.reduce((sum, ratio) => sum + ratio, 0);
+        cement = ((dryVolume * ratios[0]) / totalRatio) * 1.25;
+        sand = (dryVolume * ratios[1]) / totalRatio;
+        stoneChips = (dryVolume * ratios[2]) / totalRatio;
 
         // Detailed reinforcement calculation for pile
         const longReinforcement =
