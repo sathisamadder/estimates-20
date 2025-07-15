@@ -303,11 +303,11 @@ export default function Index() {
         sand = (dryVolume * 1.5) / 5.5;
         stoneChips = (dryVolume * 3) / 5.5;
         // Main and distribution reinforcement
-        const mainReinforcement =
+        const rwMainReinforcement =
           (parseFloat(length) / 0.42) * parseFloat(height) * 0.27 * 2;
         const distributionReinforcement =
           (parseFloat(height) / 0.58) * parseFloat(length) * 0.19;
-        reinforcement = mainReinforcement + distributionReinforcement;
+        reinforcement = rwMainReinforcement + distributionReinforcement;
         break;
 
       case "water_reservoir":
