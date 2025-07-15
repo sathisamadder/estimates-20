@@ -420,9 +420,7 @@ export default function Index() {
     let stoneChips = 0;
 
     // Initialize reinforcement details
-    let reinforcementDetails: ReinforcementDetails = {
-      mainReinforcement: 0,
-    };
+    let reinforcementDetails: ReinforcementDetails = {};
 
     switch (type) {
       case "pile":
