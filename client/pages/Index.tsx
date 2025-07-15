@@ -1325,6 +1325,10 @@ export default function Index() {
                     <SelectItem value="6">6 bars</SelectItem>
                     <SelectItem value="8">8 bars</SelectItem>
                     <SelectItem value="10">10 bars</SelectItem>
+                    <SelectItem value="12">12 bars</SelectItem>
+                    <SelectItem value="16">16 bars</SelectItem>
+                    <SelectItem value="20">20 bars</SelectItem>
+                    <SelectItem value="24">24 bars</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
