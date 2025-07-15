@@ -255,7 +255,7 @@ export default function Index() {
       prefix: "S",
       name: "Stair",
       category: "Structure",
-      icon: Stairs,
+      icon: Navigation,
       color: "text-green-600",
       bgColor: "bg-green-50",
     },
