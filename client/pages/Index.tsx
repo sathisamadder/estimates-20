@@ -637,7 +637,7 @@ export default function Index() {
           wrBinderReinforcement;
         break;
 
-      case "column":
+      case "column": {
         const colLength = parseFloat(length) / 12; // inches to feet
         const colWidth = parseFloat(width) / 12; // inches to feet
         const colHeight = parseFloat(height);
@@ -702,6 +702,7 @@ export default function Index() {
         };
         reinforcement = colMainReinforcement + totalStirrups;
         break;
+      }
 
       case "beam":
         const beamLength = parseFloat(length);
