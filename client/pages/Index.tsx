@@ -212,6 +212,8 @@ export default function Index() {
     stirrupSpacing: "4",
     barDiameter: "20",
     clearCover: "1.5",
+    stirrupDiameter: "8",
+    mixingRatio: "1:1.5:3",
   });
 
   // Format currency to BDT
