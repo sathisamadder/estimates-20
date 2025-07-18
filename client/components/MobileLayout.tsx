@@ -1,4 +1,4 @@
-importimport { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -183,7 +183,7 @@ export function MobileLayout({
 
         {/* Mobile Tab Navigation */}
         <div className="border-t bg-white">
-          <ScrollArea orientation="horizontal" className="w-full">
+          <div className="overflow-x-auto">
             <div className="flex space-x-1 p-2 min-w-max">
               {navigationItems.map((item) => {
                 const IconComponent = item.icon;
@@ -205,7 +205,7 @@ export function MobileLayout({
                 );
               })}
             </div>
-          </ScrollArea>
+          </div>
         </div>
       </header>
 
