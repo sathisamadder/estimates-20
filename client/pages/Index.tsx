@@ -4056,8 +4056,27 @@ export default function Index() {
                           </div>
                         </div>
                       ))
-                    )}
+                                        )}
                   </div>
+                  {projects.length > 5 && (
+                    <div className="border-t pt-3 mt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // Show a toast or handle viewing all projects
+                          const allProjectsElement = document.getElementById('all-projects-section');
+                          if (allProjectsElement) {
+                            allProjectsElement.scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }}
+                        className="w-full"
+                      >
+                        View All {projects.length} Projects
+                        <Eye className="h-4 w-4 ml-2" />
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
