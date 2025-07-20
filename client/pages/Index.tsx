@@ -1256,7 +1256,9 @@ export default function Index() {
       barDiameter: item.dimensions.barDiameter || "20",
       clearCover: item.dimensions.clearCover || "1.5",
       stirrupDiameter: item.dimensions.stirrupDiameter || "8",
-      mixingRatio: item.dimensions.mixingRatio || "1:1.5:3",
+            mixingRatio: item.dimensions.mixingRatio || "1:1.5:3",
+      multiplyQuantity: item.dimensions.multiplyQuantity || "1",
+      isMultipleUnits: item.dimensions.isMultipleUnits === "true" || false,
     });
     setIsDialogOpen(true);
   };
