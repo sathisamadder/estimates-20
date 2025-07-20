@@ -213,8 +213,8 @@ export function useDataManager() {
     return newProject;
   }, [isFirebaseAvailable]);
 
-  const updateProject = useCallback(async (id: string, updates: Partial<Project>) => {
-    const updatedProject = { ...updates, updatedAt: new Date().toISOString() };
+    const updateProject = useCallback(async (id: string, updates: Partial<Project>) => {
+    const updatedProject = { ...updates, updatedAt: new Date().toISOString() } as Partial<Project>;
     
     setProjects(prev => prev.map(p => 
       p.id === id ? { ...p, ...updatedProject } : p
@@ -279,8 +279,8 @@ export function useDataManager() {
     return newClient;
   }, [isFirebaseAvailable]);
 
-  const updateClient = useCallback(async (id: string, updates: Partial<ClientData>) => {
-    const updatedClient = { ...updates, updatedAt: new Date().toISOString() };
+    const updateClient = useCallback(async (id: string, updates: Partial<ClientData>) => {
+    const updatedClient = { ...updates, updatedAt: new Date().toISOString() } as Partial<ClientData>;
     
     setClients(prev => prev.map(c => 
       c.id === id ? { ...c, ...updatedClient } : c
