@@ -1258,9 +1258,9 @@ export default function Index() {
     });
 
     setCurrentProjectId(newProject.id);
-    setNewProjectName("");
+        setNewProjectName("");
     setNewProjectDescription("");
-    setSelectedClientId("");
+    setSelectedClientId("no-client");
     setIsProjectDialogOpen(false);
   };
 
@@ -4459,9 +4459,9 @@ export default function Index() {
               variant="outline"
               onClick={() => {
                 setIsProjectDialogOpen(false);
-                setNewProjectName("");
+                                setNewProjectName("");
                 setNewProjectDescription("");
-                setSelectedClientId("");
+                setSelectedClientId("no-client");
               }}
             >
               Cancel
