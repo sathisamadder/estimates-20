@@ -2523,11 +2523,55 @@ export default function Index() {
                 Export
               </Button>
 
-              <Button variant="outline" size="sm" onClick={() => {
+                            <Button variant="outline" size="sm" onClick={() => {
                 window.print();
               }}>
                 <Printer className="h-4 w-4 mr-2" />
                 Print
+              </Button>
+
+              <input
+                type="file"
+                accept=".json"
+                style={{ display: 'none' }}
+                id="file-import"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      try {
+                        const importedProject = JSON.parse(event.target?.result as string);
+                        if (importedProject.items && importedProject.name) {
+                          const newProject: Project = {
+                            ...importedProject,
+                            id: Date.now().toString(),
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString(),
+                          };
+                          setProjects(prev => [...prev, newProject]);
+                          setCurrentProject(newProject);
+                          setCurrentProjectId(newProject.id);
+                        }
+                      } catch (error) {
+                        console.error('Error importing project:', error);
+                        alert('Error importing project. Please check the file format.');
+                      }
+                    };
+                    reader.readAsText(file);
+                  }
+                  // Reset input
+                  e.target.value = '';
+                }}
+              />
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => document.getElementById('file-import')?.click()}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import
               </Button>
               <Dialog
                 open={isPricingDialogOpen}
