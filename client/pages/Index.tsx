@@ -179,7 +179,11 @@ interface MaterialRates {
 }
 
 export default function Index() {
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState("items");
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [clients, setClients] = useState<ClientData[]>([]);
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [currentProject, setCurrentProject] = useState<Project>({
     id: "1",
     name: "Construction Project",
