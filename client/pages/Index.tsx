@@ -1945,8 +1945,8 @@ export default function Index() {
         <div className="container mx-auto px-4 py-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsContent value="items" className="space-y-6">
-              {/* Mobile Category Selection */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+                            {/* Mobile Category Selection */}
+              <div className="grid grid-cols-2 gap-2 mb-6">
                 <Card
                   className={`cursor-pointer transition-all duration-200 ${
                     selectedCategory === "all"
