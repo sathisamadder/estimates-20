@@ -1,4 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import {
+  useDataManager,
+  type Project,
+  type ClientData,
+} from "@/hooks/use-data-manager";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -81,7 +87,11 @@ import {
   Anchor,
   DollarSign,
   Cog,
+  Upload,
 } from "lucide-react";
+import { MobileLayout } from "@/components/MobileLayout";
+import { MobileTable } from "@/components/MobileTable";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type ItemType =
   | "pile"
@@ -135,17 +145,11 @@ interface EstimateItem {
   updatedAt: string;
 }
 
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  client: string;
-  location: string;
-  items: EstimateItem[];
-  totalBudget: number;
-  customRates?: MaterialRates;
-  createdAt: string;
-  updatedAt: string;
+interface LocalStorageData {
+  projects: Project[];
+  clients: ClientData[];
+  currentProjectId: string | null;
+  lastSaved: string;
 }
 
 interface MaterialRates {
@@ -158,18 +162,53 @@ interface MaterialRates {
 }
 
 export default function Index() {
+  const isMobile = useIsMobile();
+  const { currentUser, logout } = useAuth();
+  const {
+    projects,
+    clients,
+    currentProjectId,
+    isFirebaseAvailable,
+    isSyncing,
+    lastSynced,
+    setCurrentProjectId,
+    createProject,
+    updateProject,
+    deleteProject,
+    createClient,
+    updateClient,
+    deleteClient,
+    syncWithFirebase,
+    saveToLocalStorage,
+    loadFromLocalStorage,
+  } = useDataManager();
+
   const [activeTab, setActiveTab] = useState("items");
-  const [currentProject, setCurrentProject] = useState<Project>({
-    id: "1",
-    name: "Construction Project",
-    description: "Professional estimation project",
-    client: "",
-    location: "",
-    items: [],
-    totalBudget: 0,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  });
+
+  // Get current project from data manager
+  const currentProject = currentProjectId
+    ? projects.find((p) => p.id === currentProjectId) || {
+        id: "1",
+        name: "Construction Project",
+        description: "Professional estimation project",
+        client: "",
+        location: "",
+        items: [],
+        totalBudget: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+    : {
+        id: "1",
+        name: "Construction Project",
+        description: "Professional estimation project",
+        client: "",
+        location: "",
+        items: [],
+        totalBudget: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
   const [materialRates, setMaterialRates] = useState<MaterialRates>({
     cement: 450,
@@ -188,6 +227,15 @@ export default function Index() {
   const [filterType, setFilterType] = useState<ItemType | "all">("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [tempRates, setTempRates] = useState<MaterialRates>(materialRates);
+  const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
+  const [isClientDialogOpen, setIsClientDialogOpen] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+  const [newProjectDescription, setNewProjectDescription] = useState("");
+  const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [newClientName, setNewClientName] = useState("");
+  const [newClientEmail, setNewClientEmail] = useState("");
+  const [newClientPhone, setNewClientPhone] = useState("");
+  const [newClientAddress, setNewClientAddress] = useState("");
 
   // Form states
   const [formData, setFormData] = useState({
@@ -214,6 +262,9 @@ export default function Index() {
     clearCover: "1.5",
     stirrupDiameter: "8",
     mixingRatio: "1:1.5:3",
+    // Quantity multiplication fields
+    multiplyQuantity: "1",
+    isMultipleUnits: false,
   });
 
   // Format currency to BDT
@@ -389,6 +440,33 @@ export default function Index() {
     },
   ];
 
+  // Load data on mount
+  useEffect(() => {
+    loadFromLocalStorage();
+  }, [loadFromLocalStorage]);
+
+  // Save data when it changes
+  useEffect(() => {
+    if (projects.length > 0 || clients.length > 0) {
+      saveToLocalStorage();
+    }
+  }, [projects, clients, currentProjectId, saveToLocalStorage]);
+
+  // Update project when current project changes
+  useEffect(() => {
+    if (currentProjectId && currentProject.id === currentProjectId) {
+      updateProject(currentProjectId, {
+        items: currentProject.items,
+        customRates: currentProject.customRates,
+      });
+    }
+  }, [
+    currentProject.items,
+    currentProject.customRates,
+    currentProjectId,
+    updateProject,
+  ]);
+
   // Load custom rates if available
   useEffect(() => {
     if (currentProject.customRates) {
@@ -429,6 +507,8 @@ export default function Index() {
       clearCover = "1.5",
       stirrupDiameter = "8",
       mixingRatio = "1:1.5:3",
+      multiplyQuantity = "1",
+      isMultipleUnits = "false",
     } = dimensions;
 
     const qty = parseFloat(quantity);
@@ -977,21 +1057,60 @@ export default function Index() {
       brickCost +
       laborCost;
 
+    // Apply quantity multiplication if enabled
+    const multiplier =
+      isMultipleUnits === "true" ? parseFloat(multiplyQuantity) || 1 : 1;
+
     return {
-      cement: Math.round(cement * 100) / 100,
-      sand: Math.round(sand * 100) / 100,
-      stoneChips: Math.round(stoneChips * 100) / 100,
-      reinforcement: Math.round(reinforcement * 100) / 100,
-      reinforcementDetails,
-      volume: Math.round(volume * 100) / 100,
-      totalCost: Math.round(totalCost),
-      brickQuantity: Math.round(brickQuantity),
-      plasterArea: Math.round(plasterArea * 100) / 100,
+      cement: Math.round(cement * multiplier * 100) / 100,
+      sand: Math.round(sand * multiplier * 100) / 100,
+      stoneChips: Math.round(stoneChips * multiplier * 100) / 100,
+      reinforcement: Math.round(reinforcement * multiplier * 100) / 100,
+      reinforcementDetails: {
+        ...reinforcementDetails,
+        mainReinforcement: reinforcementDetails.mainReinforcement
+          ? reinforcementDetails.mainReinforcement * multiplier
+          : undefined,
+        distributionReinforcement:
+          reinforcementDetails.distributionReinforcement
+            ? reinforcementDetails.distributionReinforcement * multiplier
+            : undefined,
+        stirrups: reinforcementDetails.stirrups
+          ? reinforcementDetails.stirrups * multiplier
+          : undefined,
+        spiralReinforcement: reinforcementDetails.spiralReinforcement
+          ? reinforcementDetails.spiralReinforcement * multiplier
+          : undefined,
+        extraTopReinforcement: reinforcementDetails.extraTopReinforcement
+          ? reinforcementDetails.extraTopReinforcement * multiplier
+          : undefined,
+        longDirection: reinforcementDetails.longDirection
+          ? reinforcementDetails.longDirection * multiplier
+          : undefined,
+        shortDirection: reinforcementDetails.shortDirection
+          ? reinforcementDetails.shortDirection * multiplier
+          : undefined,
+        topReinforcement: reinforcementDetails.topReinforcement
+          ? reinforcementDetails.topReinforcement * multiplier
+          : undefined,
+        bottomReinforcement: reinforcementDetails.bottomReinforcement
+          ? reinforcementDetails.bottomReinforcement * multiplier
+          : undefined,
+      },
+      volume: Math.round(volume * multiplier * 100) / 100,
+      totalCost: Math.round(totalCost * multiplier),
+      brickQuantity: Math.round(brickQuantity * multiplier),
+      plasterArea: Math.round(plasterArea * multiplier * 100) / 100,
+      multiplier, // Include multiplier info
+      isMultipleUnits: isMultipleUnits === "true",
     };
   };
 
   const handleAddItem = () => {
-    const results = calculateEstimate(selectedType, formData);
+    const results = calculateEstimate(selectedType, {
+      ...formData,
+      isMultipleUnits: formData.isMultipleUnits.toString(),
+    });
     const itemId = editingItem
       ? editingItem.itemId
       : generateItemId(selectedType);
@@ -1003,7 +1122,10 @@ export default function Index() {
       description:
         formData.description ||
         `${itemTypeConfig[selectedType].name} ${itemId}`,
-      dimensions: { ...formData },
+      dimensions: {
+        ...formData,
+        isMultipleUnits: formData.isMultipleUnits.toString(),
+      },
       results,
       unit:
         selectedType === "brick_work"
@@ -1017,19 +1139,13 @@ export default function Index() {
     };
 
     if (editingItem) {
-      setCurrentProject((prev) => ({
-        ...prev,
-        items: prev.items.map((item) =>
-          item.id === editingItem.id ? newItem : item,
-        ),
-        updatedAt: new Date().toISOString(),
-      }));
+      const updatedItems = currentProject.items.map((item) =>
+        item.id === editingItem.id ? newItem : item,
+      );
+      updateProject(currentProjectId!, { items: updatedItems });
     } else {
-      setCurrentProject((prev) => ({
-        ...prev,
-        items: [...prev.items, newItem],
-        updatedAt: new Date().toISOString(),
-      }));
+      const updatedItems = [...currentProject.items, newItem];
+      updateProject(currentProjectId!, { items: updatedItems });
     }
 
     resetForm();
@@ -1037,11 +1153,7 @@ export default function Index() {
 
   const handleSavePricingSettings = () => {
     setMaterialRates(tempRates);
-    setCurrentProject((prev) => ({
-      ...prev,
-      customRates: tempRates,
-      updatedAt: new Date().toISOString(),
-    }));
+    updateProject(currentProjectId!, { customRates: tempRates });
     setIsPricingDialogOpen(false);
   };
 
@@ -1069,6 +1181,8 @@ export default function Index() {
       clearCover: "1.5",
       stirrupDiameter: "8",
       mixingRatio: "1:1.5:3",
+      multiplyQuantity: "1",
+      isMultipleUnits: false,
     });
     setEditingItem(null);
     setIsDialogOpen(false);
@@ -1100,16 +1214,17 @@ export default function Index() {
       clearCover: item.dimensions.clearCover || "1.5",
       stirrupDiameter: item.dimensions.stirrupDiameter || "8",
       mixingRatio: item.dimensions.mixingRatio || "1:1.5:3",
+      multiplyQuantity: item.dimensions.multiplyQuantity || "1",
+      isMultipleUnits: item.dimensions.isMultipleUnits === "true" || false,
     });
     setIsDialogOpen(true);
   };
 
   const handleDeleteItem = (itemId: string) => {
-    setCurrentProject((prev) => ({
-      ...prev,
-      items: prev.items.filter((item) => item.id !== itemId),
-      updatedAt: new Date().toISOString(),
-    }));
+    const updatedItems = currentProject.items.filter(
+      (item) => item.id !== itemId,
+    );
+    updateProject(currentProjectId!, { items: updatedItems });
   };
 
   const handleDuplicateItem = (item: EstimateItem) => {
@@ -1123,11 +1238,50 @@ export default function Index() {
       updatedAt: new Date().toISOString(),
     };
 
-    setCurrentProject((prev) => ({
-      ...prev,
-      items: [...prev.items, duplicatedItem],
-      updatedAt: new Date().toISOString(),
-    }));
+    const updatedItems = [...currentProject.items, duplicatedItem];
+    updateProject(currentProjectId!, { items: updatedItems });
+  };
+
+  // Project Management Functions using data manager
+  const handleCreateNewProject = async () => {
+    const newProject = await createProject({
+      name: newProjectName || "New Project",
+      description: newProjectDescription || "",
+      client: selectedClientId
+        ? clients.find((c) => c.id === selectedClientId)?.name || ""
+        : "",
+      clientId: selectedClientId,
+      location: "",
+      items: [],
+      totalBudget: 0,
+      customRates: materialRates,
+    });
+
+    setCurrentProjectId(newProject.id);
+    setNewProjectName("");
+    setNewProjectDescription("");
+    setSelectedClientId("");
+    setIsProjectDialogOpen(false);
+  };
+
+  const switchProject = (projectId: string) => {
+    setCurrentProjectId(projectId);
+  };
+
+  // Client Management Functions using data manager
+  const handleCreateNewClient = async () => {
+    await createClient({
+      name: newClientName,
+      email: newClientEmail,
+      phone: newClientPhone,
+      address: newClientAddress,
+    });
+
+    setNewClientName("");
+    setNewClientEmail("");
+    setNewClientPhone("");
+    setNewClientAddress("");
+    setIsClientDialogOpen(false);
   };
 
   const getTotalEstimate = () => {
@@ -1680,6 +1834,82 @@ export default function Index() {
             ].includes(selectedType) && reinforcementFields}
           </div>
         )}
+
+        {/* Quantity Multiplication Section */}
+        <div className="border-t pt-4 mt-6">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="isMultipleUnits"
+                checked={formData.isMultipleUnits}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    isMultipleUnits: e.target.checked,
+                  })
+                }
+                className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
+              />
+              <Label htmlFor="isMultipleUnits" className="text-sm font-medium">
+                Multiple Units (e.g., 5 identical columns)
+              </Label>
+            </div>
+
+            {formData.isMultipleUnits && (
+              <div className="bg-brand-50 p-4 rounded-lg border border-brand-200">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label
+                      htmlFor="multiplyQuantity"
+                      className="text-sm font-medium"
+                    >
+                      Number of Units
+                    </Label>
+                    <Input
+                      id="multiplyQuantity"
+                      type="number"
+                      min="1"
+                      max="100"
+                      placeholder="e.g., 5"
+                      value={formData.multiplyQuantity}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          multiplyQuantity: e.target.value,
+                        })
+                      }
+                      className="h-10"
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <div className="text-sm text-gray-600">
+                      <p className="font-medium">Example:</p>
+                      <p>
+                        For 5 identical{" "}
+                        {itemTypeConfig[selectedType].name.toLowerCase()}s,
+                      </p>
+                      <p>all materials will be multiplied by 5</p>
+                    </div>
+                  </div>
+                </div>
+
+                {parseFloat(formData.multiplyQuantity) > 1 && (
+                  <div className="mt-3 p-3 bg-blue-50 rounded border border-blue-200">
+                    <p className="text-sm text-blue-700 font-medium">
+                      📋 This will calculate materials for{" "}
+                      {formData.multiplyQuantity} ×{" "}
+                      {itemTypeConfig[selectedType].name}
+                    </p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      Total quantities will be automatically multiplied
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     );
   };
@@ -1707,6 +1937,599 @@ export default function Index() {
     ),
   );
 
+  // Mobile layout wrapper
+  if (isMobile) {
+    return (
+      <MobileLayout
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onAddItem={() => setIsDialogOpen(true)}
+        onOpenPricing={() => setIsPricingDialogOpen(true)}
+        onSave={() => {
+          saveToLocalStorage();
+          if (isFirebaseAvailable) {
+            syncWithFirebase();
+          }
+        }}
+        onExport={() => {
+          const dataStr = JSON.stringify(currentProject, null, 2);
+          const dataBlob = new Blob([dataStr], { type: "application/json" });
+          const url = URL.createObjectURL(dataBlob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = `${currentProject.name.replace(/\s+/g, "_")}_estimate.json`;
+          link.click();
+          URL.revokeObjectURL(url);
+        }}
+        onPrint={() => window.print()}
+        projectName={currentProject.name}
+        totalCost={formatBDT(totals.totalCost)}
+        itemCount={currentProject.items.length}
+      >
+        <div className="container mx-auto px-4 py-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsContent value="items" className="space-y-6">
+              {/* Mobile Category Selection */}
+              <div className="grid grid-cols-2 gap-2 mb-6">
+                <Card
+                  className={`cursor-pointer transition-all duration-200 ${
+                    selectedCategory === "all"
+                      ? "ring-2 ring-brand-500 bg-brand-50 shadow-lg"
+                      : "hover:shadow-md"
+                  }`}
+                  onClick={() => setSelectedCategory("all")}
+                >
+                  <CardContent className="p-3 text-center">
+                    <HardHat className="h-6 w-6 mx-auto mb-2 text-gray-600" />
+                    <h3 className="font-medium text-xs">All Categories</h3>
+                    <p className="text-xs text-gray-500">
+                      {currentProject.items.length} items
+                    </p>
+                  </CardContent>
+                </Card>
+                {categories.map((category) => {
+                  const IconComponent = category.icon;
+                  const categoryItems = currentProject.items.filter((item) =>
+                    category.items.includes(item.type),
+                  );
+                  return (
+                    <Card
+                      key={category.name}
+                      className={`cursor-pointer transition-all duration-200 ${
+                        selectedCategory === category.name
+                          ? `ring-2 ring-brand-500 ${category.bgColor} shadow-lg`
+                          : "hover:shadow-md"
+                      }`}
+                      onClick={() => setSelectedCategory(category.name)}
+                    >
+                      <CardContent className="p-3 text-center">
+                        <IconComponent
+                          className={`h-6 w-6 mx-auto mb-2 ${category.color}`}
+                        />
+                        <h3 className="font-medium text-xs">{category.name}</h3>
+                        <p className="text-xs text-gray-500">
+                          {categoryItems.length} items
+                        </p>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* Mobile Items List */}
+              <MobileTable
+                items={filteredItems.map((item) => ({
+                  ...item,
+                  category: itemTypeConfig[item.type].category,
+                  reinforcement: item.results.reinforcement,
+                  volume: item.results.volume,
+                  totalCost: item.results.totalCost,
+                  icon: itemTypeConfig[item.type].icon,
+                  color: itemTypeConfig[item.type].color,
+                  bgColor: itemTypeConfig[item.type].bgColor,
+                  brickQuantity: item.results.brickQuantity,
+                  plasterArea: item.results.plasterArea,
+                }))}
+                onEdit={handleEditItem}
+                onDuplicate={handleDuplicateItem}
+                onDelete={handleDeleteItem}
+                formatBDT={formatBDT}
+              />
+            </TabsContent>
+
+            <TabsContent value="summary" className="space-y-6">
+              {/* Mobile Summary */}
+              <div className="space-y-4">
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 text-lg">
+                      <BarChart3 className="h-5 w-5" />
+                      <span>Material Summary</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 bg-blue-50 rounded-lg border">
+                        <p className="text-sm text-blue-600">Cement</p>
+                        <p className="text-xl font-bold text-blue-900">
+                          {totals.cement.toFixed(2)}
+                        </p>
+                        <p className="text-sm text-blue-600">bags</p>
+                      </div>
+                      <div className="p-3 bg-amber-50 rounded-lg border">
+                        <p className="text-sm text-amber-600">Sand</p>
+                        <p className="text-xl font-bold text-amber-900">
+                          {totals.sand.toFixed(2)}
+                        </p>
+                        <p className="text-sm text-amber-600">cft</p>
+                      </div>
+                      <div className="p-3 bg-gray-50 rounded-lg border">
+                        <p className="text-sm text-gray-600">Stone Chips</p>
+                        <p className="text-xl font-bold text-gray-900">
+                          {totals.stoneChips.toFixed(2)}
+                        </p>
+                        <p className="text-sm text-gray-600">cft</p>
+                      </div>
+                      <div className="p-3 bg-green-50 rounded-lg border">
+                        <p className="text-sm text-green-600">Steel</p>
+                        <p className="text-xl font-bold text-green-900">
+                          {totals.reinforcement.toFixed(2)}
+                        </p>
+                        <p className="text-sm text-green-600">kg</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 text-lg">
+                      <DollarSign className="h-5 w-5" />
+                      <span>Cost Breakdown</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {categoryTotals.map(([category, cost]) => {
+                        const categoryConfig = categories.find(
+                          (c) => c.name === category,
+                        );
+                        const IconComponent = categoryConfig?.icon || Building2;
+                        return (
+                          <div
+                            key={category}
+                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <IconComponent
+                                className={`h-4 w-4 ${categoryConfig?.color || "text-gray-600"}`}
+                              />
+                              <span className="text-sm font-medium">
+                                {category}
+                              </span>
+                            </div>
+                            <span className="font-bold text-sm">
+                              {formatBDT(cost)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                      <Separator />
+                      <div className="flex justify-between items-center text-lg font-bold bg-brand-50 p-3 rounded-lg border-2 border-brand-200">
+                        <span>Total Cost</span>
+                        <span className="text-brand-600">
+                          {formatBDT(totals.totalCost)}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="details" className="space-y-6">
+              {/* Mobile Details */}
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2 text-lg">
+                    <FileText className="h-5 w-5" />
+                    <span>Project Report</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {Object.entries(
+                      currentProject.items.reduce(
+                        (acc, item) => {
+                          const category = itemTypeConfig[item.type].category;
+                          if (!acc[category]) acc[category] = [];
+                          acc[category].push(item);
+                          return acc;
+                        },
+                        {} as Record<string, EstimateItem[]>,
+                      ),
+                    ).map(([category, items]) => {
+                      const categoryConfig = categories.find(
+                        (c) => c.name === category,
+                      );
+                      const IconComponent = categoryConfig?.icon || Building2;
+                      return (
+                        <div
+                          key={category}
+                          className="border rounded-lg p-4 shadow-sm"
+                        >
+                          <div className="flex items-center space-x-2 mb-3">
+                            <IconComponent
+                              className={`h-5 w-5 ${categoryConfig?.color || "text-gray-600"}`}
+                            />
+                            <h3 className="text-lg font-bold">
+                              {category} Works
+                            </h3>
+                            <Badge variant="secondary">
+                              {items.length} items
+                            </Badge>
+                          </div>
+                          <div className="space-y-3">
+                            {items.map((item) => {
+                              const config = itemTypeConfig[item.type];
+                              const ItemIcon = config.icon;
+                              return (
+                                <div
+                                  key={item.id}
+                                  className="border-l-4 border-l-brand-500 pl-3 bg-gray-50 p-3 rounded-r-lg"
+                                >
+                                  <div className="flex items-center space-x-2 mb-2">
+                                    <ItemIcon
+                                      className={`h-4 w-4 ${config.color}`}
+                                    />
+                                    <h4 className="font-semibold text-sm">
+                                      {item.itemId} - {item.description}
+                                    </h4>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-3 text-xs">
+                                    <div>
+                                      <span className="text-gray-600">
+                                        Volume:
+                                      </span>
+                                      <span className="ml-1 font-medium">
+                                        {item.results.volume} cft
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="text-gray-600">
+                                        Steel:
+                                      </span>
+                                      <span className="ml-1 font-medium">
+                                        {item.results.reinforcement.toFixed(1)}{" "}
+                                        kg
+                                      </span>
+                                    </div>
+                                    <div className="col-span-2">
+                                      <span className="text-gray-600">
+                                        Cost:
+                                      </span>
+                                      <span className="ml-1 font-bold text-brand-600">
+                                        {formatBDT(item.results.totalCost)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="analytics" className="space-y-6">
+              {/* Mobile Analytics */}
+              <div className="grid grid-cols-2 gap-3">
+                <Card className="shadow-lg">
+                  <CardContent className="p-4 text-center">
+                    <Building2 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <div className="text-2xl font-bold">
+                      {currentProject.items.length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Total Items</p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardContent className="p-4 text-center">
+                    <Activity className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                    <div className="text-2xl font-bold">
+                      {totals.reinforcement.toFixed(1)}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Steel (kg)</p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardContent className="p-4 text-center">
+                    <PieChart className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <div className="text-2xl font-bold">
+                      {totals.volume.toFixed(1)}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Volume (cft)
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardContent className="p-4 text-center">
+                    <BarChart3 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <div className="text-xl font-bold">
+                      {formatBDT(totals.totalCost)}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Total Value</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2 text-lg">
+                    <TrendingUp className="h-5 w-5" />
+                    <span>Category Progress</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {categoryTotals.map(([category, cost]) => {
+                      const percentage = (cost / totals.totalCost) * 100;
+                      const categoryConfig = categories.find(
+                        (c) => c.name === category,
+                      );
+                      const IconComponent = categoryConfig?.icon || Building2;
+                      return (
+                        <div key={category} className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center space-x-2">
+                              <IconComponent
+                                className={`h-4 w-4 ${categoryConfig?.color || "text-gray-600"}`}
+                              />
+                              <span className="text-sm font-medium">
+                                {category}
+                              </span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-sm font-medium">
+                                {formatBDT(cost)}
+                              </span>
+                              <span className="text-xs text-gray-600 ml-2">
+                                {percentage.toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+                          <Progress value={percentage} className="h-2" />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Add Item Dialog */}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogContent className="max-w-[95vw] max-h-[90vh] overflow-y-auto mx-4">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingItem ? "Edit Item" : "Add New Item"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {editingItem
+                      ? "Update the item details and calculations"
+                      : "Add a new construction element with detailed reinforcement calculations"}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <Label htmlFor="item-type">Item Type</Label>
+                      <Select
+                        value={selectedType}
+                        onValueChange={(value: ItemType) =>
+                          setSelectedType(value)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((category) => (
+                            <div key={category.name}>
+                              <div className="px-2 py-1.5 text-sm font-semibold text-gray-500 bg-gray-100">
+                                {category.name} Works
+                              </div>
+                              {category.items.map((itemType) => {
+                                const config =
+                                  itemTypeConfig[itemType as ItemType];
+                                const IconComponent = config.icon;
+                                return (
+                                  <SelectItem key={itemType} value={itemType}>
+                                    <div className="flex items-center space-x-2">
+                                      <IconComponent
+                                        className={`h-4 w-4 ${config.color}`}
+                                      />
+                                      <span>{config.name}</span>
+                                    </div>
+                                  </SelectItem>
+                                );
+                              })}
+                            </div>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="description">
+                        Description (Optional)
+                      </Label>
+                      <Input
+                        id="description"
+                        placeholder="e.g., Main structural column"
+                        value={formData.description}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            description: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                  {renderDimensionFields()}
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleAddItem}
+                    className="bg-brand-500 hover:bg-brand-600"
+                  >
+                    {editingItem ? "Update Item" : "Add Item"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {/* Pricing Dialog */}
+            <Dialog
+              open={isPricingDialogOpen}
+              onOpenChange={setIsPricingDialogOpen}
+            >
+              <DialogContent className="max-w-[95vw] mx-4">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center space-x-2">
+                    <Cog className="h-5 w-5" />
+                    <span>Material Pricing</span>
+                  </DialogTitle>
+                  <DialogDescription>
+                    Set custom material rates for this project.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <Label htmlFor="cement-rate">
+                      Cement Rate (BDT per bag)
+                    </Label>
+                    <Input
+                      id="cement-rate"
+                      placeholder="450"
+                      value={tempRates.cement}
+                      onChange={(e) =>
+                        setTempRates({
+                          ...tempRates,
+                          cement: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="sand-rate">Sand Rate (BDT per cft)</Label>
+                    <Input
+                      id="sand-rate"
+                      placeholder="45"
+                      value={tempRates.sand}
+                      onChange={(e) =>
+                        setTempRates({
+                          ...tempRates,
+                          sand: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="stone-rate">
+                      Stone Chips Rate (BDT per cft)
+                    </Label>
+                    <Input
+                      id="stone-rate"
+                      placeholder="55"
+                      value={tempRates.stoneChips}
+                      onChange={(e) =>
+                        setTempRates({
+                          ...tempRates,
+                          stoneChips: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="steel-rate">Steel Rate (BDT per kg)</Label>
+                    <Input
+                      id="steel-rate"
+                      placeholder="75"
+                      value={tempRates.reinforcement}
+                      onChange={(e) =>
+                        setTempRates({
+                          ...tempRates,
+                          reinforcement: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="brick-rate">
+                      Brick Rate (BDT per piece)
+                    </Label>
+                    <Input
+                      id="brick-rate"
+                      placeholder="12"
+                      value={tempRates.brick}
+                      onChange={(e) =>
+                        setTempRates({
+                          ...tempRates,
+                          brick: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="labor-rate">Labor Rate (BDT per cft)</Label>
+                    <Input
+                      id="labor-rate"
+                      placeholder="300"
+                      value={tempRates.labor}
+                      onChange={(e) =>
+                        setTempRates({
+                          ...tempRates,
+                          labor: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsPricingDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSavePricingSettings}
+                    className="bg-brand-500 hover:bg-brand-600"
+                  >
+                    Save Settings
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </Tabs>
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  // Desktop layout
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-amber-50">
       {/* Header */}
@@ -1715,11 +2538,23 @@ export default function Index() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl shadow-lg">
-                <Calculator className="h-7 w-7 text-white" />
+                <img
+                  src="https://cdn.builder.io/api/v1/image/assets%2F60f84872b4b14093aa9e83d9ad74d969%2F46361fbad51e408b89450daa00371588"
+                  alt="ROY Logo"
+                  className="w-8 h-8 object-contain bg-transparent"
+                  style={{ background: "transparent", backdropFilter: "none" }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.nextElementSibling?.classList.remove(
+                      "hidden",
+                    );
+                  }}
+                />
+                <Calculator className="h-7 w-7 text-white hidden" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">
-                  Professional Construction Estimator
+                  ROY - Professional Construction Estimator
                 </h1>
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <span>{currentProject.name}</span>
@@ -1731,18 +2566,284 @@ export default function Index() {
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">
-                <Save className="h-4 w-4 mr-2" />
-                Save
+              {/* Project Selector */}
+              <Select
+                value={currentProjectId || ""}
+                onValueChange={switchProject}
+              >
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Select Project" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      <div className="flex items-center space-x-2">
+                        <Building2 className="h-4 w-4" />
+                        <span>{project.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsProjectDialogOpen(true)}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Project
               </Button>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Export
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  saveToLocalStorage();
+                  if (isFirebaseAvailable) {
+                    syncWithFirebase();
+                  }
+                }}
+                disabled={isSyncing}
+                className={`${isFirebaseAvailable ? "border-green-500 text-green-700" : "border-orange-500 text-orange-700"}`}
+              >
+                {isSyncing ? (
+                  <>
+                    <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                    Syncing...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    {isFirebaseAvailable ? "Save & Sync" : "Save Local"}
+                  </>
+                )}
               </Button>
-              <Button variant="outline" size="sm">
+
+              {lastSynced && (
+                <div className="text-xs text-gray-500">
+                  Last synced: {new Date(lastSynced).toLocaleTimeString()}
+                </div>
+              )}
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => {
+                      const dataStr = JSON.stringify(currentProject, null, 2);
+                      const dataBlob = new Blob([dataStr], {
+                        type: "application/json",
+                      });
+                      const url = URL.createObjectURL(dataBlob);
+                      const link = document.createElement("a");
+                      link.href = url;
+                      link.download = `${currentProject.name.replace(/\s+/g, "_")}_estimate.json`;
+                      link.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Export as JSON
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      // Export as CSV
+                      const headers = [
+                        "Item ID",
+                        "Type",
+                        "Description",
+                        "Volume (cft)",
+                        "Cement (bags)",
+                        "Sand (cft)",
+                        "Stone Chips (cft)",
+                        "Steel (kg)",
+                        "Cost (BDT)",
+                      ];
+                      const rows = currentProject.items.map((item) => [
+                        item.itemId,
+                        itemTypeConfig[item.type].name,
+                        item.description,
+                        item.results.volume,
+                        item.results.cement,
+                        item.results.sand,
+                        item.results.stoneChips,
+                        item.results.reinforcement,
+                        item.results.totalCost,
+                      ]);
+
+                      const csvContent = [headers, ...rows]
+                        .map((row) => row.map((cell) => `"${cell}"`).join(","))
+                        .join("\n");
+
+                      const dataBlob = new Blob([csvContent], {
+                        type: "text/csv",
+                      });
+                      const url = URL.createObjectURL(dataBlob);
+                      const link = document.createElement("a");
+                      link.href = url;
+                      link.download = `${currentProject.name.replace(/\s+/g, "_")}_estimate.csv`;
+                      link.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Export as CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      // Export summary as text
+                      const totals = getTotalEstimate();
+                      const summary =
+                        `Construction Estimate Summary\n
+` +
+                        `Project: ${currentProject.name}\n` +
+                        `Description: ${currentProject.description}\n` +
+                        `Client: ${currentProject.client}\n` +
+                        `Location: ${currentProject.location}\n\n` +
+                        `MATERIAL SUMMARY:\n` +
+                        `Cement: ${totals.cement.toFixed(2)} bags\n` +
+                        `Sand: ${totals.sand.toFixed(2)} cft\n` +
+                        `Stone Chips: ${totals.stoneChips.toFixed(2)} cft\n` +
+                        `Steel Reinforcement: ${totals.reinforcement.toFixed(2)} kg\n` +
+                        `Bricks: ${totals.brickQuantity} nos\n\n` +
+                        `TOTAL COST: ${formatBDT(totals.totalCost)}\n\n` +
+                        `Generated on: ${new Date().toLocaleDateString()}`;
+
+                      const dataBlob = new Blob([summary], {
+                        type: "text/plain",
+                      });
+                      const url = URL.createObjectURL(dataBlob);
+                      const link = document.createElement("a");
+                      link.href = url;
+                      link.download = `${currentProject.name.replace(/\s+/g, "_")}_summary.txt`;
+                      link.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Export Summary
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  // Add print-friendly class to body
+                  document.body.classList.add("print-mode");
+
+                  // Create print styles
+                  const printStyles = `
+                  <style id="print-styles">
+                    @media print {
+                      @page { margin: 1in; }
+                      .print-mode { -webkit-print-color-adjust: exact; }
+                      .print-mode .bg-gradient-to-br { background: white !important; }
+                      .print-mode header { display: none !important; }
+                      .print-mode .fixed { display: none !important; }
+                      .print-mode .shadow-lg { box-shadow: none !important; }
+                      .print-mode .border { border: 1px solid #ccc !important; }
+                      .print-mode .bg-gray-50 { background: #f9f9f9 !important; }
+                      .print-mode .text-brand-600 { color: #2563eb !important; }
+                      .print-mode .bg-brand-50 { background: #eff6ff !important; }
+                    }
+                  </style>
+                `;
+
+                  // Inject print styles
+                  document.head.insertAdjacentHTML("beforeend", printStyles);
+
+                  // Print
+                  window.print();
+
+                  // Cleanup after print
+                  setTimeout(() => {
+                    document.body.classList.remove("print-mode");
+                    const printStyleElement =
+                      document.getElementById("print-styles");
+                    if (printStyleElement) {
+                      printStyleElement.remove();
+                    }
+                  }, 1000);
+                }}
+              >
                 <Printer className="h-4 w-4 mr-2" />
                 Print
               </Button>
+
+              <input
+                type="file"
+                accept=".json"
+                style={{ display: "none" }}
+                id="file-import"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      try {
+                        const importedProject = JSON.parse(
+                          event.target?.result as string,
+                        );
+                        if (importedProject.items && importedProject.name) {
+                          const newProject: Project = {
+                            ...importedProject,
+                            id: Date.now().toString(),
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString(),
+                          };
+                          createProject(newProject);
+                          setCurrentProjectId(newProject.id);
+                        }
+                      } catch (error) {
+                        console.error("Error importing project:", error);
+                        alert(
+                          "Error importing project. Please check the file format.",
+                        );
+                      }
+                    };
+                    reader.readAsText(file);
+                  }
+                  // Reset input
+                  e.target.value = "";
+                }}
+              />
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => document.getElementById("file-import")?.click()}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import
+              </Button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <User className="h-4 w-4 mr-2" />
+                    {currentUser?.email?.split("@")[0] || "User"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => {
+                      logout().catch(console.error);
+                    }}
+                    className="text-red-600"
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Dialog
                 open={isPricingDialogOpen}
                 onOpenChange={setIsPricingDialogOpen}
@@ -1883,7 +2984,7 @@ export default function Index() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="items" className="flex items-center space-x-2">
               <Building2 className="h-4 w-4" />
               <span>Project Items</span>
@@ -1908,6 +3009,13 @@ export default function Index() {
             >
               <PieChart className="h-4 w-4" />
               <span>Analytics</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="projects"
+              className="flex items-center space-x-2"
+            >
+              <Settings className="h-4 w-4" />
+              <span>Projects</span>
             </TabsTrigger>
           </TabsList>
 
@@ -2102,127 +3210,132 @@ export default function Index() {
 
             <Card className="shadow-lg">
               <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-gray-50">
-                      <TableHead>Item ID</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Reinforcement</TableHead>
-                      <TableHead>Volume/Area</TableHead>
-                      <TableHead className="text-right">Cost (BDT)</TableHead>
-                      <TableHead className="w-[50px]"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredItems.map((item) => {
-                      const config = itemTypeConfig[item.type];
-                      const IconComponent = config.icon;
-                      return (
-                        <TableRow key={item.id} className="hover:bg-gray-50">
-                          <TableCell>
-                            <Badge variant="outline" className="font-mono">
-                              {item.itemId}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center space-x-2">
-                              <IconComponent
-                                className={`h-4 w-4 ${config.color}`}
-                              />
-                              <div>
-                                <p className="font-medium">{config.name}</p>
-                                <p className="text-xs text-gray-500">
-                                  {item.type.replace("_", " ")}
-                                </p>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gray-50">
+                        <TableHead>Item ID</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Reinforcement</TableHead>
+                        <TableHead>Volume/Area</TableHead>
+                        <TableHead className="text-right">Cost (BDT)</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredItems.map((item) => {
+                        const config = itemTypeConfig[item.type];
+                        const IconComponent = config.icon;
+                        return (
+                          <TableRow key={item.id} className="hover:bg-gray-50">
+                            <TableCell>
+                              <Badge variant="outline" className="font-mono">
+                                {item.itemId}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center space-x-2">
+                                <IconComponent
+                                  className={`h-4 w-4 ${config.color}`}
+                                />
+                                <div>
+                                  <p className="font-medium">{config.name}</p>
+                                  <p className="text-xs text-gray-500">
+                                    {item.type.replace("_", " ")}
+                                  </p>
+                                </div>
                               </div>
+                            </TableCell>
+                            <TableCell>{item.description}</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="secondary"
+                                className={`${config.bgColor} ${config.color}`}
+                              >
+                                {config.category}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center space-x-1">
+                                <Activity className="h-3 w-3 text-green-600" />
+                                <span className="text-sm font-medium">
+                                  {item.results.reinforcement} kg
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                {item.type === "brick_work" ||
+                                item.type === "plaster_work" ? (
+                                  <p>
+                                    {item.results.plasterArea ||
+                                      item.results.brickQuantity}{" "}
+                                    {item.unit}
+                                  </p>
+                                ) : (
+                                  <p>{item.results.volume} cft</p>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatBDT(item.results.totalCost)}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onClick={() => handleEditItem(item)}
+                                  >
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => handleDuplicateItem(item)}
+                                  >
+                                    <Copy className="mr-2 h-4 w-4" />
+                                    Duplicate
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => handleDeleteItem(item.id)}
+                                    className="text-red-600"
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                      {filteredItems.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center py-8">
+                            <div className="flex flex-col items-center">
+                              <Building2 className="h-12 w-12 text-gray-300 mb-4" />
+                              <p className="text-gray-500">No items found</p>
+                              <p className="text-sm text-gray-400">
+                                {searchTerm || filterType !== "all"
+                                  ? "Try adjusting your search or filter"
+                                  : "Click 'Add Item' to start building your estimate"}
+                              </p>
                             </div>
-                          </TableCell>
-                          <TableCell>{item.description}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="secondary"
-                              className={`${config.bgColor} ${config.color}`}
-                            >
-                              {config.category}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center space-x-1">
-                              <Activity className="h-3 w-3 text-green-600" />
-                              <span className="text-sm font-medium">
-                                {item.results.reinforcement} kg
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="text-sm">
-                              {item.type === "brick_work" ||
-                              item.type === "plaster_work" ? (
-                                <p>
-                                  {item.results.plasterArea ||
-                                    item.results.brickQuantity}{" "}
-                                  {item.unit}
-                                </p>
-                              ) : (
-                                <p>{item.results.volume} cft</p>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {formatBDT(item.results.totalCost)}
-                          </TableCell>
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={() => handleEditItem(item)}
-                                >
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleDuplicateItem(item)}
-                                >
-                                  <Copy className="mr-2 h-4 w-4" />
-                                  Duplicate
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleDeleteItem(item.id)}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
                           </TableCell>
                         </TableRow>
-                      );
-                    })}
-                    {filteredItems.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8">
-                          <div className="flex flex-col items-center">
-                            <Building2 className="h-12 w-12 text-gray-300 mb-4" />
-                            <p className="text-gray-500">No items found</p>
-                            <p className="text-sm text-gray-400">
-                              {searchTerm || filterType !== "all"
-                                ? "Try adjusting your search or filter"
-                                : "Click 'Add Item' to start building your estimate"}
-                            </p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -2765,6 +3878,286 @@ export default function Index() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="projects" className="space-y-6 mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Projects Management */}
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Building2 className="h-5 w-5" />
+                      <span>Projects</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => setIsProjectDialogOpen(true)}
+                      className="bg-brand-500 hover:bg-brand-600"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      New Project
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your construction projects
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {projects.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Building2 className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500">No projects yet</p>
+                        <p className="text-sm text-gray-400">
+                          Create your first project to get started
+                        </p>
+                      </div>
+                    ) : (
+                      projects.map((project) => (
+                        <div
+                          key={project.id}
+                          className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                            currentProjectId === project.id
+                              ? "ring-2 ring-brand-500 bg-brand-50"
+                              : "hover:shadow-md"
+                          }`}
+                          onClick={() => switchProject(project.id)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-medium">{project.name}</h3>
+                              <p className="text-sm text-gray-600">
+                                {project.description}
+                              </p>
+                              <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                <span>{project.items.length} items</span>
+                                <span>
+                                  {formatBDT(
+                                    project.items.reduce(
+                                      (sum, item) =>
+                                        sum + item.results.totalCost,
+                                      0,
+                                    ),
+                                  )}
+                                </span>
+                                <span>
+                                  {new Date(
+                                    project.updatedAt,
+                                  ).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              {currentProjectId === project.id && (
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-brand-100 text-brand-700"
+                                >
+                                  Active
+                                </Badge>
+                              )}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onClick={() => switchProject(project.id)}
+                                  >
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    Open
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      const dataStr = JSON.stringify(
+                                        project,
+                                        null,
+                                        2,
+                                      );
+                                      const dataBlob = new Blob([dataStr], {
+                                        type: "application/json",
+                                      });
+                                      const url = URL.createObjectURL(dataBlob);
+                                      const link = document.createElement("a");
+                                      link.href = url;
+                                      link.download = `${project.name.replace(/\s+/g, "_")}_estimate.json`;
+                                      link.click();
+                                      URL.revokeObjectURL(url);
+                                    }}
+                                  >
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Export
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => deleteProject(project.id)}
+                                    className="text-red-600"
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Clients Management */}
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <User className="h-5 w-5" />
+                      <span>Clients</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => setIsClientDialogOpen(true)}
+                      className="bg-brand-500 hover:bg-brand-600"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      New Client
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>Manage your client database</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {clients.length === 0 ? (
+                      <div className="text-center py-8">
+                        <User className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500">No clients yet</p>
+                        <p className="text-sm text-gray-400">
+                          Add clients to organize your projects
+                        </p>
+                      </div>
+                    ) : (
+                      clients.map((client) => (
+                        <div
+                          key={client.id}
+                          className="p-4 border rounded-lg hover:shadow-md transition-all"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-medium">{client.name}</h3>
+                              <p className="text-sm text-gray-600">
+                                {client.email}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {client.phone}
+                              </p>
+                              <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                <span>{client.projects.length} projects</span>
+                                <span>
+                                  {new Date(
+                                    client.updatedAt,
+                                  ).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setNewClientName(client.name);
+                                    setNewClientEmail(client.email);
+                                    setNewClientPhone(client.phone);
+                                    setNewClientAddress(client.address);
+                                    setIsClientDialogOpen(true);
+                                  }}
+                                >
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => deleteClient(client.id)}
+                                  className="text-red-600"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Project Statistics */}
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <BarChart3 className="h-5 w-5" />
+                  <span>Project Statistics</span>
+                </CardTitle>
+                <CardDescription>
+                  Overview of all your projects and clients
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-brand-600">
+                      {projects.length}
+                    </div>
+                    <p className="text-sm text-gray-600">Total Projects</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-600">
+                      {clients.length}
+                    </div>
+                    <p className="text-sm text-gray-600">Total Clients</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-600">
+                      {projects.reduce((sum, p) => sum + p.items.length, 0)}
+                    </div>
+                    <p className="text-sm text-gray-600">Total Items</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-orange-600">
+                      {formatBDT(
+                        projects.reduce(
+                          (sum, p) =>
+                            sum +
+                            p.items.reduce(
+                              (itemSum, item) =>
+                                itemSum + item.results.totalCost,
+                              0,
+                            ),
+                          0,
+                        ),
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600">Total Value</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -2778,7 +4171,7 @@ export default function Index() {
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">
-                  Professional Construction Estimator
+                  ROY - Professional Construction Estimator
                 </h3>
                 <p className="text-sm text-gray-600">
                   Advanced Construction Cost Calculation Software
@@ -2812,6 +4205,168 @@ export default function Index() {
           </div>
         </div>
       </footer>
+
+      {/* Project Management Dialog */}
+      <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+            <DialogDescription>
+              Create a new construction estimation project
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="project-name">Project Name</Label>
+              <Input
+                id="project-name"
+                placeholder="e.g., Residential Building"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="project-description">Description</Label>
+              <Textarea
+                id="project-description"
+                placeholder="Brief project description"
+                value={newProjectDescription}
+                onChange={(e) => setNewProjectDescription(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="client-select">Client (Optional)</Label>
+              <Select
+                value={selectedClientId}
+                onValueChange={setSelectedClientId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">
+                    <div className="flex items-center space-x-2">
+                      <User className="h-4 w-4" />
+                      <span>No Client</span>
+                    </div>
+                  </SelectItem>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      <div className="flex items-center space-x-2">
+                        <User className="h-4 w-4" />
+                        <span>{client.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="mt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsClientDialogOpen(true)}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add New Client
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsProjectDialogOpen(false);
+                setNewProjectName("");
+                setNewProjectDescription("");
+                setSelectedClientId("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateNewProject}
+              className="bg-brand-500 hover:bg-brand-600"
+              disabled={!newProjectName}
+            >
+              Create Project
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Client Management Dialog */}
+      <Dialog open={isClientDialogOpen} onOpenChange={setIsClientDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Client</DialogTitle>
+            <DialogDescription>
+              Add a new client to your database
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="client-name">Client Name</Label>
+              <Input
+                id="client-name"
+                placeholder="e.g., John Doe"
+                value={newClientName}
+                onChange={(e) => setNewClientName(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="client-email">Email</Label>
+              <Input
+                id="client-email"
+                type="email"
+                placeholder="e.g., john@example.com"
+                value={newClientEmail}
+                onChange={(e) => setNewClientEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="client-phone">Phone</Label>
+              <Input
+                id="client-phone"
+                placeholder="e.g., +880 1234 567890"
+                value={newClientPhone}
+                onChange={(e) => setNewClientPhone(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="client-address">Address</Label>
+              <Textarea
+                id="client-address"
+                placeholder="Client address"
+                value={newClientAddress}
+                onChange={(e) => setNewClientAddress(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsClientDialogOpen(false);
+                setNewClientName("");
+                setNewClientEmail("");
+                setNewClientPhone("");
+                setNewClientAddress("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateNewClient}
+              className="bg-brand-500 hover:bg-brand-600"
+              disabled={!newClientName}
+            >
+              Add Client
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

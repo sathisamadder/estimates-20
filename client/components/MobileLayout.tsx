@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Menu,
   Calculator,
@@ -15,6 +16,9 @@ import {
   Home,
   Plus,
   Search,
+  Save,
+  Download,
+  Printer,
 } from "lucide-react";
 
 interface MobileLayoutProps {
@@ -22,6 +26,10 @@ interface MobileLayoutProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   onAddItem: () => void;
+  onOpenPricing: () => void;
+  onSave: () => void;
+  onExport: () => void;
+  onPrint: () => void;
   projectName: string;
   totalCost: string;
   itemCount: number;
@@ -39,12 +47,17 @@ export function MobileLayout({
   activeTab,
   onTabChange,
   onAddItem,
+  onOpenPricing,
+  onSave,
+  onExport,
+  onPrint,
   projectName,
   totalCost,
   itemCount,
 }: MobileLayoutProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isMobile = useIsMobile();
+  const { currentUser, logout } = useAuth();
 
   if (!isMobile) {
     return <>{children}</>;
@@ -68,11 +81,28 @@ export function MobileLayout({
                   <div className="p-6 border-b bg-gradient-to-r from-brand-500 to-brand-600">
                     <div className="flex items-center space-x-3">
                       <div className="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg">
-                        <Calculator className="h-6 w-6 text-white" />
+                        <img
+                          src="https://cdn.builder.io/api/v1/image/assets%2F60f84872b4b14093aa9e83d9ad74d969%2F46361fbad51e408b89450daa00371588"
+                          alt="ROY Logo"
+                          className="w-7 h-7 object-contain bg-transparent"
+                          style={{
+                            background: "transparent",
+                            backdropFilter: "none",
+                          }}
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            e.currentTarget.nextElementSibling?.classList.remove(
+                              "hidden",
+                            );
+                          }}
+                        />
+                        <Calculator className="h-6 w-6 text-white hidden" />
                       </div>
                       <div>
-                        <h2 className="font-bold text-white">Construction</h2>
-                        <p className="text-sm text-white/80">Estimator Pro</p>
+                        <h2 className="font-bold text-white">ROY</h2>
+                        <p className="text-sm text-white/80">
+                          Construction Pro
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -100,7 +130,9 @@ export function MobileLayout({
                         return (
                           <Button
                             key={item.id}
-                            variant={activeTab === item.id ? "secondary" : "ghost"}
+                            variant={
+                              activeTab === item.id ? "secondary" : "ghost"
+                            }
                             className={`w-full justify-start h-12 ${
                               activeTab === item.id
                                 ? "bg-brand-50 text-brand-700 border-r-2 border-brand-500"
@@ -123,17 +155,51 @@ export function MobileLayout({
                         <Button
                           variant="ghost"
                           className="w-full justify-start h-12 text-gray-700"
+                          onClick={onOpenPricing}
                         >
                           <Settings className="h-5 w-5 mr-3" />
-                          Settings
+                          Pricing Settings
                         </Button>
                         <Button
                           variant="ghost"
                           className="w-full justify-start h-12 text-gray-700"
+                          onClick={onSave}
                         >
-                          <User className="h-5 w-5 mr-3" />
-                          Profile
+                          <Save className="h-5 w-5 mr-3" />
+                          Save Project
                         </Button>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start h-12 text-gray-700"
+                          onClick={onExport}
+                        >
+                          <Download className="h-5 w-5 mr-3" />
+                          Export Data
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start h-12 text-gray-700"
+                          onClick={onPrint}
+                        >
+                          <Printer className="h-5 w-5 mr-3" />
+                          Print Report
+                        </Button>
+
+                        <div className="border-t pt-2 mt-2">
+                          <div className="p-2 text-xs text-gray-600 mb-2">
+                            {currentUser?.email}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start h-10 text-red-600 hover:bg-red-50"
+                            onClick={() => {
+                              logout().catch(console.error);
+                            }}
+                          >
+                            <User className="h-4 w-4 mr-3" />
+                            Logout
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </ScrollArea>
@@ -155,7 +221,19 @@ export function MobileLayout({
 
             <div className="flex items-center space-x-2">
               <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg">
-                <Calculator className="h-5 w-5 text-white" />
+                <img
+                  src="https://cdn.builder.io/api/v1/image/assets%2F60f84872b4b14093aa9e83d9ad74d969%2F46361fbad51e408b89450daa00371588"
+                  alt="ROY Logo"
+                  className="w-5 h-5 object-contain bg-transparent"
+                  style={{ background: "transparent", backdropFilter: "none" }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.nextElementSibling?.classList.remove(
+                      "hidden",
+                    );
+                  }}
+                />
+                <Calculator className="h-5 w-5 text-white hidden" />
               </div>
               <div>
                 <h1 className="text-sm font-bold text-gray-900 truncate max-w-32">
@@ -210,9 +288,7 @@ export function MobileLayout({
       </header>
 
       {/* Content */}
-      <main className="pb-20">
-        {children}
-      </main>
+      <main className="pb-20">{children}</main>
 
       {/* Mobile Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-sm">

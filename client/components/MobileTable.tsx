@@ -1,4 +1,4 @@
-importimportimportimportimportimportimportimportimportimportimportimport { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +20,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 
-interface EstimateItem {
+interface MobileEstimateItem {
   id: string;
   itemId: string;
   type: string;
@@ -38,9 +38,9 @@ interface EstimateItem {
 }
 
 interface MobileTableProps {
-  items: EstimateItem[];
-  onEdit: (item: EstimateItem) => void;
-  onDuplicate: (item: EstimateItem) => void;
+  items: MobileEstimateItem[];
+  onEdit: (item: any) => void;
+  onDuplicate: (item: any) => void;
   onDelete: (itemId: string) => void;
   formatBDT: (amount: number) => string;
 }
@@ -102,7 +102,10 @@ export function MobileTable({
                   </td>
                   <td className="p-4">{item.description}</td>
                   <td className="p-4">
-                    <Badge variant="secondary" className={`${item.bgColor} ${item.color}`}>
+                    <Badge
+                      variant="secondary"
+                      className={`${item.bgColor} ${item.color}`}
+                    >
                       {item.category}
                     </Badge>
                   </td>
@@ -169,7 +172,7 @@ export function MobileTable({
       {items.map((item) => {
         const IconComponent = item.icon;
         const isExpanded = expandedItems.has(item.id);
-        
+
         return (
           <Card key={item.id} className="shadow-sm">
             <CardContent className="p-4">
@@ -193,7 +196,7 @@ export function MobileTable({
                     </h3>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <Button
                     variant="ghost"
@@ -207,7 +210,7 @@ export function MobileTable({
                       <ChevronDown className="h-4 w-4" />
                     )}
                   </Button>
-                  
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm" className="p-1">
@@ -244,18 +247,20 @@ export function MobileTable({
                     <span className="font-medium">{item.reinforcement} kg</span>
                   </div>
                 </div>
-                
+
                 <div>
                   <p className="text-gray-500 text-xs">Volume/Area</p>
                   <p className="font-medium">
                     {item.brickQuantity || item.plasterArea ? (
-                      <>{item.plasterArea || item.brickQuantity} {item.unit}</>
+                      <>
+                        {item.plasterArea || item.brickQuantity} {item.unit}
+                      </>
                     ) : (
                       <>{item.volume} cft</>
                     )}
                   </p>
                 </div>
-                
+
                 <div className="text-right">
                   <p className="text-gray-500 text-xs">Total Cost</p>
                   <p className="font-bold text-brand-600">
@@ -270,7 +275,9 @@ export function MobileTable({
                   <Separator className="my-3" />
                   <div className="space-y-3 text-sm">
                     <div>
-                      <h4 className="font-medium text-gray-700 mb-2">Item Details</h4>
+                      <h4 className="font-medium text-gray-700 mb-2">
+                        Item Details
+                      </h4>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
                           <span className="text-gray-500">Type:</span>
@@ -278,32 +285,44 @@ export function MobileTable({
                         </div>
                         <div>
                           <span className="text-gray-500">Category:</span>
-                          <span className="ml-2 font-medium">{item.category}</span>
+                          <span className="ml-2 font-medium">
+                            {item.category}
+                          </span>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div>
-                      <h4 className="font-medium text-gray-700 mb-2">Measurements</h4>
+                      <h4 className="font-medium text-gray-700 mb-2">
+                        Measurements
+                      </h4>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
                           <span className="text-gray-500">Volume:</span>
-                          <span className="ml-2 font-medium">{item.volume} cft</span>
+                          <span className="ml-2 font-medium">
+                            {item.volume} cft
+                          </span>
                         </div>
                         <div>
                           <span className="text-gray-500">Steel:</span>
-                          <span className="ml-2 font-medium">{item.reinforcement} kg</span>
+                          <span className="ml-2 font-medium">
+                            {item.reinforcement} kg
+                          </span>
                         </div>
                         {item.brickQuantity && (
                           <div>
                             <span className="text-gray-500">Bricks:</span>
-                            <span className="ml-2 font-medium">{item.brickQuantity} nos</span>
+                            <span className="ml-2 font-medium">
+                              {item.brickQuantity} nos
+                            </span>
                           </div>
                         )}
                         {item.plasterArea && (
                           <div>
                             <span className="text-gray-500">Area:</span>
-                            <span className="ml-2 font-medium">{item.plasterArea} sft</span>
+                            <span className="ml-2 font-medium">
+                              {item.plasterArea} sft
+                            </span>
                           </div>
                         )}
                       </div>
@@ -315,7 +334,7 @@ export function MobileTable({
           </Card>
         );
       })}
-      
+
       {items.length === 0 && (
         <Card className="shadow-sm">
           <CardContent className="p-8 text-center">
