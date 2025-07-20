@@ -249,7 +249,10 @@ export default function Index() {
     barDiameter: "20",
     clearCover: "1.5",
     stirrupDiameter: "8",
-    mixingRatio: "1:1.5:3",
+        mixingRatio: "1:1.5:3",
+    // Quantity multiplication fields
+    multiplyQuantity: "1",
+    isMultipleUnits: false,
   });
 
   // Local Storage Functions
