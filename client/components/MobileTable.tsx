@@ -20,7 +20,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 
-interface EstimateItem {
+interface MobileEstimateItem {
   id: string;
   itemId: string;
   type: string;
