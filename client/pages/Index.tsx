@@ -3879,62 +3879,29 @@ export default function Index() {
             </Card>
           </TabsContent>
 
-                    <TabsContent value="projects" className="space-y-6 mt-6">
-            {/* Quick Actions Section */}
-            <Card className="shadow-lg bg-gradient-to-r from-brand-50 to-blue-50 border-brand-200">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-brand-700">
-                  <Plus className="h-6 w-6" />
-                  <span>Start New Project</span>
-                </CardTitle>
-                <CardDescription>
-                  Create a new construction estimation project to begin calculating materials and costs
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Button
-                    onClick={() => setIsProjectDialogOpen(true)}
-                    className="bg-brand-500 hover:bg-brand-600 flex-1 h-12 text-lg font-medium shadow-lg"
-                  >
-                    <Plus className="h-5 w-5 mr-2" />
-                    Create New Project
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => document.getElementById("file-import")?.click()}
-                    className="flex-1 h-12 border-brand-300 text-brand-700 hover:bg-brand-50"
-                  >
-                    <Upload className="h-5 w-5 mr-2" />
-                    Import Project
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
+          <TabsContent value="projects" className="space-y-6 mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Recent Projects */}
+              {/* Projects Management */}
               <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Building2 className="h-5 w-5 text-green-600" />
-                      <span>Recent Projects</span>
-                      <Badge variant="secondary">{projects.slice(0, 5).length} of {projects.length}</Badge>
+                      <Building2 className="h-5 w-5" />
+                      <span>Projects</span>
                     </div>
                     <Button
-                      variant="outline"
                       size="sm"
                       onClick={() => setIsProjectDialogOpen(true)}
+                      className="bg-brand-500 hover:bg-brand-600"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      New
+                      New Project
                     </Button>
                   </CardTitle>
                   <CardDescription>
-                    Recently updated construction projects
+                    Manage your construction projects
                   </CardDescription>
-                                </CardHeader>
+                </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     {projects.length === 0 ? (
@@ -3944,16 +3911,9 @@ export default function Index() {
                         <p className="text-sm text-gray-400">
                           Create your first project to get started
                         </p>
-                        <Button
-                          onClick={() => setIsProjectDialogOpen(true)}
-                          className="bg-brand-500 hover:bg-brand-600 mt-4"
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Create First Project
-                        </Button>
                       </div>
                     ) : (
-                      projects.slice(0, 5).map((project) => (
+                      projects.map((project) => (
                         <div
                           key={project.id}
                           className={`p-4 border rounded-lg cursor-pointer transition-all ${
@@ -3963,44 +3923,28 @@ export default function Index() {
                           }`}
                           onClick={() => switchProject(project.id)}
                         >
-                                                      <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2 mb-1">
-                                <h3 className="font-medium">{project.name}</h3>
-                                {new Date(project.updatedAt).getTime() > Date.now() - 24 * 60 * 60 * 1000 && (
-                                  <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
-                                    New
-                                  </Badge>
-                                )}
-                              </div>
-                              <p className="text-sm text-gray-600 mb-2">
-                                {project.description || "No description"}
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-medium">{project.name}</h3>
+                              <p className="text-sm text-gray-600">
+                                {project.description}
                               </p>
-                              <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
-                                <div className="flex items-center">
-                                  <Building2 className="h-3 w-3 mr-1" />
-                                  <span>{project.items.length} items</span>
-                                </div>
-                                <div className="flex items-center">
-                                  <DollarSign className="h-3 w-3 mr-1" />
-                                  <span>
-                                    {formatBDT(
-                                      project.items.reduce(
-                                        (sum, item) =>
-                                          sum + item.results.totalCost,
-                                        0,
-                                      ),
-                                    )}
-                                  </span>
-                                </div>
-                                <div className="flex items-center col-span-2">
-                                  <Activity className="h-3 w-3 mr-1" />
-                                  <span>
-                                    Updated {new Date(
-                                      project.updatedAt,
-                                    ).toLocaleDateString()}
-                                  </span>
-                                </div>
+                              <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                <span>{project.items.length} items</span>
+                                <span>
+                                  {formatBDT(
+                                    project.items.reduce(
+                                      (sum, item) =>
+                                        sum + item.results.totalCost,
+                                      0,
+                                    ),
+                                  )}
+                                </span>
+                                <span>
+                                  {new Date(
+                                    project.updatedAt,
+                                  ).toLocaleDateString()}
+                                </span>
                               </div>
                             </div>
                             <div className="flex items-center space-x-2">
@@ -4066,34 +4010,15 @@ export default function Index() {
                     )}
                   </div>
                 </CardContent>
-                                </div>
-                  {projects.length > 5 && (
-                    <div className="border-t pt-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          // Scroll to see all projects in the lower section
-                          const allProjectsElement = document.getElementById('all-projects-section');
-                          allProjectsElement?.scrollIntoView({ behavior: 'smooth' });
-                        }}
-                        className="w-full"
-                      >
-                        View All {projects.length} Projects
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
               </Card>
 
               {/* Clients Management */}
-                            <Card className="shadow-lg">
+              <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <User className="h-5 w-5 text-blue-600" />
-                      <span>Client Management</span>
-                      <Badge variant="secondary">{clients.length}</Badge>
+                      <User className="h-5 w-5" />
+                      <span>Clients</span>
                     </div>
                     <Button
                       size="sm"
@@ -4101,10 +4026,10 @@ export default function Index() {
                       className="bg-brand-500 hover:bg-brand-600"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Client
+                      New Client
                     </Button>
                   </CardTitle>
-                  <CardDescription>Manage your client database for project assignment</CardDescription>
+                  <CardDescription>Manage your client database</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -4131,13 +4056,9 @@ export default function Index() {
                               <p className="text-sm text-gray-600">
                                 {client.phone}
                               </p>
-                                                            <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                                <span className="flex items-center">
-                                  <Building2 className="h-3 w-3 mr-1" />
-                                  {projects.filter(p => p.clientId === client.id).length} projects
-                                </span>
-                                <span className="flex items-center">
-                                  <Activity className="h-3 w-3 mr-1" />
+                              <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                <span>{client.projects.length} projects</span>
+                                <span>
                                   {new Date(
                                     client.updatedAt,
                                   ).toLocaleDateString()}
@@ -4183,71 +4104,7 @@ export default function Index() {
                   </div>
                 </CardContent>
               </Card>
-                        </div>
-
-            {/* All Projects Section */}
-            {projects.length > 5 && (
-              <Card className="shadow-lg" id="all-projects-section">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Building2 className="h-5 w-5 text-orange-600" />
-                    <span>All Projects</span>
-                    <Badge variant="secondary">{projects.length} total</Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    Complete list of all your construction projects
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {projects.map((project) => (
-                      <div
-                        key={project.id}
-                        className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
-                          currentProjectId === project.id
-                            ? "ring-2 ring-brand-500 bg-brand-50"
-                            : "hover:bg-gray-50"
-                        }`}
-                        onClick={() => switchProject(project.id)}
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <h4 className="font-medium text-sm">{project.name}</h4>
-                          {currentProjectId === project.id && (
-                            <Badge variant="secondary" className="bg-brand-100 text-brand-700 text-xs">
-                              Active
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-600 mb-3 line-clamp-2">
-                          {project.description || "No description"}
-                        </p>
-                        <div className="space-y-1 text-xs text-gray-500">
-                          <div className="flex justify-between">
-                            <span>Items:</span>
-                            <span>{project.items.length}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Value:</span>
-                            <span className="font-medium">
-                              {formatBDT(
-                                project.items.reduce(
-                                  (sum, item) => sum + item.results.totalCost,
-                                  0,
-                                ),
-                              )}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Updated:</span>
-                            <span>{new Date(project.updatedAt).toLocaleDateString()}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            </div>
 
             {/* Project Statistics */}
             <Card className="shadow-lg">
