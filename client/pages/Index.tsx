@@ -2027,8 +2027,8 @@ export default function Index() {
                       <span>Material Summary</span>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                                    <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
                       <div className="p-3 bg-blue-50 rounded-lg border">
                         <p className="text-sm text-blue-600">Cement</p>
                         <p className="text-xl font-bold text-blue-900">
