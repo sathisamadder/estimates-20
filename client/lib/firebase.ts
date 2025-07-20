@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { getAnalytics } from 'firebase/analytics';
 
 // Firebase configuration - your actual project config
 const firebaseConfig = {
@@ -22,14 +23,7 @@ export const db = getFirestore(app);
 // Initialize Auth
 export const auth = getAuth(app);
 
-// Connect to emulators in development
-if (import.meta.env.DEV && !import.meta.env.VITE_USE_FIREBASE_PROD) {
-  try {
-    connectFirestoreEmulator(db, 'localhost', 8080);
-    connectAuthEmulator(auth, 'http://localhost:9099');
-  } catch (error) {
-    console.log('Emulators already connected or not available');
-  }
-}
+// Initialize Analytics
+export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 
 export default app;
