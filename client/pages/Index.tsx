@@ -79,7 +79,7 @@ import {
   User,
   Activity,
   Anchor,
-    DollarSign,
+  DollarSign,
   Cog,
   Upload,
 } from "lucide-react";
@@ -213,7 +213,7 @@ export default function Index() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<ItemType | "all">("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-    const [tempRates, setTempRates] = useState<MaterialRates>(materialRates);
+  const [tempRates, setTempRates] = useState<MaterialRates>(materialRates);
   const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
   const [isClientDialogOpen, setIsClientDialogOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
@@ -251,7 +251,7 @@ export default function Index() {
     mixingRatio: "1:1.5:3",
   });
 
-    // Local Storage Functions
+  // Local Storage Functions
   const saveToLocalStorage = useCallback(() => {
     try {
       const data: LocalStorageData = {
@@ -260,15 +260,15 @@ export default function Index() {
         currentProjectId,
         lastSaved: new Date().toISOString(),
       };
-      localStorage.setItem('construction-estimator-data', JSON.stringify(data));
+      localStorage.setItem("construction-estimator-data", JSON.stringify(data));
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error("Error saving to localStorage:", error);
     }
   }, [projects, clients, currentProjectId]);
 
   const loadFromLocalStorage = useCallback(() => {
     try {
-      const savedData = localStorage.getItem('construction-estimator-data');
+      const savedData = localStorage.getItem("construction-estimator-data");
       if (savedData) {
         const data: LocalStorageData = JSON.parse(savedData);
         setProjects(data.projects || []);
@@ -277,7 +277,9 @@ export default function Index() {
 
         // Load current project if exists
         if (data.currentProjectId && data.projects.length > 0) {
-          const project = data.projects.find(p => p.id === data.currentProjectId);
+          const project = data.projects.find(
+            (p) => p.id === data.currentProjectId,
+          );
           if (project) {
             setCurrentProject(project);
             if (project.customRates) {
@@ -293,7 +295,7 @@ export default function Index() {
         }
       }
     } catch (error) {
-      console.error('Error loading from localStorage:', error);
+      console.error("Error loading from localStorage:", error);
     }
   }, []);
 
@@ -470,7 +472,7 @@ export default function Index() {
     },
   ];
 
-    // Load data on mount
+  // Load data on mount
   useEffect(() => {
     loadFromLocalStorage();
   }, [loadFromLocalStorage]);
@@ -485,9 +487,9 @@ export default function Index() {
   // Update projects array when current project changes
   useEffect(() => {
     if (currentProjectId) {
-      setProjects(prev => prev.map(p =>
-        p.id === currentProjectId ? currentProject : p
-      ));
+      setProjects((prev) =>
+        prev.map((p) => (p.id === currentProjectId ? currentProject : p)),
+      );
     }
   }, [currentProject, currentProjectId]);
 
@@ -1214,7 +1216,7 @@ export default function Index() {
     }));
   };
 
-    const handleDuplicateItem = (item: EstimateItem) => {
+  const handleDuplicateItem = (item: EstimateItem) => {
     const newItemId = generateItemId(item.type);
     const duplicatedItem: EstimateItem = {
       ...item,
@@ -1236,10 +1238,12 @@ export default function Index() {
   const createNewProject = () => {
     const newProject: Project = {
       id: Date.now().toString(),
-      name: newProjectName || 'New Project',
-      description: newProjectDescription || '',
-      client: selectedClientId ? clients.find(c => c.id === selectedClientId)?.name || '' : '',
-      location: '',
+      name: newProjectName || "New Project",
+      description: newProjectDescription || "",
+      client: selectedClientId
+        ? clients.find((c) => c.id === selectedClientId)?.name || ""
+        : "",
+      location: "",
       items: [],
       totalBudget: 0,
       customRates: materialRates,
@@ -1247,35 +1251,43 @@ export default function Index() {
       updatedAt: new Date().toISOString(),
     };
 
-    setProjects(prev => [...prev, newProject]);
+    setProjects((prev) => [...prev, newProject]);
     setCurrentProject(newProject);
     setCurrentProjectId(newProject.id);
 
     // Update client's projects if client selected
     if (selectedClientId) {
-      setClients(prev => prev.map(client =>
-        client.id === selectedClientId
-          ? { ...client, projects: [...client.projects, newProject], updatedAt: new Date().toISOString() }
-          : client
-      ));
+      setClients((prev) =>
+        prev.map((client) =>
+          client.id === selectedClientId
+            ? {
+                ...client,
+                projects: [...client.projects, newProject],
+                updatedAt: new Date().toISOString(),
+              }
+            : client,
+        ),
+      );
     }
 
-    setNewProjectName('');
-    setNewProjectDescription('');
-    setSelectedClientId('');
+    setNewProjectName("");
+    setNewProjectDescription("");
+    setSelectedClientId("");
     setIsProjectDialogOpen(false);
   };
 
   const deleteProject = (projectId: string) => {
-    setProjects(prev => prev.filter(p => p.id !== projectId));
-    setClients(prev => prev.map(client => ({
-      ...client,
-      projects: client.projects.filter(p => p.id !== projectId),
-      updatedAt: new Date().toISOString()
-    })));
+    setProjects((prev) => prev.filter((p) => p.id !== projectId));
+    setClients((prev) =>
+      prev.map((client) => ({
+        ...client,
+        projects: client.projects.filter((p) => p.id !== projectId),
+        updatedAt: new Date().toISOString(),
+      })),
+    );
 
     if (currentProjectId === projectId) {
-      const remainingProjects = projects.filter(p => p.id !== projectId);
+      const remainingProjects = projects.filter((p) => p.id !== projectId);
       if (remainingProjects.length > 0) {
         const firstProject = remainingProjects[0];
         setCurrentProject(firstProject);
@@ -1284,10 +1296,10 @@ export default function Index() {
         // Create a new default project
         const defaultProject: Project = {
           id: Date.now().toString(),
-          name: 'Construction Project',
-          description: 'Professional estimation project',
-          client: '',
-          location: '',
+          name: "Construction Project",
+          description: "Professional estimation project",
+          client: "",
+          location: "",
           items: [],
           totalBudget: 0,
           createdAt: new Date().toISOString(),
@@ -1301,7 +1313,7 @@ export default function Index() {
   };
 
   const switchProject = (projectId: string) => {
-    const project = projects.find(p => p.id === projectId);
+    const project = projects.find((p) => p.id === projectId);
     if (project) {
       setCurrentProject(project);
       setCurrentProjectId(projectId);
@@ -1321,24 +1333,26 @@ export default function Index() {
       updatedAt: new Date().toISOString(),
     };
 
-    setClients(prev => [...prev, newClient]);
-    setNewClientName('');
-    setNewClientEmail('');
-    setNewClientPhone('');
-    setNewClientAddress('');
+    setClients((prev) => [...prev, newClient]);
+    setNewClientName("");
+    setNewClientEmail("");
+    setNewClientPhone("");
+    setNewClientAddress("");
     setIsClientDialogOpen(false);
   };
 
   const deleteClient = (clientId: string) => {
-    setClients(prev => prev.filter(c => c.id !== clientId));
+    setClients((prev) => prev.filter((c) => c.id !== clientId));
   };
 
   const updateClient = (clientId: string, updates: Partial<ClientData>) => {
-    setClients(prev => prev.map(client =>
-      client.id === clientId
-        ? { ...client, ...updates, updatedAt: new Date().toISOString() }
-        : client
-    ));
+    setClients((prev) =>
+      prev.map((client) =>
+        client.id === clientId
+          ? { ...client, ...updates, updatedAt: new Date().toISOString() }
+          : client,
+      ),
+    );
   };
 
   const getTotalEstimate = () => {
@@ -1918,10 +1932,10 @@ export default function Index() {
     ),
   );
 
-    // Mobile layout wrapper
+  // Mobile layout wrapper
   if (isMobile) {
     return (
-            <MobileLayout
+      <MobileLayout
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onAddItem={() => setIsDialogOpen(true)}
@@ -1929,11 +1943,11 @@ export default function Index() {
         onSave={saveToLocalStorage}
         onExport={() => {
           const dataStr = JSON.stringify(currentProject, null, 2);
-          const dataBlob = new Blob([dataStr], {type: 'application/json'});
+          const dataBlob = new Blob([dataStr], { type: "application/json" });
           const url = URL.createObjectURL(dataBlob);
-          const link = document.createElement('a');
+          const link = document.createElement("a");
           link.href = url;
-          link.download = `${currentProject.name.replace(/\s+/g, '_')}_estimate.json`;
+          link.download = `${currentProject.name.replace(/\s+/g, "_")}_estimate.json`;
           link.click();
           URL.revokeObjectURL(url);
         }}
@@ -1945,7 +1959,7 @@ export default function Index() {
         <div className="container mx-auto px-4 py-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsContent value="items" className="space-y-6">
-                            {/* Mobile Category Selection */}
+              {/* Mobile Category Selection */}
               <div className="grid grid-cols-2 gap-2 mb-6">
                 <Card
                   className={`cursor-pointer transition-all duration-200 ${
@@ -1957,9 +1971,7 @@ export default function Index() {
                 >
                   <CardContent className="p-3 text-center">
                     <HardHat className="h-6 w-6 mx-auto mb-2 text-gray-600" />
-                    <h3 className="font-medium text-xs">
-                      All Categories
-                    </h3>
+                    <h3 className="font-medium text-xs">All Categories</h3>
                     <p className="text-xs text-gray-500">
                       {currentProject.items.length} items
                     </p>
@@ -1984,9 +1996,7 @@ export default function Index() {
                         <IconComponent
                           className={`h-6 w-6 mx-auto mb-2 ${category.color}`}
                         />
-                        <h3 className="font-medium text-xs">
-                          {category.name}
-                        </h3>
+                        <h3 className="font-medium text-xs">{category.name}</h3>
                         <p className="text-xs text-gray-500">
                           {categoryItems.length} items
                         </p>
@@ -1998,7 +2008,7 @@ export default function Index() {
 
               {/* Mobile Items List */}
               <MobileTable
-                items={filteredItems.map(item => ({
+                items={filteredItems.map((item) => ({
                   ...item,
                   category: itemTypeConfig[item.type].category,
                   reinforcement: item.results.reinforcement,
@@ -2027,7 +2037,7 @@ export default function Index() {
                       <span>Material Summary</span>
                     </CardTitle>
                   </CardHeader>
-                                    <CardContent className="space-y-4">
+                  <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="p-3 bg-blue-50 rounded-lg border">
                         <p className="text-sm text-blue-600">Cement</p>
@@ -2088,7 +2098,9 @@ export default function Index() {
                                 {category}
                               </span>
                             </div>
-                            <span className="font-bold text-sm">{formatBDT(cost)}</span>
+                            <span className="font-bold text-sm">
+                              {formatBDT(cost)}
+                            </span>
                           </div>
                         );
                       })}
@@ -2132,13 +2144,20 @@ export default function Index() {
                       );
                       const IconComponent = categoryConfig?.icon || Building2;
                       return (
-                        <div key={category} className="border rounded-lg p-4 shadow-sm">
+                        <div
+                          key={category}
+                          className="border rounded-lg p-4 shadow-sm"
+                        >
                           <div className="flex items-center space-x-2 mb-3">
                             <IconComponent
                               className={`h-5 w-5 ${categoryConfig?.color || "text-gray-600"}`}
                             />
-                            <h3 className="text-lg font-bold">{category} Works</h3>
-                            <Badge variant="secondary">{items.length} items</Badge>
+                            <h3 className="text-lg font-bold">
+                              {category} Works
+                            </h3>
+                            <Badge variant="secondary">
+                              {items.length} items
+                            </Badge>
                           </div>
                           <div className="space-y-3">
                             {items.map((item) => {
@@ -2150,22 +2169,35 @@ export default function Index() {
                                   className="border-l-4 border-l-brand-500 pl-3 bg-gray-50 p-3 rounded-r-lg"
                                 >
                                   <div className="flex items-center space-x-2 mb-2">
-                                    <ItemIcon className={`h-4 w-4 ${config.color}`} />
+                                    <ItemIcon
+                                      className={`h-4 w-4 ${config.color}`}
+                                    />
                                     <h4 className="font-semibold text-sm">
                                       {item.itemId} - {item.description}
                                     </h4>
                                   </div>
                                   <div className="grid grid-cols-2 gap-3 text-xs">
                                     <div>
-                                      <span className="text-gray-600">Volume:</span>
-                                      <span className="ml-1 font-medium">{item.results.volume} cft</span>
+                                      <span className="text-gray-600">
+                                        Volume:
+                                      </span>
+                                      <span className="ml-1 font-medium">
+                                        {item.results.volume} cft
+                                      </span>
                                     </div>
                                     <div>
-                                      <span className="text-gray-600">Steel:</span>
-                                      <span className="ml-1 font-medium">{item.results.reinforcement.toFixed(1)} kg</span>
+                                      <span className="text-gray-600">
+                                        Steel:
+                                      </span>
+                                      <span className="ml-1 font-medium">
+                                        {item.results.reinforcement.toFixed(1)}{" "}
+                                        kg
+                                      </span>
                                     </div>
                                     <div className="col-span-2">
-                                      <span className="text-gray-600">Cost:</span>
+                                      <span className="text-gray-600">
+                                        Cost:
+                                      </span>
                                       <span className="ml-1 font-bold text-brand-600">
                                         {formatBDT(item.results.totalCost)}
                                       </span>
@@ -2184,33 +2216,43 @@ export default function Index() {
             </TabsContent>
 
             <TabsContent value="analytics" className="space-y-6">
-                            {/* Mobile Analytics */}
+              {/* Mobile Analytics */}
               <div className="grid grid-cols-2 gap-3">
                 <Card className="shadow-lg">
                   <CardContent className="p-4 text-center">
                     <Building2 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <div className="text-2xl font-bold">{currentProject.items.length}</div>
+                    <div className="text-2xl font-bold">
+                      {currentProject.items.length}
+                    </div>
                     <p className="text-xs text-muted-foreground">Total Items</p>
                   </CardContent>
                 </Card>
                 <Card className="shadow-lg">
                   <CardContent className="p-4 text-center">
                     <Activity className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold">{totals.reinforcement.toFixed(1)}</div>
+                    <div className="text-2xl font-bold">
+                      {totals.reinforcement.toFixed(1)}
+                    </div>
                     <p className="text-xs text-muted-foreground">Steel (kg)</p>
                   </CardContent>
                 </Card>
                 <Card className="shadow-lg">
                   <CardContent className="p-4 text-center">
                     <PieChart className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <div className="text-2xl font-bold">{totals.volume.toFixed(1)}</div>
-                    <p className="text-xs text-muted-foreground">Volume (cft)</p>
+                    <div className="text-2xl font-bold">
+                      {totals.volume.toFixed(1)}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Volume (cft)
+                    </p>
                   </CardContent>
                 </Card>
                 <Card className="shadow-lg">
                   <CardContent className="p-4 text-center">
                     <BarChart3 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <div className="text-xl font-bold">{formatBDT(totals.totalCost)}</div>
+                    <div className="text-xl font-bold">
+                      {formatBDT(totals.totalCost)}
+                    </div>
                     <p className="text-xs text-muted-foreground">Total Value</p>
                   </CardContent>
                 </Card>
@@ -2238,10 +2280,14 @@ export default function Index() {
                               <IconComponent
                                 className={`h-4 w-4 ${categoryConfig?.color || "text-gray-600"}`}
                               />
-                              <span className="text-sm font-medium">{category}</span>
+                              <span className="text-sm font-medium">
+                                {category}
+                              </span>
                             </div>
                             <div className="text-right">
-                              <span className="text-sm font-medium">{formatBDT(cost)}</span>
+                              <span className="text-sm font-medium">
+                                {formatBDT(cost)}
+                              </span>
                               <span className="text-xs text-gray-600 ml-2">
                                 {percentage.toFixed(1)}%
                               </span>
@@ -2275,7 +2321,9 @@ export default function Index() {
                       <Label htmlFor="item-type">Item Type</Label>
                       <Select
                         value={selectedType}
-                        onValueChange={(value: ItemType) => setSelectedType(value)}
+                        onValueChange={(value: ItemType) =>
+                          setSelectedType(value)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -2287,12 +2335,15 @@ export default function Index() {
                                 {category.name} Works
                               </div>
                               {category.items.map((itemType) => {
-                                const config = itemTypeConfig[itemType as ItemType];
+                                const config =
+                                  itemTypeConfig[itemType as ItemType];
                                 const IconComponent = config.icon;
                                 return (
                                   <SelectItem key={itemType} value={itemType}>
                                     <div className="flex items-center space-x-2">
-                                      <IconComponent className={`h-4 w-4 ${config.color}`} />
+                                      <IconComponent
+                                        className={`h-4 w-4 ${config.color}`}
+                                      />
                                       <span>{config.name}</span>
                                     </div>
                                   </SelectItem>
@@ -2304,7 +2355,9 @@ export default function Index() {
                       </Select>
                     </div>
                     <div>
-                      <Label htmlFor="description">Description (Optional)</Label>
+                      <Label htmlFor="description">
+                        Description (Optional)
+                      </Label>
                       <Input
                         id="description"
                         placeholder="e.g., Main structural column"
@@ -2321,7 +2374,10 @@ export default function Index() {
                   {renderDimensionFields()}
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
                     Cancel
                   </Button>
                   <Button
@@ -2335,7 +2391,10 @@ export default function Index() {
             </Dialog>
 
             {/* Pricing Dialog */}
-            <Dialog open={isPricingDialogOpen} onOpenChange={setIsPricingDialogOpen}>
+            <Dialog
+              open={isPricingDialogOpen}
+              onOpenChange={setIsPricingDialogOpen}
+            >
               <DialogContent className="max-w-[95vw] mx-4">
                 <DialogHeader>
                   <DialogTitle className="flex items-center space-x-2">
@@ -2348,7 +2407,9 @@ export default function Index() {
                 </DialogHeader>
                 <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <Label htmlFor="cement-rate">Cement Rate (BDT per bag)</Label>
+                    <Label htmlFor="cement-rate">
+                      Cement Rate (BDT per bag)
+                    </Label>
                     <Input
                       id="cement-rate"
                       placeholder="450"
@@ -2376,7 +2437,9 @@ export default function Index() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="stone-rate">Stone Chips Rate (BDT per cft)</Label>
+                    <Label htmlFor="stone-rate">
+                      Stone Chips Rate (BDT per cft)
+                    </Label>
                     <Input
                       id="stone-rate"
                       placeholder="55"
@@ -2404,7 +2467,9 @@ export default function Index() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="brick-rate">Brick Rate (BDT per piece)</Label>
+                    <Label htmlFor="brick-rate">
+                      Brick Rate (BDT per piece)
+                    </Label>
                     <Input
                       id="brick-rate"
                       placeholder="12"
@@ -2433,7 +2498,10 @@ export default function Index() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsPricingDialogOpen(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsPricingDialogOpen(false)}
+                  >
                     Cancel
                   </Button>
                   <Button
@@ -2475,10 +2543,10 @@ export default function Index() {
                 </div>
               </div>
             </div>
-                        <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
               {/* Project Selector */}
               <Select
-                value={currentProjectId || ''}
+                value={currentProjectId || ""}
                 onValueChange={switchProject}
               >
                 <SelectTrigger className="w-48">
@@ -2510,26 +2578,35 @@ export default function Index() {
                 Save
               </Button>
 
-              <Button variant="outline" size="sm" onClick={() => {
-                const dataStr = JSON.stringify(currentProject, null, 2);
-                const dataBlob = new Blob([dataStr], {type: 'application/json'});
-                const url = URL.createObjectURL(dataBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `${currentProject.name.replace(/\s+/g, '_')}_estimate.json`;
-                link.click();
-                URL.revokeObjectURL(url);
-              }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const dataStr = JSON.stringify(currentProject, null, 2);
+                  const dataBlob = new Blob([dataStr], {
+                    type: "application/json",
+                  });
+                  const url = URL.createObjectURL(dataBlob);
+                  const link = document.createElement("a");
+                  link.href = url;
+                  link.download = `${currentProject.name.replace(/\s+/g, "_")}_estimate.json`;
+                  link.click();
+                  URL.revokeObjectURL(url);
+                }}
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
 
-                                          <Button variant="outline" size="sm" onClick={() => {
-                // Add print-friendly class to body
-                document.body.classList.add('print-mode');
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  // Add print-friendly class to body
+                  document.body.classList.add("print-mode");
 
-                // Create print styles
-                const printStyles = `
+                  // Create print styles
+                  const printStyles = `
                   <style id="print-styles">
                     @media print {
                       @page { margin: 1in; }
@@ -2546,21 +2623,23 @@ export default function Index() {
                   </style>
                 `;
 
-                // Inject print styles
-                document.head.insertAdjacentHTML('beforeend', printStyles);
+                  // Inject print styles
+                  document.head.insertAdjacentHTML("beforeend", printStyles);
 
-                // Print
-                window.print();
+                  // Print
+                  window.print();
 
-                // Cleanup after print
-                setTimeout(() => {
-                  document.body.classList.remove('print-mode');
-                  const printStyleElement = document.getElementById('print-styles');
-                  if (printStyleElement) {
-                    printStyleElement.remove();
-                  }
-                }, 1000);
-              }}>
+                  // Cleanup after print
+                  setTimeout(() => {
+                    document.body.classList.remove("print-mode");
+                    const printStyleElement =
+                      document.getElementById("print-styles");
+                    if (printStyleElement) {
+                      printStyleElement.remove();
+                    }
+                  }, 1000);
+                }}
+              >
                 <Printer className="h-4 w-4 mr-2" />
                 Print
               </Button>
@@ -2568,7 +2647,7 @@ export default function Index() {
               <input
                 type="file"
                 accept=".json"
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
                 id="file-import"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
@@ -2576,7 +2655,9 @@ export default function Index() {
                     const reader = new FileReader();
                     reader.onload = (event) => {
                       try {
-                        const importedProject = JSON.parse(event.target?.result as string);
+                        const importedProject = JSON.parse(
+                          event.target?.result as string,
+                        );
                         if (importedProject.items && importedProject.name) {
                           const newProject: Project = {
                             ...importedProject,
@@ -2584,26 +2665,28 @@ export default function Index() {
                             createdAt: new Date().toISOString(),
                             updatedAt: new Date().toISOString(),
                           };
-                          setProjects(prev => [...prev, newProject]);
+                          setProjects((prev) => [...prev, newProject]);
                           setCurrentProject(newProject);
                           setCurrentProjectId(newProject.id);
                         }
                       } catch (error) {
-                        console.error('Error importing project:', error);
-                        alert('Error importing project. Please check the file format.');
+                        console.error("Error importing project:", error);
+                        alert(
+                          "Error importing project. Please check the file format.",
+                        );
                       }
                     };
                     reader.readAsText(file);
                   }
                   // Reset input
-                  e.target.value = '';
+                  e.target.value = "";
                 }}
               />
 
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => document.getElementById('file-import')?.click()}
+                onClick={() => document.getElementById("file-import")?.click()}
               >
                 <Upload className="h-4 w-4 mr-2" />
                 Import
@@ -2747,7 +2830,7 @@ export default function Index() {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="items" className="flex items-center space-x-2">
               <Building2 className="h-4 w-4" />
@@ -2972,130 +3055,133 @@ export default function Index() {
               </div>
             </div>
 
-                                    <Card className="shadow-lg">
+            <Card className="shadow-lg">
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <Table>
-                  <TableHeader>
-                    <TableRow className="bg-gray-50">
-                      <TableHead>Item ID</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Reinforcement</TableHead>
-                      <TableHead>Volume/Area</TableHead>
-                      <TableHead className="text-right">Cost (BDT)</TableHead>
-                      <TableHead className="w-[50px]"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredItems.map((item) => {
-                      const config = itemTypeConfig[item.type];
-                      const IconComponent = config.icon;
-                      return (
-                        <TableRow key={item.id} className="hover:bg-gray-50">
-                          <TableCell>
-                            <Badge variant="outline" className="font-mono">
-                              {item.itemId}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center space-x-2">
-                              <IconComponent
-                                className={`h-4 w-4 ${config.color}`}
-                              />
-                              <div>
-                                <p className="font-medium">{config.name}</p>
-                                <p className="text-xs text-gray-500">
-                                  {item.type.replace("_", " ")}
-                                </p>
+                    <TableHeader>
+                      <TableRow className="bg-gray-50">
+                        <TableHead>Item ID</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Reinforcement</TableHead>
+                        <TableHead>Volume/Area</TableHead>
+                        <TableHead className="text-right">Cost (BDT)</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredItems.map((item) => {
+                        const config = itemTypeConfig[item.type];
+                        const IconComponent = config.icon;
+                        return (
+                          <TableRow key={item.id} className="hover:bg-gray-50">
+                            <TableCell>
+                              <Badge variant="outline" className="font-mono">
+                                {item.itemId}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center space-x-2">
+                                <IconComponent
+                                  className={`h-4 w-4 ${config.color}`}
+                                />
+                                <div>
+                                  <p className="font-medium">{config.name}</p>
+                                  <p className="text-xs text-gray-500">
+                                    {item.type.replace("_", " ")}
+                                  </p>
+                                </div>
                               </div>
+                            </TableCell>
+                            <TableCell>{item.description}</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="secondary"
+                                className={`${config.bgColor} ${config.color}`}
+                              >
+                                {config.category}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center space-x-1">
+                                <Activity className="h-3 w-3 text-green-600" />
+                                <span className="text-sm font-medium">
+                                  {item.results.reinforcement} kg
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                {item.type === "brick_work" ||
+                                item.type === "plaster_work" ? (
+                                  <p>
+                                    {item.results.plasterArea ||
+                                      item.results.brickQuantity}{" "}
+                                    {item.unit}
+                                  </p>
+                                ) : (
+                                  <p>{item.results.volume} cft</p>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatBDT(item.results.totalCost)}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onClick={() => handleEditItem(item)}
+                                  >
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => handleDuplicateItem(item)}
+                                  >
+                                    <Copy className="mr-2 h-4 w-4" />
+                                    Duplicate
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => handleDeleteItem(item.id)}
+                                    className="text-red-600"
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                      {filteredItems.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center py-8">
+                            <div className="flex flex-col items-center">
+                              <Building2 className="h-12 w-12 text-gray-300 mb-4" />
+                              <p className="text-gray-500">No items found</p>
+                              <p className="text-sm text-gray-400">
+                                {searchTerm || filterType !== "all"
+                                  ? "Try adjusting your search or filter"
+                                  : "Click 'Add Item' to start building your estimate"}
+                              </p>
                             </div>
-                          </TableCell>
-                          <TableCell>{item.description}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="secondary"
-                              className={`${config.bgColor} ${config.color}`}
-                            >
-                              {config.category}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center space-x-1">
-                              <Activity className="h-3 w-3 text-green-600" />
-                              <span className="text-sm font-medium">
-                                {item.results.reinforcement} kg
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="text-sm">
-                              {item.type === "brick_work" ||
-                              item.type === "plaster_work" ? (
-                                <p>
-                                  {item.results.plasterArea ||
-                                    item.results.brickQuantity}{" "}
-                                  {item.unit}
-                                </p>
-                              ) : (
-                                <p>{item.results.volume} cft</p>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {formatBDT(item.results.totalCost)}
-                          </TableCell>
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={() => handleEditItem(item)}
-                                >
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleDuplicateItem(item)}
-                                >
-                                  <Copy className="mr-2 h-4 w-4" />
-                                  Duplicate
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleDeleteItem(item.id)}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
                           </TableCell>
                         </TableRow>
-                      );
-                    })}
-                    {filteredItems.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8">
-                          <div className="flex flex-col items-center">
-                            <Building2 className="h-12 w-12 text-gray-300 mb-4" />
-                            <p className="text-gray-500">No items found</p>
-                            <p className="text-sm text-gray-400">
-                              {searchTerm || filterType !== "all"
-                                ? "Try adjusting your search or filter"
-                                : "Click 'Add Item' to start building your estimate"}
-                            </p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                                    </TableBody>
-                </Table>
+                      )}
+                    </TableBody>
+                  </Table>
                 </div>
               </CardContent>
             </Card>
@@ -3638,7 +3724,7 @@ export default function Index() {
                 </div>
               </CardContent>
             </Card>
-                    </TabsContent>
+          </TabsContent>
 
           <TabsContent value="projects" className="space-y-6 mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -3669,7 +3755,9 @@ export default function Index() {
                       <div className="text-center py-8">
                         <Building2 className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                         <p className="text-gray-500">No projects yet</p>
-                        <p className="text-sm text-gray-400">Create your first project to get started</p>
+                        <p className="text-sm text-gray-400">
+                          Create your first project to get started
+                        </p>
                       </div>
                     ) : (
                       projects.map((project) => (
@@ -3677,46 +3765,75 @@ export default function Index() {
                           key={project.id}
                           className={`p-4 border rounded-lg cursor-pointer transition-all ${
                             currentProjectId === project.id
-                              ? 'ring-2 ring-brand-500 bg-brand-50'
-                              : 'hover:shadow-md'
+                              ? "ring-2 ring-brand-500 bg-brand-50"
+                              : "hover:shadow-md"
                           }`}
                           onClick={() => switchProject(project.id)}
                         >
                           <div className="flex items-center justify-between">
                             <div>
                               <h3 className="font-medium">{project.name}</h3>
-                              <p className="text-sm text-gray-600">{project.description}</p>
+                              <p className="text-sm text-gray-600">
+                                {project.description}
+                              </p>
                               <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
                                 <span>{project.items.length} items</span>
-                                <span>{formatBDT(project.items.reduce((sum, item) => sum + item.results.totalCost, 0))}</span>
-                                <span>{new Date(project.updatedAt).toLocaleDateString()}</span>
+                                <span>
+                                  {formatBDT(
+                                    project.items.reduce(
+                                      (sum, item) =>
+                                        sum + item.results.totalCost,
+                                      0,
+                                    ),
+                                  )}
+                                </span>
+                                <span>
+                                  {new Date(
+                                    project.updatedAt,
+                                  ).toLocaleDateString()}
+                                </span>
                               </div>
                             </div>
                             <div className="flex items-center space-x-2">
                               {currentProjectId === project.id && (
-                                <Badge variant="secondary" className="bg-brand-100 text-brand-700">
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-brand-100 text-brand-700"
+                                >
                                   Active
                                 </Badge>
                               )}
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                  >
                                     <MoreHorizontal className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => switchProject(project.id)}>
+                                  <DropdownMenuItem
+                                    onClick={() => switchProject(project.id)}
+                                  >
                                     <Eye className="mr-2 h-4 w-4" />
                                     Open
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                     onClick={() => {
-                                      const dataStr = JSON.stringify(project, null, 2);
-                                      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                                      const dataStr = JSON.stringify(
+                                        project,
+                                        null,
+                                        2,
+                                      );
+                                      const dataBlob = new Blob([dataStr], {
+                                        type: "application/json",
+                                      });
                                       const url = URL.createObjectURL(dataBlob);
-                                      const link = document.createElement('a');
+                                      const link = document.createElement("a");
                                       link.href = url;
-                                      link.download = `${project.name.replace(/\s+/g, '_')}_estimate.json`;
+                                      link.download = `${project.name.replace(/\s+/g, "_")}_estimate.json`;
                                       link.click();
                                       URL.revokeObjectURL(url);
                                     }}
@@ -3759,9 +3876,7 @@ export default function Index() {
                       New Client
                     </Button>
                   </CardTitle>
-                  <CardDescription>
-                    Manage your client database
-                  </CardDescription>
+                  <CardDescription>Manage your client database</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -3769,7 +3884,9 @@ export default function Index() {
                       <div className="text-center py-8">
                         <User className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                         <p className="text-gray-500">No clients yet</p>
-                        <p className="text-sm text-gray-400">Add clients to organize your projects</p>
+                        <p className="text-sm text-gray-400">
+                          Add clients to organize your projects
+                        </p>
                       </div>
                     ) : (
                       clients.map((client) => (
@@ -3780,16 +3897,28 @@ export default function Index() {
                           <div className="flex items-center justify-between">
                             <div>
                               <h3 className="font-medium">{client.name}</h3>
-                              <p className="text-sm text-gray-600">{client.email}</p>
-                              <p className="text-sm text-gray-600">{client.phone}</p>
+                              <p className="text-sm text-gray-600">
+                                {client.email}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {client.phone}
+                              </p>
                               <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
                                 <span>{client.projects.length} projects</span>
-                                <span>{new Date(client.updatedAt).toLocaleDateString()}</span>
+                                <span>
+                                  {new Date(
+                                    client.updatedAt,
+                                  ).toLocaleDateString()}
+                                </span>
                               </div>
                             </div>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0"
+                                >
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
@@ -3838,11 +3967,15 @@ export default function Index() {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-brand-600">{projects.length}</div>
+                    <div className="text-3xl font-bold text-brand-600">
+                      {projects.length}
+                    </div>
                     <p className="text-sm text-gray-600">Total Projects</p>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-green-600">{clients.length}</div>
+                    <div className="text-3xl font-bold text-green-600">
+                      {clients.length}
+                    </div>
                     <p className="text-sm text-gray-600">Total Clients</p>
                   </div>
                   <div className="text-center">
@@ -3853,9 +3986,18 @@ export default function Index() {
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-orange-600">
-                      {formatBDT(projects.reduce((sum, p) =>
-                        sum + p.items.reduce((itemSum, item) => itemSum + item.results.totalCost, 0), 0
-                      ))}
+                      {formatBDT(
+                        projects.reduce(
+                          (sum, p) =>
+                            sum +
+                            p.items.reduce(
+                              (itemSum, item) =>
+                                itemSum + item.results.totalCost,
+                              0,
+                            ),
+                          0,
+                        ),
+                      )}
                     </div>
                     <p className="text-sm text-gray-600">Total Value</p>
                   </div>
@@ -3907,7 +4049,7 @@ export default function Index() {
                 </span>
               </div>
             </div>
-                    </div>
+          </div>
         </div>
       </footer>
 
@@ -3941,7 +4083,10 @@ export default function Index() {
             </div>
             <div>
               <Label htmlFor="client-select">Client (Optional)</Label>
-              <Select value={selectedClientId} onValueChange={setSelectedClientId}>
+              <Select
+                value={selectedClientId}
+                onValueChange={setSelectedClientId}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a client" />
                 </SelectTrigger>
@@ -3976,12 +4121,15 @@ export default function Index() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setIsProjectDialogOpen(false);
-              setNewProjectName('');
-              setNewProjectDescription('');
-              setSelectedClientId('');
-            }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsProjectDialogOpen(false);
+                setNewProjectName("");
+                setNewProjectDescription("");
+                setSelectedClientId("");
+              }}
+            >
               Cancel
             </Button>
             <Button
@@ -4044,13 +4192,16 @@ export default function Index() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setIsClientDialogOpen(false);
-              setNewClientName('');
-              setNewClientEmail('');
-              setNewClientPhone('');
-              setNewClientAddress('');
-            }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsClientDialogOpen(false);
+                setNewClientName("");
+                setNewClientEmail("");
+                setNewClientPhone("");
+                setNewClientAddress("");
+              }}
+            >
               Cancel
             </Button>
             <Button

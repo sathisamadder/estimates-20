@@ -111,7 +111,9 @@ export function MobileLayout({
                         return (
                           <Button
                             key={item.id}
-                            variant={activeTab === item.id ? "secondary" : "ghost"}
+                            variant={
+                              activeTab === item.id ? "secondary" : "ghost"
+                            }
                             className={`w-full justify-start h-12 ${
                               activeTab === item.id
                                 ? "bg-brand-50 text-brand-700 border-r-2 border-brand-500"
@@ -129,7 +131,7 @@ export function MobileLayout({
                       })}
                     </div>
 
-                                        <div className="mt-6 pt-4 border-t">
+                    <div className="mt-6 pt-4 border-t">
                       <div className="space-y-1">
                         <Button
                           variant="ghost"
@@ -239,9 +241,7 @@ export function MobileLayout({
       </header>
 
       {/* Content */}
-      <main className="pb-20">
-        {children}
-      </main>
+      <main className="pb-20">{children}</main>
 
       {/* Mobile Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-sm">
