@@ -2057,7 +2057,12 @@ export default function Index() {
         onTabChange={setActiveTab}
         onAddItem={() => setIsDialogOpen(true)}
         onOpenPricing={() => setIsPricingDialogOpen(true)}
-        onSave={saveToLocalStorage}
+                onSave={() => {
+          saveToLocalStorage();
+          if (isFirebaseAvailable) {
+            syncWithFirebase();
+          }
+        }}
         onExport={() => {
           const dataStr = JSON.stringify(currentProject, null, 2);
           const dataBlob = new Blob([dataStr], { type: "application/json" });
