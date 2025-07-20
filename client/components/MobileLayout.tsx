@@ -168,7 +168,7 @@ export function MobileLayout({
                           <Download className="h-5 w-5 mr-3" />
                           Export Data
                         </Button>
-                        <Button
+                                                <Button
                           variant="ghost"
                           className="w-full justify-start h-12 text-gray-700"
                           onClick={onPrint}
@@ -176,6 +176,22 @@ export function MobileLayout({
                           <Printer className="h-5 w-5 mr-3" />
                           Print Report
                         </Button>
+
+                        <div className="border-t pt-2 mt-2">
+                          <div className="p-2 text-xs text-gray-600 mb-2">
+                            {currentUser?.email}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start h-10 text-red-600 hover:bg-red-50"
+                            onClick={() => {
+                              logout().catch(console.error);
+                            }}
+                          >
+                            <User className="h-4 w-4 mr-3" />
+                            Logout
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </ScrollArea>
