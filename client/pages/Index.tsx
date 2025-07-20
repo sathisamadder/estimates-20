@@ -1247,7 +1247,7 @@ export default function Index() {
     const newProject = await createProject({
       name: newProjectName || "New Project",
       description: newProjectDescription || "",
-      client: selectedClientId
+            client: selectedClientId && selectedClientId !== "no-client"
         ? clients.find((c) => c.id === selectedClientId)?.name || ""
         : "",
       clientId: selectedClientId,
