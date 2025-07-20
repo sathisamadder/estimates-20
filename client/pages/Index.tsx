@@ -3879,7 +3879,39 @@ export default function Index() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="projects" className="space-y-6 mt-6">
+                    <TabsContent value="projects" className="space-y-6 mt-6">
+            {/* Quick Start - New Project Section */}
+            <Card className="shadow-lg bg-gradient-to-r from-brand-50 to-blue-50 border-brand-200">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-brand-700">
+                  <Plus className="h-6 w-6" />
+                  <span>Start New Project</span>
+                </CardTitle>
+                <CardDescription>
+                  Create a new construction estimation project to begin calculating materials and costs
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button
+                    onClick={() => setIsProjectDialogOpen(true)}
+                    className="bg-brand-500 hover:bg-brand-600 flex-1 h-12 text-lg font-medium shadow-lg"
+                  >
+                    <Plus className="h-5 w-5 mr-2" />
+                    Create New Project
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => document.getElementById("file-import")?.click()}
+                    className="flex-1 h-12 border-brand-300 text-brand-700 hover:bg-brand-50"
+                  >
+                    <Upload className="h-5 w-5 mr-2" />
+                    Import Project
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Projects Management */}
               <Card className="shadow-lg">
