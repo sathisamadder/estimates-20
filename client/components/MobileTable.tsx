@@ -38,9 +38,9 @@ interface MobileEstimateItem {
 }
 
 interface MobileTableProps {
-  items: EstimateItem[];
-  onEdit: (item: EstimateItem) => void;
-  onDuplicate: (item: EstimateItem) => void;
+  items: MobileEstimateItem[];
+  onEdit: (item: any) => void;
+  onDuplicate: (item: any) => void;
   onDelete: (itemId: string) => void;
   formatBDT: (amount: number) => string;
 }
