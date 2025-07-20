@@ -564,8 +564,10 @@ export default function Index() {
       stirrupSpacing = "4",
       barDiameter = "20",
       clearCover = "1.5",
-      stirrupDiameter = "8",
+            stirrupDiameter = "8",
       mixingRatio = "1:1.5:3",
+      multiplyQuantity = "1",
+      isMultipleUnits = "false",
     } = dimensions;
 
     const qty = parseFloat(quantity);
