@@ -212,7 +212,16 @@ export default function Index() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<ItemType | "all">("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [tempRates, setTempRates] = useState<MaterialRates>(materialRates);
+    const [tempRates, setTempRates] = useState<MaterialRates>(materialRates);
+  const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
+  const [isClientDialogOpen, setIsClientDialogOpen] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+  const [newProjectDescription, setNewProjectDescription] = useState("");
+  const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [newClientName, setNewClientName] = useState("");
+  const [newClientEmail, setNewClientEmail] = useState("");
+  const [newClientPhone, setNewClientPhone] = useState("");
+  const [newClientAddress, setNewClientAddress] = useState("");
 
   // Form states
   const [formData, setFormData] = useState({
