@@ -1116,16 +1116,32 @@ export default function Index() {
       brickCost +
       laborCost;
 
+        // Apply quantity multiplication if enabled
+    const multiplier = isMultipleUnits === "true" ? parseFloat(multiplyQuantity) || 1 : 1;
+
     return {
-      cement: Math.round(cement * 100) / 100,
-      sand: Math.round(sand * 100) / 100,
-      stoneChips: Math.round(stoneChips * 100) / 100,
-      reinforcement: Math.round(reinforcement * 100) / 100,
-      reinforcementDetails,
-      volume: Math.round(volume * 100) / 100,
-      totalCost: Math.round(totalCost),
-      brickQuantity: Math.round(brickQuantity),
-      plasterArea: Math.round(plasterArea * 100) / 100,
+      cement: Math.round(cement * multiplier * 100) / 100,
+      sand: Math.round(sand * multiplier * 100) / 100,
+      stoneChips: Math.round(stoneChips * multiplier * 100) / 100,
+      reinforcement: Math.round(reinforcement * multiplier * 100) / 100,
+      reinforcementDetails: {
+        ...reinforcementDetails,
+        mainReinforcement: reinforcementDetails.mainReinforcement ? reinforcementDetails.mainReinforcement * multiplier : undefined,
+        distributionReinforcement: reinforcementDetails.distributionReinforcement ? reinforcementDetails.distributionReinforcement * multiplier : undefined,
+        stirrups: reinforcementDetails.stirrups ? reinforcementDetails.stirrups * multiplier : undefined,
+        spiralReinforcement: reinforcementDetails.spiralReinforcement ? reinforcementDetails.spiralReinforcement * multiplier : undefined,
+        extraTopReinforcement: reinforcementDetails.extraTopReinforcement ? reinforcementDetails.extraTopReinforcement * multiplier : undefined,
+        longDirection: reinforcementDetails.longDirection ? reinforcementDetails.longDirection * multiplier : undefined,
+        shortDirection: reinforcementDetails.shortDirection ? reinforcementDetails.shortDirection * multiplier : undefined,
+        topReinforcement: reinforcementDetails.topReinforcement ? reinforcementDetails.topReinforcement * multiplier : undefined,
+        bottomReinforcement: reinforcementDetails.bottomReinforcement ? reinforcementDetails.bottomReinforcement * multiplier : undefined,
+      },
+      volume: Math.round(volume * multiplier * 100) / 100,
+      totalCost: Math.round(totalCost * multiplier),
+      brickQuantity: Math.round(brickQuantity * multiplier),
+      plasterArea: Math.round(plasterArea * multiplier * 100) / 100,
+      multiplier, // Include multiplier info
+      isMultipleUnits: isMultipleUnits === "true",
     };
   };
 
