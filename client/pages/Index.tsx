@@ -2536,25 +2536,22 @@ export default function Index() {
       <header className="border-b bg-white/80 backdrop-blur-sm shadow-lg">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl shadow-lg">
-                <img
-                  src="https://cdn.builder.io/api/v1/image/assets%2F60f84872b4b14093aa9e83d9ad74d969%2F46361fbad51e408b89450daa00371588"
-                  alt="ROY Logo"
-                  className="w-8 h-8 object-contain bg-transparent"
-                  style={{ background: "transparent", backdropFilter: "none" }}
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                    e.currentTarget.nextElementSibling?.classList.remove(
-                      "hidden",
-                    );
-                  }}
-                />
-                <Calculator className="h-7 w-7 text-white hidden" />
-              </div>
+                        <div className="flex items-center space-x-3">
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2F60f84872b4b14093aa9e83d9ad74d969%2F46361fbad51e408b89450daa00371588"
+                alt="ROY Logo"
+                className="w-12 h-12 object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                  e.currentTarget.nextElementSibling?.classList.remove(
+                    "hidden",
+                  );
+                }}
+              />
+              <Calculator className="h-12 w-12 text-red-600 hidden" />
               <div>
-                <h1 className="text-xl font-bold text-gray-900">
-                  ROY - Professional Construction Estimator
+                <h1 className="text-xl font-bold text-red-600">
+                  ROY
                 </h1>
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <span>{currentProject.name}</span>
