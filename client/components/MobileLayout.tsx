@@ -22,6 +22,10 @@ interface MobileLayoutProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   onAddItem: () => void;
+  onOpenPricing: () => void;
+  onSave: () => void;
+  onExport: () => void;
+  onPrint: () => void;
   projectName: string;
   totalCost: string;
   itemCount: number;
