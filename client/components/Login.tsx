@@ -49,7 +49,8 @@ export function Login() {
               <img 
                 src="https://cdn.builder.io/api/v1/image/assets%2F60f84872b4b14093aa9e83d9ad74d969%2F46361fbad51e408b89450daa00371588" 
                                 alt="ROY Logo" 
-                                className="w-10 h-10 object-contain bg-transparent"
+                                                className="w-10 h-10 object-contain bg-transparent"
+                style={{ background: 'transparent', backdropFilter: 'none' }}
                 onError={(e) => {
                   // Fallback to calculator icon if image fails to load
                   e.currentTarget.style.display = 'none';
