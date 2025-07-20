@@ -3945,8 +3945,8 @@ export default function Index() {
                           Create your first project to get started
                         </p>
                       </div>
-                    ) : (
-                      projects.map((project) => (
+                                        ) : (
+                      projects.slice(0, 5).map((project) => (
                         <div
                           key={project.id}
                           className={`p-4 border rounded-lg cursor-pointer transition-all ${
