@@ -1953,9 +1953,71 @@ export default function Index() {
               "stair",
               "slab",
               "lift_core",
-            ].includes(selectedType) && reinforcementFields}
+                        ].includes(selectedType) && reinforcementFields}
           </div>
         )}
+
+        {/* Quantity Multiplication Section */}
+        <div className="border-t pt-4 mt-6">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="isMultipleUnits"
+                checked={formData.isMultipleUnits}
+                onChange={(e) =>
+                  setFormData({ ...formData, isMultipleUnits: e.target.checked })
+                }
+                className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
+              />
+              <Label htmlFor="isMultipleUnits" className="text-sm font-medium">
+                Multiple Units (e.g., 5 identical columns)
+              </Label>
+            </div>
+
+            {formData.isMultipleUnits && (
+              <div className="bg-brand-50 p-4 rounded-lg border border-brand-200">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="multiplyQuantity" className="text-sm font-medium">
+                      Number of Units
+                    </Label>
+                    <Input
+                      id="multiplyQuantity"
+                      type="number"
+                      min="1"
+                      max="100"
+                      placeholder="e.g., 5"
+                      value={formData.multiplyQuantity}
+                      onChange={(e) =>
+                        setFormData({ ...formData, multiplyQuantity: e.target.value })
+                      }
+                      className="h-10"
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <div className="text-sm text-gray-600">
+                      <p className="font-medium">Example:</p>
+                      <p>For 5 identical {itemTypeConfig[selectedType].name.toLowerCase()}s,</p>
+                      <p>all materials will be multiplied by 5</p>
+                    </div>
+                  </div>
+                </div>
+
+                {parseFloat(formData.multiplyQuantity) > 1 && (
+                  <div className="mt-3 p-3 bg-blue-50 rounded border border-blue-200">
+                    <p className="text-sm text-blue-700 font-medium">
+                      📋 This will calculate materials for {formData.multiplyQuantity} × {itemTypeConfig[selectedType].name}
+                    </p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      Total quantities will be automatically multiplied
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     );
   };
