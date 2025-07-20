@@ -450,14 +450,15 @@ export default function Index() {
     }
   }, [projects, clients, currentProjectId, saveToLocalStorage]);
 
-  // Update projects array when current project changes
+    // Update project when current project changes
   useEffect(() => {
-    if (currentProjectId) {
-      setProjects((prev) =>
-        prev.map((p) => (p.id === currentProjectId ? currentProject : p)),
-      );
+    if (currentProjectId && currentProject.id === currentProjectId) {
+      updateProject(currentProjectId, {
+        items: currentProject.items,
+        customRates: currentProject.customRates,
+      });
     }
-  }, [currentProject, currentProjectId]);
+  }, [currentProject.items, currentProject.customRates, currentProjectId, updateProject]);
 
   // Load custom rates if available
   useEffect(() => {
@@ -1110,32 +1111,22 @@ export default function Index() {
       updatedAt: new Date().toISOString(),
     };
 
-    if (editingItem) {
-      setCurrentProject((prev) => ({
-        ...prev,
-        items: prev.items.map((item) =>
-          item.id === editingItem.id ? newItem : item,
-        ),
-        updatedAt: new Date().toISOString(),
-      }));
+        if (editingItem) {
+      const updatedItems = currentProject.items.map((item) =>
+        item.id === editingItem.id ? newItem : item
+      );
+      updateProject(currentProjectId!, { items: updatedItems });
     } else {
-      setCurrentProject((prev) => ({
-        ...prev,
-        items: [...prev.items, newItem],
-        updatedAt: new Date().toISOString(),
-      }));
+      const updatedItems = [...currentProject.items, newItem];
+      updateProject(currentProjectId!, { items: updatedItems });
     }
 
     resetForm();
   };
 
-  const handleSavePricingSettings = () => {
+    const handleSavePricingSettings = () => {
     setMaterialRates(tempRates);
-    setCurrentProject((prev) => ({
-      ...prev,
-      customRates: tempRates,
-      updatedAt: new Date().toISOString(),
-    }));
+    updateProject(currentProjectId!, { customRates: tempRates });
     setIsPricingDialogOpen(false);
   };
 
@@ -1202,12 +1193,9 @@ export default function Index() {
     setIsDialogOpen(true);
   };
 
-  const handleDeleteItem = (itemId: string) => {
-    setCurrentProject((prev) => ({
-      ...prev,
-      items: prev.items.filter((item) => item.id !== itemId),
-      updatedAt: new Date().toISOString(),
-    }));
+    const handleDeleteItem = (itemId: string) => {
+    const updatedItems = currentProject.items.filter((item) => item.id !== itemId);
+    updateProject(currentProjectId!, { items: updatedItems });
   };
 
   const handleDuplicateItem = (item: EstimateItem) => {
@@ -1221,11 +1209,8 @@ export default function Index() {
       updatedAt: new Date().toISOString(),
     };
 
-    setCurrentProject((prev) => ({
-      ...prev,
-      items: [...prev.items, duplicatedItem],
-      updatedAt: new Date().toISOString(),
-    }));
+        const updatedItems = [...currentProject.items, duplicatedItem];
+    updateProject(currentProjectId!, { items: updatedItems });
   };
 
     // Project Management Functions using data manager
@@ -2753,8 +2738,7 @@ export default function Index() {
                             createdAt: new Date().toISOString(),
                             updatedAt: new Date().toISOString(),
                           };
-                          setProjects((prev) => [...prev, newProject]);
-                          setCurrentProject(newProject);
+                                                    createProject(newProject);
                           setCurrentProjectId(newProject.id);
                         }
                       } catch (error) {
