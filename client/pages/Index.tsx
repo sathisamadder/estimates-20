@@ -160,7 +160,7 @@ interface MaterialRates {
 export default function Index() {
   const isMobile = useIsMobile();
   const { currentUser, logout } = useAuth();
-  const {
+    const {
     projects,
     clients,
     currentProjectId,
@@ -176,6 +176,7 @@ export default function Index() {
     deleteClient,
     syncWithFirebase,
     saveToLocalStorage,
+    loadFromLocalStorage,
   } = useDataManager();
 
     const [activeTab, setActiveTab] = useState("items");
