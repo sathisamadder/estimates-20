@@ -1926,7 +1926,7 @@ export default function Index() {
   });
 
   const totals = getTotalEstimate();
-    const categoryTotals = Object.entries(
+  const categoryTotals = Object.entries(
     currentProject.items.reduce(
       (acc, item) => {
         const category = itemTypeConfig[item.type].category;
@@ -2138,17 +2138,19 @@ export default function Index() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                                        {(Object.entries(
-                      currentProject.items.reduce(
-                        (acc, item) => {
-                          const category = itemTypeConfig[item.type].category;
-                          if (!acc[category]) acc[category] = [];
-                          acc[category].push(item);
-                          return acc;
-                        },
-                        {} as Record<string, EstimateItem[]>,
-                      ),
-                    ) as [string, EstimateItem[]][]).map(([category, items]) => {
+                    {(
+                      Object.entries(
+                        currentProject.items.reduce(
+                          (acc, item) => {
+                            const category = itemTypeConfig[item.type].category;
+                            if (!acc[category]) acc[category] = [];
+                            acc[category].push(item);
+                            return acc;
+                          },
+                          {} as Record<string, EstimateItem[]>,
+                        ),
+                      ) as [string, EstimateItem[]][]
+                    ).map(([category, items]) => {
                       const categoryConfig = categories.find(
                         (c) => c.name === category,
                       );
@@ -2536,7 +2538,7 @@ export default function Index() {
       <header className="border-b bg-white/80 backdrop-blur-sm shadow-lg">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3">
               <img
                 src="https://cdn.builder.io/api/v1/image/assets%2F60f84872b4b14093aa9e83d9ad74d969%2F46361fbad51e408b89450daa00371588"
                 alt="ROY Logo"
@@ -2550,9 +2552,7 @@ export default function Index() {
               />
               <Calculator className="h-12 w-12 text-red-600 hidden" />
               <div>
-                <h1 className="text-xl font-bold text-red-600">
-                  ROY
-                </h1>
+                <h1 className="text-xl font-bold text-red-600">ROY</h1>
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <span>{currentProject.name}</span>
                   <span>•</span>
@@ -3535,17 +3535,19 @@ export default function Index() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                                    {(Object.entries(
-                    currentProject.items.reduce(
-                      (acc, item) => {
-                        const category = itemTypeConfig[item.type].category;
-                        if (!acc[category]) acc[category] = [];
-                        acc[category].push(item);
-                        return acc;
-                      },
-                      {} as Record<string, EstimateItem[]>,
-                    ),
-                  ) as [string, EstimateItem[]][]).map(([category, items]) => {
+                  {(
+                    Object.entries(
+                      currentProject.items.reduce(
+                        (acc, item) => {
+                          const category = itemTypeConfig[item.type].category;
+                          if (!acc[category]) acc[category] = [];
+                          acc[category].push(item);
+                          return acc;
+                        },
+                        {} as Record<string, EstimateItem[]>,
+                      ),
+                    ) as [string, EstimateItem[]][]
+                  ).map(([category, items]) => {
                     const categoryConfig = categories.find(
                       (c) => c.name === category,
                     );
@@ -3876,7 +3878,7 @@ export default function Index() {
             </Card>
           </TabsContent>
 
-                    <TabsContent value="projects" className="space-y-6 mt-6">
+          <TabsContent value="projects" className="space-y-6 mt-6">
             {/* Quick Start - New Project Section */}
             <Card className="shadow-lg bg-gradient-to-r from-brand-50 to-blue-50 border-brand-200">
               <CardHeader>
@@ -3885,7 +3887,8 @@ export default function Index() {
                   <span>Start New Project</span>
                 </CardTitle>
                 <CardDescription>
-                  Create a new construction estimation project to begin calculating materials and costs
+                  Create a new construction estimation project to begin
+                  calculating materials and costs
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -3899,7 +3902,9 @@ export default function Index() {
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => document.getElementById("file-import")?.click()}
+                    onClick={() =>
+                      document.getElementById("file-import")?.click()
+                    }
                     className="flex-1 h-12 border-brand-300 text-brand-700 hover:bg-brand-50"
                   >
                     <Upload className="h-5 w-5 mr-2" />
@@ -3910,14 +3915,16 @@ export default function Index() {
             </Card>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* Recent Projects */}
+              {/* Recent Projects */}
               <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Building2 className="h-5 w-5 text-green-600" />
                       <span>Recent Projects</span>
-                      <Badge variant="secondary">{Math.min(projects.length, 5)} of {projects.length}</Badge>
+                      <Badge variant="secondary">
+                        {Math.min(projects.length, 5)} of {projects.length}
+                      </Badge>
                     </div>
                     <Button
                       variant="outline"
@@ -3942,7 +3949,7 @@ export default function Index() {
                           Create your first project to get started
                         </p>
                       </div>
-                                        ) : (
+                    ) : (
                       projects.slice(0, 5).map((project) => (
                         <div
                           key={project.id}
@@ -3953,12 +3960,16 @@ export default function Index() {
                           }`}
                           onClick={() => switchProject(project.id)}
                         >
-                                                    <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between">
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-1">
                                 <h3 className="font-medium">{project.name}</h3>
-                                {new Date(project.updatedAt).getTime() > Date.now() - 24 * 60 * 60 * 1000 && (
-                                  <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                                {new Date(project.updatedAt).getTime() >
+                                  Date.now() - 24 * 60 * 60 * 1000 && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="bg-green-100 text-green-700 text-xs"
+                                  >
                                     New
                                   </Badge>
                                 )}
@@ -3986,7 +3997,8 @@ export default function Index() {
                                 <div className="flex items-center col-span-2">
                                   <Activity className="h-3 w-3 mr-1" />
                                   <span>
-                                    Updated {new Date(
+                                    Updated{" "}
+                                    {new Date(
                                       project.updatedAt,
                                     ).toLocaleDateString()}
                                   </span>
@@ -4053,7 +4065,7 @@ export default function Index() {
                           </div>
                         </div>
                       ))
-                                        )}
+                    )}
                   </div>
                   {projects.length > 5 && (
                     <div className="border-t pt-3 mt-4">
@@ -4062,9 +4074,13 @@ export default function Index() {
                         size="sm"
                         onClick={() => {
                           // Show a toast or handle viewing all projects
-                          const allProjectsElement = document.getElementById('all-projects-section');
+                          const allProjectsElement = document.getElementById(
+                            "all-projects-section",
+                          );
                           if (allProjectsElement) {
-                            allProjectsElement.scrollIntoView({ behavior: 'smooth' });
+                            allProjectsElement.scrollIntoView({
+                              behavior: "smooth",
+                            });
                           }
                         }}
                         className="w-full"
@@ -4078,7 +4094,7 @@ export default function Index() {
               </Card>
 
               {/* Clients Management */}
-                            <Card className="shadow-lg">
+              <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
@@ -4095,7 +4111,9 @@ export default function Index() {
                       Add Client
                     </Button>
                   </CardTitle>
-                  <CardDescription>Manage your client database for project assignment</CardDescription>
+                  <CardDescription>
+                    Manage your client database for project assignment
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -4122,10 +4140,15 @@ export default function Index() {
                               <p className="text-sm text-gray-600">
                                 {client.phone}
                               </p>
-                                                            <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                              <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
                                 <span className="flex items-center">
                                   <Building2 className="h-3 w-3 mr-1" />
-                                  {projects.filter(p => p.clientId === client.id).length} projects
+                                  {
+                                    projects.filter(
+                                      (p) => p.clientId === client.id,
+                                    ).length
+                                  }{" "}
+                                  projects
                                 </span>
                                 <span className="flex items-center">
                                   <Activity className="h-3 w-3 mr-1" />
@@ -4174,7 +4197,7 @@ export default function Index() {
                   </div>
                 </CardContent>
               </Card>
-                        </div>
+            </div>
 
             {/* All Projects Section - Only shown when there are more than 5 projects */}
             {projects.length > 5 && (
@@ -4186,7 +4209,8 @@ export default function Index() {
                     <Badge variant="secondary">{projects.length} total</Badge>
                   </CardTitle>
                   <CardDescription>
-                    Complete list of all your construction projects organized by update date
+                    Complete list of all your construction projects organized by
+                    update date
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -4203,15 +4227,24 @@ export default function Index() {
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center space-x-2">
-                            <h4 className="font-medium text-sm">{project.name}</h4>
-                            {new Date(project.updatedAt).getTime() > Date.now() - 24 * 60 * 60 * 1000 && (
-                              <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                            <h4 className="font-medium text-sm">
+                              {project.name}
+                            </h4>
+                            {new Date(project.updatedAt).getTime() >
+                              Date.now() - 24 * 60 * 60 * 1000 && (
+                              <Badge
+                                variant="secondary"
+                                className="bg-green-100 text-green-700 text-xs"
+                              >
                                 New
                               </Badge>
                             )}
                           </div>
                           {currentProjectId === project.id && (
-                            <Badge variant="secondary" className="bg-brand-100 text-brand-700 text-xs">
+                            <Badge
+                              variant="secondary"
+                              className="bg-brand-100 text-brand-700 text-xs"
+                            >
                               Active
                             </Badge>
                           )}
@@ -4246,7 +4279,9 @@ export default function Index() {
                               <Activity className="h-3 w-3 mr-1" />
                               Updated:
                             </span>
-                            <span>{new Date(project.updatedAt).toLocaleDateString()}</span>
+                            <span>
+                              {new Date(project.updatedAt).toLocaleDateString()}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -4316,11 +4351,9 @@ export default function Index() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
-                            <Calculator className="h-8 w-8 text-red-600" />
+              <Calculator className="h-8 w-8 text-red-600" />
               <div>
-                <h3 className="font-semibold text-red-600">
-                  ROY
-                </h3>
+                <h3 className="font-semibold text-red-600">ROY</h3>
                 <p className="text-sm text-gray-600">
                   Advanced Construction Cost Calculation Software
                 </p>
