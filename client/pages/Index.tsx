@@ -1213,7 +1213,7 @@ export default function Index() {
     }));
   };
 
-  const handleDuplicateItem = (item: EstimateItem) => {
+    const handleDuplicateItem = (item: EstimateItem) => {
     const newItemId = generateItemId(item.type);
     const duplicatedItem: EstimateItem = {
       ...item,
@@ -1229,6 +1229,115 @@ export default function Index() {
       items: [...prev.items, duplicatedItem],
       updatedAt: new Date().toISOString(),
     }));
+  };
+
+  // Project Management Functions
+  const createNewProject = () => {
+    const newProject: Project = {
+      id: Date.now().toString(),
+      name: newProjectName || 'New Project',
+      description: newProjectDescription || '',
+      client: selectedClientId ? clients.find(c => c.id === selectedClientId)?.name || '' : '',
+      location: '',
+      items: [],
+      totalBudget: 0,
+      customRates: materialRates,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    setProjects(prev => [...prev, newProject]);
+    setCurrentProject(newProject);
+    setCurrentProjectId(newProject.id);
+
+    // Update client's projects if client selected
+    if (selectedClientId) {
+      setClients(prev => prev.map(client =>
+        client.id === selectedClientId
+          ? { ...client, projects: [...client.projects, newProject], updatedAt: new Date().toISOString() }
+          : client
+      ));
+    }
+
+    setNewProjectName('');
+    setNewProjectDescription('');
+    setSelectedClientId('');
+    setIsProjectDialogOpen(false);
+  };
+
+  const deleteProject = (projectId: string) => {
+    setProjects(prev => prev.filter(p => p.id !== projectId));
+    setClients(prev => prev.map(client => ({
+      ...client,
+      projects: client.projects.filter(p => p.id !== projectId),
+      updatedAt: new Date().toISOString()
+    })));
+
+    if (currentProjectId === projectId) {
+      const remainingProjects = projects.filter(p => p.id !== projectId);
+      if (remainingProjects.length > 0) {
+        const firstProject = remainingProjects[0];
+        setCurrentProject(firstProject);
+        setCurrentProjectId(firstProject.id);
+      } else {
+        // Create a new default project
+        const defaultProject: Project = {
+          id: Date.now().toString(),
+          name: 'Construction Project',
+          description: 'Professional estimation project',
+          client: '',
+          location: '',
+          items: [],
+          totalBudget: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        setCurrentProject(defaultProject);
+        setCurrentProjectId(defaultProject.id);
+        setProjects([defaultProject]);
+      }
+    }
+  };
+
+  const switchProject = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      setCurrentProject(project);
+      setCurrentProjectId(projectId);
+    }
+  };
+
+  // Client Management Functions
+  const createNewClient = () => {
+    const newClient: ClientData = {
+      id: Date.now().toString(),
+      name: newClientName,
+      email: newClientEmail,
+      phone: newClientPhone,
+      address: newClientAddress,
+      projects: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    setClients(prev => [...prev, newClient]);
+    setNewClientName('');
+    setNewClientEmail('');
+    setNewClientPhone('');
+    setNewClientAddress('');
+    setIsClientDialogOpen(false);
+  };
+
+  const deleteClient = (clientId: string) => {
+    setClients(prev => prev.filter(c => c.id !== clientId));
+  };
+
+  const updateClient = (clientId: string, updates: Partial<ClientData>) => {
+    setClients(prev => prev.map(client =>
+      client.id === clientId
+        ? { ...client, ...updates, updatedAt: new Date().toISOString() }
+        : client
+    ));
   };
 
   const getTotalEstimate = () => {
