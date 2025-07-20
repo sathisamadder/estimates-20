@@ -2461,16 +2461,58 @@ export default function Index() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">
+                        <div className="flex items-center space-x-2">
+              {/* Project Selector */}
+              <Select
+                value={currentProjectId || ''}
+                onValueChange={switchProject}
+              >
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Select Project" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      <div className="flex items-center space-x-2">
+                        <Building2 className="h-4 w-4" />
+                        <span>{project.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsProjectDialogOpen(true)}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Project
+              </Button>
+
+              <Button variant="outline" size="sm" onClick={saveToLocalStorage}>
                 <Save className="h-4 w-4 mr-2" />
                 Save
               </Button>
-              <Button variant="outline" size="sm">
+
+              <Button variant="outline" size="sm" onClick={() => {
+                const dataStr = JSON.stringify(currentProject, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${currentProject.name.replace(/\s+/g, '_')}_estimate.json`;
+                link.click();
+                URL.revokeObjectURL(url);
+              }}>
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
-              <Button variant="outline" size="sm">
+
+              <Button variant="outline" size="sm" onClick={() => {
+                window.print();
+              }}>
                 <Printer className="h-4 w-4 mr-2" />
                 Print
               </Button>
