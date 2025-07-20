@@ -182,10 +182,25 @@ interface MaterialRates {
 
 export default function Index() {
   const isMobile = useIsMobile();
+  const {
+    projects,
+    clients,
+    currentProjectId,
+    isFirebaseAvailable,
+    isSyncing,
+    lastSynced,
+    setCurrentProjectId,
+    createProject,
+    updateProject,
+    deleteProject,
+    createClient,
+    updateClient,
+    deleteClient,
+    syncWithFirebase,
+    saveToLocalStorage,
+  } = useDataManager();
+
   const [activeTab, setActiveTab] = useState("items");
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [clients, setClients] = useState<ClientData[]>([]);
-  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [currentProject, setCurrentProject] = useState<Project>({
     id: "1",
     name: "Construction Project",
