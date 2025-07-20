@@ -250,6 +250,52 @@ export default function Index() {
     mixingRatio: "1:1.5:3",
   });
 
+    // Local Storage Functions
+  const saveToLocalStorage = useCallback(() => {
+    try {
+      const data: LocalStorageData = {
+        projects,
+        clients,
+        currentProjectId,
+        lastSaved: new Date().toISOString(),
+      };
+      localStorage.setItem('construction-estimator-data', JSON.stringify(data));
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+    }
+  }, [projects, clients, currentProjectId]);
+
+  const loadFromLocalStorage = useCallback(() => {
+    try {
+      const savedData = localStorage.getItem('construction-estimator-data');
+      if (savedData) {
+        const data: LocalStorageData = JSON.parse(savedData);
+        setProjects(data.projects || []);
+        setClients(data.clients || []);
+        setCurrentProjectId(data.currentProjectId);
+
+        // Load current project if exists
+        if (data.currentProjectId && data.projects.length > 0) {
+          const project = data.projects.find(p => p.id === data.currentProjectId);
+          if (project) {
+            setCurrentProject(project);
+            if (project.customRates) {
+              setMaterialRates(project.customRates);
+              setTempRates(project.customRates);
+            }
+          }
+        } else if (data.projects.length > 0) {
+          // Load first project if no current project set
+          const firstProject = data.projects[0];
+          setCurrentProject(firstProject);
+          setCurrentProjectId(firstProject.id);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading from localStorage:', error);
+    }
+  }, []);
+
   // Format currency to BDT
   const formatBDT = (amount: number): string => {
     return `BDT ${amount.toLocaleString()}`;
