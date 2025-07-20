@@ -2721,25 +2721,96 @@ export default function Index() {
                 </div>
               )}
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const dataStr = JSON.stringify(currentProject, null, 2);
-                  const dataBlob = new Blob([dataStr], {
-                    type: "application/json",
-                  });
-                  const url = URL.createObjectURL(dataBlob);
-                  const link = document.createElement("a");
-                  link.href = url;
-                  link.download = `${currentProject.name.replace(/\s+/g, "_")}_estimate.json`;
-                  link.click();
-                  URL.revokeObjectURL(url);
-                }}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
+                            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => {
+                      const dataStr = JSON.stringify(currentProject, null, 2);
+                      const dataBlob = new Blob([dataStr], {
+                        type: "application/json",
+                      });
+                      const url = URL.createObjectURL(dataBlob);
+                      const link = document.createElement("a");
+                      link.href = url;
+                      link.download = `${currentProject.name.replace(/\s+/g, "_")}_estimate.json`;
+                      link.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Export as JSON
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      // Export as CSV
+                      const headers = ['Item ID', 'Type', 'Description', 'Volume (cft)', 'Cement (bags)', 'Sand (cft)', 'Stone Chips (cft)', 'Steel (kg)', 'Cost (BDT)'];
+                      const rows = currentProject.items.map(item => [
+                        item.itemId,
+                        itemTypeConfig[item.type].name,
+                        item.description,
+                        item.results.volume,
+                        item.results.cement,
+                        item.results.sand,
+                        item.results.stoneChips,
+                        item.results.reinforcement,
+                        item.results.totalCost
+                      ]);
+
+                      const csvContent = [headers, ...rows]
+                        .map(row => row.map(cell => `"${cell}"`).join(','))
+                        .join('\n');
+
+                      const dataBlob = new Blob([csvContent], { type: 'text/csv' });
+                      const url = URL.createObjectURL(dataBlob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = `${currentProject.name.replace(/\s+/g, '_')}_estimate.csv`;
+                      link.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Export as CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      // Export summary as text
+                      const totals = getTotalEstimate();
+                      const summary = `Construction Estimate Summary\n
+` +
+                        `Project: ${currentProject.name}\n` +
+                        `Description: ${currentProject.description}\n` +
+                        `Client: ${currentProject.client}\n` +
+                        `Location: ${currentProject.location}\n\n` +
+                        `MATERIAL SUMMARY:\n` +
+                        `Cement: ${totals.cement.toFixed(2)} bags\n` +
+                        `Sand: ${totals.sand.toFixed(2)} cft\n` +
+                        `Stone Chips: ${totals.stoneChips.toFixed(2)} cft\n` +
+                        `Steel Reinforcement: ${totals.reinforcement.toFixed(2)} kg\n` +
+                        `Bricks: ${totals.brickQuantity} nos\n\n` +
+                        `TOTAL COST: ${formatBDT(totals.totalCost)}\n\n` +
+                        `Generated on: ${new Date().toLocaleDateString()}`;
+
+                      const dataBlob = new Blob([summary], { type: 'text/plain' });
+                      const url = URL.createObjectURL(dataBlob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = `${currentProject.name.replace(/\s+/g, '_')}_summary.txt`;
+                      link.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Export Summary
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               <Button
                 variant="outline"
