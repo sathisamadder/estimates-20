@@ -4125,9 +4125,13 @@ export default function Index() {
                               <p className="text-sm text-gray-600">
                                 {client.phone}
                               </p>
-                              <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                                <span>{client.projects.length} projects</span>
-                                <span>
+                                                            <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                <span className="flex items-center">
+                                  <Building2 className="h-3 w-3 mr-1" />
+                                  {projects.filter(p => p.clientId === client.id).length} projects
+                                </span>
+                                <span className="flex items-center">
+                                  <Activity className="h-3 w-3 mr-1" />
                                   {new Date(
                                     client.updatedAt,
                                   ).toLocaleDateString()}
