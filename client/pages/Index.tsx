@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useDataManager } from "@/hooks/use-data-manager";
+import { useDataManager, type Project, type ClientData } from "@/hooks/use-data-manager";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -136,30 +136,6 @@ interface EstimateItem {
   };
   unit: string;
   quantity: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  client: string;
-  location: string;
-  items: EstimateItem[];
-  totalBudget: number;
-  customRates?: MaterialRates;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface ClientData {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  projects: Project[];
   createdAt: string;
   updatedAt: string;
 }
