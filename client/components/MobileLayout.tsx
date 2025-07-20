@@ -214,10 +214,11 @@ export function MobileLayout({
 
             <div className="flex items-center space-x-2">
                             <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg">
-                <img
+                                <img
                   src="https://cdn.builder.io/api/v1/image/assets%2F60f84872b4b14093aa9e83d9ad74d969%2F46361fbad51e408b89450daa00371588"
-                  alt="Construction Estimator Logo"
-                  className="w-5 h-5 object-contain"
+                  alt="ROY Logo"
+                  className="w-5 h-5 object-contain bg-transparent"
+                  style={{ background: 'transparent', backdropFilter: 'none' }}
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                     e.currentTarget.nextElementSibling?.classList.remove('hidden');
