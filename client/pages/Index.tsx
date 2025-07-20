@@ -2668,8 +2668,8 @@ export default function Index() {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="items" className="flex items-center space-x-2">
               <Building2 className="h-4 w-4" />
               <span>Project Items</span>
@@ -2694,6 +2694,13 @@ export default function Index() {
             >
               <PieChart className="h-4 w-4" />
               <span>Analytics</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="projects"
+              className="flex items-center space-x-2"
+            >
+              <Settings className="h-4 w-4" />
+              <span>Projects</span>
             </TabsTrigger>
           </TabsList>
 
