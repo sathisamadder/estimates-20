@@ -2184,8 +2184,8 @@ export default function Index() {
             </TabsContent>
 
             <TabsContent value="analytics" className="space-y-6">
-              {/* Mobile Analytics */}
-              <div className="grid grid-cols-2 gap-4">
+                            {/* Mobile Analytics */}
+              <div className="grid grid-cols-2 gap-3">
                 <Card className="shadow-lg">
                   <CardContent className="p-4 text-center">
                     <Building2 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
