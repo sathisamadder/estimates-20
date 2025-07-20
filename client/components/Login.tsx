@@ -51,7 +51,7 @@ export function Login() {
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl shadow-lg">
+                        <div className="flex items-center justify-center w-16 h-16">
               <img
                 src="https://cdn.builder.io/api/v1/image/assets%2F60f84872b4b14093aa9e83d9ad74d969%2F46361fbad51e408b89450daa00371588"
                 alt="ROY Logo"
