@@ -1115,7 +1115,10 @@ export default function Index() {
       description:
         formData.description ||
         `${itemTypeConfig[selectedType].name} ${itemId}`,
-      dimensions: { ...formData },
+            dimensions: {
+        ...formData,
+        isMultipleUnits: formData.isMultipleUnits.toString()
+      },
       results,
       unit:
         selectedType === "brick_work"
