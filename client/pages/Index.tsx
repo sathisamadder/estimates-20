@@ -4177,7 +4177,87 @@ export default function Index() {
                   </div>
                 </CardContent>
               </Card>
-            </div>
+                        </div>
+
+            {/* All Projects Section - Only shown when there are more than 5 projects */}
+            {projects.length > 5 && (
+              <Card className="shadow-lg" id="all-projects-section">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Building2 className="h-5 w-5 text-orange-600" />
+                    <span>All Projects</span>
+                    <Badge variant="secondary">{projects.length} total</Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    Complete list of all your construction projects organized by update date
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {projects.map((project) => (
+                      <div
+                        key={project.id}
+                        className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                          currentProjectId === project.id
+                            ? "ring-2 ring-brand-500 bg-brand-50"
+                            : "hover:bg-gray-50"
+                        }`}
+                        onClick={() => switchProject(project.id)}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center space-x-2">
+                            <h4 className="font-medium text-sm">{project.name}</h4>
+                            {new Date(project.updatedAt).getTime() > Date.now() - 24 * 60 * 60 * 1000 && (
+                              <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                                New
+                              </Badge>
+                            )}
+                          </div>
+                          {currentProjectId === project.id && (
+                            <Badge variant="secondary" className="bg-brand-100 text-brand-700 text-xs">
+                              Active
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                          {project.description || "No description"}
+                        </p>
+                        <div className="space-y-1 text-xs text-gray-500">
+                          <div className="flex justify-between">
+                            <span className="flex items-center">
+                              <Building2 className="h-3 w-3 mr-1" />
+                              Items:
+                            </span>
+                            <span>{project.items.length}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="flex items-center">
+                              <DollarSign className="h-3 w-3 mr-1" />
+                              Value:
+                            </span>
+                            <span className="font-medium">
+                              {formatBDT(
+                                project.items.reduce(
+                                  (sum, item) => sum + item.results.totalCost,
+                                  0,
+                                ),
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="flex items-center">
+                              <Activity className="h-3 w-3 mr-1" />
+                              Updated:
+                            </span>
+                            <span>{new Date(project.updatedAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Project Statistics */}
             <Card className="shadow-lg">
