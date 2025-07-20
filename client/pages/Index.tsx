@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useDataManager, type Project, type ClientData } from "@/hooks/use-data-manager";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -2506,8 +2507,17 @@ export default function Index() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl shadow-lg">
-                <Calculator className="h-7 w-7 text-white" />
+                            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl shadow-lg">
+                <img
+                  src="https://cdn.builder.io/api/v1/image/assets%2F60f84872b4b14093aa9e83d9ad74d969%2F46361fbad51e408b89450daa00371588"
+                  alt="Construction Estimator Logo"
+                  className="w-8 h-8 object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <Calculator className="h-7 w-7 text-white hidden" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">
