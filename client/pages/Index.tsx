@@ -1926,7 +1926,7 @@ export default function Index() {
   });
 
   const totals = getTotalEstimate();
-  const categoryTotals = Object.entries(
+    const categoryTotals = Object.entries(
     currentProject.items.reduce(
       (acc, item) => {
         const category = itemTypeConfig[item.type].category;
@@ -1935,7 +1935,7 @@ export default function Index() {
       },
       {} as Record<string, number>,
     ),
-  );
+  ) as [string, number][];
 
   // Mobile layout wrapper
   if (isMobile) {
