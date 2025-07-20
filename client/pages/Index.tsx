@@ -3934,8 +3934,8 @@ export default function Index() {
                   <CardDescription>
                     Recently updated construction projects
                   </CardDescription>
-                </CardHeader>
-                                <CardContent>
+                                </CardHeader>
+                <CardContent>
                   <div className="space-y-3">
                     {projects.length === 0 ? (
                       <div className="text-center py-8">
