@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -82,6 +82,9 @@ import {
   DollarSign,
   Cog,
 } from "lucide-react";
+import { MobileLayout } from "@/components/MobileLayout";
+import { MobileTable } from "@/components/MobileTable";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type ItemType =
   | "pile"
@@ -146,6 +149,24 @@ interface Project {
   customRates?: MaterialRates;
   createdAt: string;
   updatedAt: string;
+}
+
+interface ClientData {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  projects: Project[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface LocalStorageData {
+  projects: Project[];
+  clients: ClientData[];
+  currentProjectId: string | null;
+  lastSaved: string;
 }
 
 interface MaterialRates {
