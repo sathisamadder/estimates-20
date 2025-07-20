@@ -48,8 +48,8 @@ export function Login() {
             <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl shadow-lg">
               <img 
                 src="https://cdn.builder.io/api/v1/image/assets%2F60f84872b4b14093aa9e83d9ad74d969%2F46361fbad51e408b89450daa00371588" 
-                alt="Construction Estimator Logo" 
-                className="w-10 h-10 object-contain"
+                                alt="ROY Logo" 
+                                className="w-10 h-10 object-contain bg-transparent"
                 onError={(e) => {
                   // Fallback to calculator icon if image fails to load
                   e.currentTarget.style.display = 'none';
@@ -60,7 +60,7 @@ export function Login() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">
-            Construction Estimator
+                        ROY
           </CardTitle>
           <CardDescription>
             {isRegistering ? 'Create your account' : 'Sign in to your account'}
