@@ -65,7 +65,7 @@ export function Login() {
                   );
                 }}
               />
-              <Calculator className="h-8 w-8 text-white hidden" />
+                            <Calculator className="h-8 w-8 text-brand-500 hidden" />
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">
