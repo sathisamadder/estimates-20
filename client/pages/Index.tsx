@@ -1100,7 +1100,10 @@ export default function Index() {
   };
 
   const handleAddItem = () => {
-    const results = calculateEstimate(selectedType, formData);
+        const results = calculateEstimate(selectedType, {
+      ...formData,
+      isMultipleUnits: formData.isMultipleUnits.toString(),
+    });
     const itemId = editingItem
       ? editingItem.itemId
       : generateItemId(selectedType);
