@@ -4081,12 +4081,13 @@ export default function Index() {
               </Card>
 
               {/* Clients Management */}
-              <Card className="shadow-lg">
+                            <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <User className="h-5 w-5" />
-                      <span>Clients</span>
+                      <User className="h-5 w-5 text-blue-600" />
+                      <span>Client Management</span>
+                      <Badge variant="secondary">{clients.length}</Badge>
                     </div>
                     <Button
                       size="sm"
@@ -4094,10 +4095,10 @@ export default function Index() {
                       className="bg-brand-500 hover:bg-brand-600"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      New Client
+                      Add Client
                     </Button>
                   </CardTitle>
-                  <CardDescription>Manage your client database</CardDescription>
+                  <CardDescription>Manage your client database for project assignment</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
