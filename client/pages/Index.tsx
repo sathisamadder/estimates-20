@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useDataManager, type Project, type ClientData } from "@/hooks/use-data-manager";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   Card,
