@@ -4316,12 +4316,10 @@ export default function Index() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
-              <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg">
-                <Calculator className="h-5 w-5 text-white" />
-              </div>
+                            <Calculator className="h-8 w-8 text-red-600" />
               <div>
-                <h3 className="font-semibold text-gray-900">
-                  ROY - Professional Construction Estimator
+                <h3 className="font-semibold text-red-600">
+                  ROY
                 </h3>
                 <p className="text-sm text-gray-600">
                   Advanced Construction Cost Calculation Software
