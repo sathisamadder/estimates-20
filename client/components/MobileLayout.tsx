@@ -126,21 +126,39 @@ export function MobileLayout({
                       })}
                     </div>
 
-                    <div className="mt-6 pt-4 border-t">
+                                        <div className="mt-6 pt-4 border-t">
                       <div className="space-y-1">
                         <Button
                           variant="ghost"
                           className="w-full justify-start h-12 text-gray-700"
+                          onClick={onOpenPricing}
                         >
                           <Settings className="h-5 w-5 mr-3" />
-                          Settings
+                          Pricing Settings
                         </Button>
                         <Button
                           variant="ghost"
                           className="w-full justify-start h-12 text-gray-700"
+                          onClick={onSave}
                         >
-                          <User className="h-5 w-5 mr-3" />
-                          Profile
+                          <Save className="h-5 w-5 mr-3" />
+                          Save Project
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start h-12 text-gray-700"
+                          onClick={onExport}
+                        >
+                          <Download className="h-5 w-5 mr-3" />
+                          Export Data
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start h-12 text-gray-700"
+                          onClick={onPrint}
+                        >
+                          <Printer className="h-5 w-5 mr-3" />
+                          Print Report
                         </Button>
                       </div>
                     </div>
