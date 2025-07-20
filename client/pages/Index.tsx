@@ -469,6 +469,27 @@ export default function Index() {
     },
   ];
 
+    // Load data on mount
+  useEffect(() => {
+    loadFromLocalStorage();
+  }, [loadFromLocalStorage]);
+
+  // Save data when it changes
+  useEffect(() => {
+    if (projects.length > 0 || clients.length > 0) {
+      saveToLocalStorage();
+    }
+  }, [projects, clients, currentProjectId, saveToLocalStorage]);
+
+  // Update projects array when current project changes
+  useEffect(() => {
+    if (currentProjectId) {
+      setProjects(prev => prev.map(p =>
+        p.id === currentProjectId ? currentProject : p
+      ));
+    }
+  }, [currentProject, currentProjectId]);
+
   // Load custom rates if available
   useEffect(() => {
     if (currentProject.customRates) {
