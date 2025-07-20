@@ -79,8 +79,9 @@ import {
   User,
   Activity,
   Anchor,
-  DollarSign,
+    DollarSign,
   Cog,
+  Upload,
 } from "lucide-react";
 import { MobileLayout } from "@/components/MobileLayout";
 import { MobileTable } from "@/components/MobileTable";
