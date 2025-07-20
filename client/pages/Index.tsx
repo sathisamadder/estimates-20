@@ -1106,7 +1106,7 @@ export default function Index() {
     };
   };
 
-  const handleAddItem = () => {
+    const handleAddItem = async () => {
     const results = calculateEstimate(selectedType, {
       ...formData,
       isMultipleUnits: formData.isMultipleUnits.toString(),
@@ -1138,14 +1138,32 @@ export default function Index() {
       updatedAt: new Date().toISOString(),
     };
 
+    // Ensure we have a valid project to work with
+    let projectId = currentProjectId;
+
+    // If no current project exists, create a default one
+    if (!projectId || !projects.find(p => p.id === projectId)) {
+      const defaultProject = await createProject({
+        name: "Construction Project",
+        description: "Professional estimation project",
+        client: "",
+        location: "",
+        items: [],
+        totalBudget: 0,
+        customRates: materialRates,
+      });
+      projectId = defaultProject.id;
+      setCurrentProjectId(projectId);
+    }
+
     if (editingItem) {
       const updatedItems = currentProject.items.map((item) =>
         item.id === editingItem.id ? newItem : item,
       );
-      updateProject(currentProjectId!, { items: updatedItems });
+      updateProject(projectId, { items: updatedItems });
     } else {
       const updatedItems = [...currentProject.items, newItem];
-      updateProject(currentProjectId!, { items: updatedItems });
+      updateProject(projectId, { items: updatedItems });
     }
 
     resetForm();
