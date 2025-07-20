@@ -3538,7 +3538,7 @@ export default function Index() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {Object.entries(
+                                    {(Object.entries(
                     currentProject.items.reduce(
                       (acc, item) => {
                         const category = itemTypeConfig[item.type].category;
@@ -3548,7 +3548,7 @@ export default function Index() {
                       },
                       {} as Record<string, EstimateItem[]>,
                     ),
-                  ).map(([category, items]) => {
+                  ) as [string, EstimateItem[]][]).map(([category, items]) => {
                     const categoryConfig = categories.find(
                       (c) => c.name === category,
                     );
