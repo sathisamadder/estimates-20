@@ -243,9 +243,17 @@ export function useDataManager() {
       const project = projects.find((p) => p.id === id);
       if (isFirebaseAvailable && project?.firebaseId) {
         try {
+          // Filter out non-Firebase compatible fields
+          const {
+            createdAt,
+            updatedAt,
+            id: projectId,
+            firebaseId,
+            ...firebaseUpdates
+          } = updatedProject;
           await DatabaseService.updateProject(
             project.firebaseId,
-            updatedProject,
+            firebaseUpdates as any,
           );
         } catch (error) {
           console.error("Error updating project in Firebase:", error);
@@ -329,7 +337,18 @@ export function useDataManager() {
       const client = clients.find((c) => c.id === id);
       if (isFirebaseAvailable && client?.firebaseId) {
         try {
-          await DatabaseService.updateClient(client.firebaseId, updatedClient);
+          // Filter out non-Firebase compatible fields
+          const {
+            createdAt,
+            updatedAt,
+            id: clientId,
+            firebaseId,
+            ...firebaseUpdates
+          } = updatedClient;
+          await DatabaseService.updateClient(
+            client.firebaseId,
+            firebaseUpdates as any,
+          );
         } catch (error) {
           console.error("Error updating client in Firebase:", error);
         }
