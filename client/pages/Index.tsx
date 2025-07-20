@@ -1169,9 +1169,26 @@ export default function Index() {
     resetForm();
   };
 
-  const handleSavePricingSettings = () => {
+    const handleSavePricingSettings = async () => {
     setMaterialRates(tempRates);
-    updateProject(currentProjectId!, { customRates: tempRates });
+
+    // Ensure we have a valid project to work with
+    let projectId = currentProjectId;
+    if (!projectId || !projects.find(p => p.id === projectId)) {
+      const defaultProject = await createProject({
+        name: "Construction Project",
+        description: "Professional estimation project",
+        client: "",
+        location: "",
+        items: [],
+        totalBudget: 0,
+        customRates: tempRates,
+      });
+      projectId = defaultProject.id;
+      setCurrentProjectId(projectId);
+    }
+
+    updateProject(projectId, { customRates: tempRates });
     setIsPricingDialogOpen(false);
   };
 
