@@ -231,7 +231,7 @@ export default function Index() {
   const [isClientDialogOpen, setIsClientDialogOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectDescription, setNewProjectDescription] = useState("");
-  const [selectedClientId, setSelectedClientId] = useState<string>("");
+    const [selectedClientId, setSelectedClientId] = useState<string>("no-client");
   const [newClientName, setNewClientName] = useState("");
   const [newClientEmail, setNewClientEmail] = useState("");
   const [newClientPhone, setNewClientPhone] = useState("");
