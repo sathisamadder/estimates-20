@@ -4305,7 +4305,7 @@ export default function Index() {
               Cancel
             </Button>
             <Button
-              onClick={createNewClient}
+                            onClick={handleCreateNewClient}
               className="bg-brand-500 hover:bg-brand-600"
               disabled={!newClientName}
             >
