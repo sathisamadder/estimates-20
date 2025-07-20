@@ -93,9 +93,9 @@ export function MobileLayout({
                         />
                         <Calculator className="h-6 w-6 text-white hidden" />
                       </div>
-                      <div>
-                        <h2 className="font-bold text-white">Construction</h2>
-                        <p className="text-sm text-white/80">Estimator Pro</p>
+                                            <div>
+                        <h2 className="font-bold text-white">ROY</h2>
+                        <p className="text-sm text-white/80">Construction Pro</p>
                       </div>
                     </div>
                   </div>
