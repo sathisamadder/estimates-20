@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getAnalytics } from 'firebase/analytics';
 
 // Firebase configuration using environment variables with fallback to actual config
 const firebaseConfig = {
@@ -21,6 +22,9 @@ export const db = getFirestore(app);
 
 // Initialize Auth
 export const auth = getAuth(app);
+
+// Initialize Analytics
+export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 
 // Connect to emulators in development
 if (import.meta.env.DEV && !import.meta.env.VITE_USE_FIREBASE_PROD) {
