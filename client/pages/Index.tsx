@@ -2524,8 +2524,42 @@ export default function Index() {
                 Export
               </Button>
 
-                            <Button variant="outline" size="sm" onClick={() => {
+                                          <Button variant="outline" size="sm" onClick={() => {
+                // Add print-friendly class to body
+                document.body.classList.add('print-mode');
+
+                // Create print styles
+                const printStyles = `
+                  <style id="print-styles">
+                    @media print {
+                      @page { margin: 1in; }
+                      .print-mode { -webkit-print-color-adjust: exact; }
+                      .print-mode .bg-gradient-to-br { background: white !important; }
+                      .print-mode header { display: none !important; }
+                      .print-mode .fixed { display: none !important; }
+                      .print-mode .shadow-lg { box-shadow: none !important; }
+                      .print-mode .border { border: 1px solid #ccc !important; }
+                      .print-mode .bg-gray-50 { background: #f9f9f9 !important; }
+                      .print-mode .text-brand-600 { color: #2563eb !important; }
+                      .print-mode .bg-brand-50 { background: #eff6ff !important; }
+                    }
+                  </style>
+                `;
+
+                // Inject print styles
+                document.head.insertAdjacentHTML('beforeend', printStyles);
+
+                // Print
                 window.print();
+
+                // Cleanup after print
+                setTimeout(() => {
+                  document.body.classList.remove('print-mode');
+                  const printStyleElement = document.getElementById('print-styles');
+                  if (printStyleElement) {
+                    printStyleElement.remove();
+                  }
+                }, 1000);
               }}>
                 <Printer className="h-4 w-4 mr-2" />
                 Print
