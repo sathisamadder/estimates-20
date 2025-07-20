@@ -3582,9 +3582,162 @@ export default function Index() {
                 </span>
               </div>
             </div>
-          </div>
+                    </div>
         </div>
       </footer>
+
+      {/* Project Management Dialog */}
+      <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+            <DialogDescription>
+              Create a new construction estimation project
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="project-name">Project Name</Label>
+              <Input
+                id="project-name"
+                placeholder="e.g., Residential Building"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="project-description">Description</Label>
+              <Textarea
+                id="project-description"
+                placeholder="Brief project description"
+                value={newProjectDescription}
+                onChange={(e) => setNewProjectDescription(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="client-select">Client (Optional)</Label>
+              <Select value={selectedClientId} onValueChange={setSelectedClientId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">
+                    <div className="flex items-center space-x-2">
+                      <User className="h-4 w-4" />
+                      <span>No Client</span>
+                    </div>
+                  </SelectItem>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      <div className="flex items-center space-x-2">
+                        <User className="h-4 w-4" />
+                        <span>{client.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="mt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsClientDialogOpen(true)}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add New Client
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setIsProjectDialogOpen(false);
+              setNewProjectName('');
+              setNewProjectDescription('');
+              setSelectedClientId('');
+            }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={createNewProject}
+              className="bg-brand-500 hover:bg-brand-600"
+              disabled={!newProjectName}
+            >
+              Create Project
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Client Management Dialog */}
+      <Dialog open={isClientDialogOpen} onOpenChange={setIsClientDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Client</DialogTitle>
+            <DialogDescription>
+              Add a new client to your database
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="client-name">Client Name</Label>
+              <Input
+                id="client-name"
+                placeholder="e.g., John Doe"
+                value={newClientName}
+                onChange={(e) => setNewClientName(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="client-email">Email</Label>
+              <Input
+                id="client-email"
+                type="email"
+                placeholder="e.g., john@example.com"
+                value={newClientEmail}
+                onChange={(e) => setNewClientEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="client-phone">Phone</Label>
+              <Input
+                id="client-phone"
+                placeholder="e.g., +880 1234 567890"
+                value={newClientPhone}
+                onChange={(e) => setNewClientPhone(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="client-address">Address</Label>
+              <Textarea
+                id="client-address"
+                placeholder="Client address"
+                value={newClientAddress}
+                onChange={(e) => setNewClientAddress(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setIsClientDialogOpen(false);
+              setNewClientName('');
+              setNewClientEmail('');
+              setNewClientPhone('');
+              setNewClientAddress('');
+            }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={createNewClient}
+              className="bg-brand-500 hover:bg-brand-600"
+              disabled={!newClientName}
+            >
+              Add Client
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
