@@ -2,14 +2,15 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
 
-// Firebase configuration using environment variables
+// Firebase configuration - your actual project config
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "demo-api-key",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "demo-project.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "demo-project.appspot.com",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef123456"
+  apiKey: "AIzaSyBYUY2Z2ZQrL0aFkFMmO3vxKHKjwmpt3Go",
+  authDomain: "tanemr-490d2.firebaseapp.com",
+  projectId: "tanemr-490d2",
+  storageBucket: "tanemr-490d2.firebasestorage.app",
+  messagingSenderId: "610909783295",
+  appId: "1:610909783295:web:536b9161cf9d0838acb8ca",
+  measurementId: "G-5KH3F9FEV2"
 };
 
 // Initialize Firebase
