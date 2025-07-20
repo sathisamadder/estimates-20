@@ -1917,6 +1917,527 @@ export default function Index() {
     ),
   );
 
+    // Mobile layout wrapper
+  if (isMobile) {
+    return (
+      <MobileLayout
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onAddItem={() => setIsDialogOpen(true)}
+        projectName={currentProject.name}
+        totalCost={formatBDT(totals.totalCost)}
+        itemCount={currentProject.items.length}
+      >
+        <div className="container mx-auto px-4 py-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsContent value="items" className="space-y-6">
+              {/* Mobile Category Selection */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+                <Card
+                  className={`cursor-pointer transition-all duration-200 ${
+                    selectedCategory === "all"
+                      ? "ring-2 ring-brand-500 bg-brand-50 shadow-lg"
+                      : "hover:shadow-md"
+                  }`}
+                  onClick={() => setSelectedCategory("all")}
+                >
+                  <CardContent className="p-3 text-center">
+                    <HardHat className="h-6 w-6 mx-auto mb-2 text-gray-600" />
+                    <h3 className="font-medium text-xs">
+                      All Categories
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      {currentProject.items.length} items
+                    </p>
+                  </CardContent>
+                </Card>
+                {categories.map((category) => {
+                  const IconComponent = category.icon;
+                  const categoryItems = currentProject.items.filter((item) =>
+                    category.items.includes(item.type),
+                  );
+                  return (
+                    <Card
+                      key={category.name}
+                      className={`cursor-pointer transition-all duration-200 ${
+                        selectedCategory === category.name
+                          ? `ring-2 ring-brand-500 ${category.bgColor} shadow-lg`
+                          : "hover:shadow-md"
+                      }`}
+                      onClick={() => setSelectedCategory(category.name)}
+                    >
+                      <CardContent className="p-3 text-center">
+                        <IconComponent
+                          className={`h-6 w-6 mx-auto mb-2 ${category.color}`}
+                        />
+                        <h3 className="font-medium text-xs">
+                          {category.name}
+                        </h3>
+                        <p className="text-xs text-gray-500">
+                          {categoryItems.length} items
+                        </p>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* Mobile Items List */}
+              <MobileTable
+                items={filteredItems.map(item => ({
+                  ...item,
+                  category: itemTypeConfig[item.type].category,
+                  reinforcement: item.results.reinforcement,
+                  volume: item.results.volume,
+                  totalCost: item.results.totalCost,
+                  icon: itemTypeConfig[item.type].icon,
+                  color: itemTypeConfig[item.type].color,
+                  bgColor: itemTypeConfig[item.type].bgColor,
+                  brickQuantity: item.results.brickQuantity,
+                  plasterArea: item.results.plasterArea,
+                }))}
+                onEdit={handleEditItem}
+                onDuplicate={handleDuplicateItem}
+                onDelete={handleDeleteItem}
+                formatBDT={formatBDT}
+              />
+            </TabsContent>
+
+            <TabsContent value="summary" className="space-y-6">
+              {/* Mobile Summary */}
+              <div className="space-y-4">
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 text-lg">
+                      <BarChart3 className="h-5 w-5" />
+                      <span>Material Summary</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-3 bg-blue-50 rounded-lg border">
+                        <p className="text-sm text-blue-600">Cement</p>
+                        <p className="text-xl font-bold text-blue-900">
+                          {totals.cement.toFixed(2)}
+                        </p>
+                        <p className="text-sm text-blue-600">bags</p>
+                      </div>
+                      <div className="p-3 bg-amber-50 rounded-lg border">
+                        <p className="text-sm text-amber-600">Sand</p>
+                        <p className="text-xl font-bold text-amber-900">
+                          {totals.sand.toFixed(2)}
+                        </p>
+                        <p className="text-sm text-amber-600">cft</p>
+                      </div>
+                      <div className="p-3 bg-gray-50 rounded-lg border">
+                        <p className="text-sm text-gray-600">Stone Chips</p>
+                        <p className="text-xl font-bold text-gray-900">
+                          {totals.stoneChips.toFixed(2)}
+                        </p>
+                        <p className="text-sm text-gray-600">cft</p>
+                      </div>
+                      <div className="p-3 bg-green-50 rounded-lg border">
+                        <p className="text-sm text-green-600">Steel</p>
+                        <p className="text-xl font-bold text-green-900">
+                          {totals.reinforcement.toFixed(2)}
+                        </p>
+                        <p className="text-sm text-green-600">kg</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 text-lg">
+                      <DollarSign className="h-5 w-5" />
+                      <span>Cost Breakdown</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {categoryTotals.map(([category, cost]) => {
+                        const categoryConfig = categories.find(
+                          (c) => c.name === category,
+                        );
+                        const IconComponent = categoryConfig?.icon || Building2;
+                        return (
+                          <div
+                            key={category}
+                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <IconComponent
+                                className={`h-4 w-4 ${categoryConfig?.color || "text-gray-600"}`}
+                              />
+                              <span className="text-sm font-medium">
+                                {category}
+                              </span>
+                            </div>
+                            <span className="font-bold text-sm">{formatBDT(cost)}</span>
+                          </div>
+                        );
+                      })}
+                      <Separator />
+                      <div className="flex justify-between items-center text-lg font-bold bg-brand-50 p-3 rounded-lg border-2 border-brand-200">
+                        <span>Total Cost</span>
+                        <span className="text-brand-600">
+                          {formatBDT(totals.totalCost)}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="details" className="space-y-6">
+              {/* Mobile Details */}
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2 text-lg">
+                    <FileText className="h-5 w-5" />
+                    <span>Project Report</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {Object.entries(
+                      currentProject.items.reduce(
+                        (acc, item) => {
+                          const category = itemTypeConfig[item.type].category;
+                          if (!acc[category]) acc[category] = [];
+                          acc[category].push(item);
+                          return acc;
+                        },
+                        {} as Record<string, EstimateItem[]>,
+                      ),
+                    ).map(([category, items]) => {
+                      const categoryConfig = categories.find(
+                        (c) => c.name === category,
+                      );
+                      const IconComponent = categoryConfig?.icon || Building2;
+                      return (
+                        <div key={category} className="border rounded-lg p-4 shadow-sm">
+                          <div className="flex items-center space-x-2 mb-3">
+                            <IconComponent
+                              className={`h-5 w-5 ${categoryConfig?.color || "text-gray-600"}`}
+                            />
+                            <h3 className="text-lg font-bold">{category} Works</h3>
+                            <Badge variant="secondary">{items.length} items</Badge>
+                          </div>
+                          <div className="space-y-3">
+                            {items.map((item) => {
+                              const config = itemTypeConfig[item.type];
+                              const ItemIcon = config.icon;
+                              return (
+                                <div
+                                  key={item.id}
+                                  className="border-l-4 border-l-brand-500 pl-3 bg-gray-50 p-3 rounded-r-lg"
+                                >
+                                  <div className="flex items-center space-x-2 mb-2">
+                                    <ItemIcon className={`h-4 w-4 ${config.color}`} />
+                                    <h4 className="font-semibold text-sm">
+                                      {item.itemId} - {item.description}
+                                    </h4>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-3 text-xs">
+                                    <div>
+                                      <span className="text-gray-600">Volume:</span>
+                                      <span className="ml-1 font-medium">{item.results.volume} cft</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-gray-600">Steel:</span>
+                                      <span className="ml-1 font-medium">{item.results.reinforcement.toFixed(1)} kg</span>
+                                    </div>
+                                    <div className="col-span-2">
+                                      <span className="text-gray-600">Cost:</span>
+                                      <span className="ml-1 font-bold text-brand-600">
+                                        {formatBDT(item.results.totalCost)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="analytics" className="space-y-6">
+              {/* Mobile Analytics */}
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="shadow-lg">
+                  <CardContent className="p-4 text-center">
+                    <Building2 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <div className="text-2xl font-bold">{currentProject.items.length}</div>
+                    <p className="text-xs text-muted-foreground">Total Items</p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardContent className="p-4 text-center">
+                    <Activity className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                    <div className="text-2xl font-bold">{totals.reinforcement.toFixed(1)}</div>
+                    <p className="text-xs text-muted-foreground">Steel (kg)</p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardContent className="p-4 text-center">
+                    <PieChart className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <div className="text-2xl font-bold">{totals.volume.toFixed(1)}</div>
+                    <p className="text-xs text-muted-foreground">Volume (cft)</p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardContent className="p-4 text-center">
+                    <BarChart3 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <div className="text-xl font-bold">{formatBDT(totals.totalCost)}</div>
+                    <p className="text-xs text-muted-foreground">Total Value</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2 text-lg">
+                    <TrendingUp className="h-5 w-5" />
+                    <span>Category Progress</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {categoryTotals.map(([category, cost]) => {
+                      const percentage = (cost / totals.totalCost) * 100;
+                      const categoryConfig = categories.find(
+                        (c) => c.name === category,
+                      );
+                      const IconComponent = categoryConfig?.icon || Building2;
+                      return (
+                        <div key={category} className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center space-x-2">
+                              <IconComponent
+                                className={`h-4 w-4 ${categoryConfig?.color || "text-gray-600"}`}
+                              />
+                              <span className="text-sm font-medium">{category}</span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-sm font-medium">{formatBDT(cost)}</span>
+                              <span className="text-xs text-gray-600 ml-2">
+                                {percentage.toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+                          <Progress value={percentage} className="h-2" />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Add Item Dialog */}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogContent className="max-w-[95vw] max-h-[90vh] overflow-y-auto mx-4">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingItem ? "Edit Item" : "Add New Item"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {editingItem
+                      ? "Update the item details and calculations"
+                      : "Add a new construction element with detailed reinforcement calculations"}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <Label htmlFor="item-type">Item Type</Label>
+                      <Select
+                        value={selectedType}
+                        onValueChange={(value: ItemType) => setSelectedType(value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((category) => (
+                            <div key={category.name}>
+                              <div className="px-2 py-1.5 text-sm font-semibold text-gray-500 bg-gray-100">
+                                {category.name} Works
+                              </div>
+                              {category.items.map((itemType) => {
+                                const config = itemTypeConfig[itemType as ItemType];
+                                const IconComponent = config.icon;
+                                return (
+                                  <SelectItem key={itemType} value={itemType}>
+                                    <div className="flex items-center space-x-2">
+                                      <IconComponent className={`h-4 w-4 ${config.color}`} />
+                                      <span>{config.name}</span>
+                                    </div>
+                                  </SelectItem>
+                                );
+                              })}
+                            </div>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="description">Description (Optional)</Label>
+                      <Input
+                        id="description"
+                        placeholder="e.g., Main structural column"
+                        value={formData.description}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            description: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                  {renderDimensionFields()}
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleAddItem}
+                    className="bg-brand-500 hover:bg-brand-600"
+                  >
+                    {editingItem ? "Update Item" : "Add Item"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {/* Pricing Dialog */}
+            <Dialog open={isPricingDialogOpen} onOpenChange={setIsPricingDialogOpen}>
+              <DialogContent className="max-w-[95vw] mx-4">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center space-x-2">
+                    <Cog className="h-5 w-5" />
+                    <span>Material Pricing</span>
+                  </DialogTitle>
+                  <DialogDescription>
+                    Set custom material rates for this project.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <Label htmlFor="cement-rate">Cement Rate (BDT per bag)</Label>
+                    <Input
+                      id="cement-rate"
+                      placeholder="450"
+                      value={tempRates.cement}
+                      onChange={(e) =>
+                        setTempRates({
+                          ...tempRates,
+                          cement: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="sand-rate">Sand Rate (BDT per cft)</Label>
+                    <Input
+                      id="sand-rate"
+                      placeholder="45"
+                      value={tempRates.sand}
+                      onChange={(e) =>
+                        setTempRates({
+                          ...tempRates,
+                          sand: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="stone-rate">Stone Chips Rate (BDT per cft)</Label>
+                    <Input
+                      id="stone-rate"
+                      placeholder="55"
+                      value={tempRates.stoneChips}
+                      onChange={(e) =>
+                        setTempRates({
+                          ...tempRates,
+                          stoneChips: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="steel-rate">Steel Rate (BDT per kg)</Label>
+                    <Input
+                      id="steel-rate"
+                      placeholder="75"
+                      value={tempRates.reinforcement}
+                      onChange={(e) =>
+                        setTempRates({
+                          ...tempRates,
+                          reinforcement: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="brick-rate">Brick Rate (BDT per piece)</Label>
+                    <Input
+                      id="brick-rate"
+                      placeholder="12"
+                      value={tempRates.brick}
+                      onChange={(e) =>
+                        setTempRates({
+                          ...tempRates,
+                          brick: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="labor-rate">Labor Rate (BDT per cft)</Label>
+                    <Input
+                      id="labor-rate"
+                      placeholder="300"
+                      value={tempRates.labor}
+                      onChange={(e) =>
+                        setTempRates({
+                          ...tempRates,
+                          labor: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsPricingDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSavePricingSettings}
+                    className="bg-brand-500 hover:bg-brand-600"
+                  >
+                    Save Settings
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </Tabs>
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  // Desktop layout
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-amber-50">
       {/* Header */}
