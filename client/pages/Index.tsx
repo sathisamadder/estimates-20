@@ -3956,28 +3956,44 @@ export default function Index() {
                           }`}
                           onClick={() => switchProject(project.id)}
                         >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="font-medium">{project.name}</h3>
-                              <p className="text-sm text-gray-600">
-                                {project.description}
+                                                    <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <h3 className="font-medium">{project.name}</h3>
+                                {new Date(project.updatedAt).getTime() > Date.now() - 24 * 60 * 60 * 1000 && (
+                                  <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                                    New
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-600 mb-2">
+                                {project.description || "No description"}
                               </p>
-                              <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                                <span>{project.items.length} items</span>
-                                <span>
-                                  {formatBDT(
-                                    project.items.reduce(
-                                      (sum, item) =>
-                                        sum + item.results.totalCost,
-                                      0,
-                                    ),
-                                  )}
-                                </span>
-                                <span>
-                                  {new Date(
-                                    project.updatedAt,
-                                  ).toLocaleDateString()}
-                                </span>
+                              <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+                                <div className="flex items-center">
+                                  <Building2 className="h-3 w-3 mr-1" />
+                                  <span>{project.items.length} items</span>
+                                </div>
+                                <div className="flex items-center">
+                                  <DollarSign className="h-3 w-3 mr-1" />
+                                  <span>
+                                    {formatBDT(
+                                      project.items.reduce(
+                                        (sum, item) =>
+                                          sum + item.results.totalCost,
+                                        0,
+                                      ),
+                                    )}
+                                  </span>
+                                </div>
+                                <div className="flex items-center col-span-2">
+                                  <Activity className="h-3 w-3 mr-1" />
+                                  <span>
+                                    Updated {new Date(
+                                      project.updatedAt,
+                                    ).toLocaleDateString()}
+                                  </span>
+                                </div>
                               </div>
                             </div>
                             <div className="flex items-center space-x-2">
