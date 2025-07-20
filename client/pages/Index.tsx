@@ -3913,25 +3913,26 @@ export default function Index() {
             </Card>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Projects Management */}
+                            {/* Recent Projects */}
               <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Building2 className="h-5 w-5" />
-                      <span>Projects</span>
+                      <Building2 className="h-5 w-5 text-green-600" />
+                      <span>Recent Projects</span>
+                      <Badge variant="secondary">{Math.min(projects.length, 5)} of {projects.length}</Badge>
                     </div>
                     <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => setIsProjectDialogOpen(true)}
-                      className="bg-brand-500 hover:bg-brand-600"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      New Project
+                      New
                     </Button>
                   </CardTitle>
                   <CardDescription>
-                    Manage your construction projects
+                    Recently updated construction projects
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
