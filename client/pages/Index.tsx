@@ -2508,8 +2508,8 @@ export default function Index() {
                 <Calculator className="h-7 w-7 text-white hidden" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">
-                  Professional Construction Estimator
+                                <h1 className="text-xl font-bold text-gray-900">
+                  ROY - Professional Construction Estimator
                 </h1>
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <span>{currentProject.name}</span>
