@@ -3557,6 +3557,230 @@ export default function Index() {
                 </div>
               </CardContent>
             </Card>
+                    </TabsContent>
+
+          <TabsContent value="projects" className="space-y-6 mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Projects Management */}
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Building2 className="h-5 w-5" />
+                      <span>Projects</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => setIsProjectDialogOpen(true)}
+                      className="bg-brand-500 hover:bg-brand-600"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      New Project
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your construction projects
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {projects.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Building2 className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500">No projects yet</p>
+                        <p className="text-sm text-gray-400">Create your first project to get started</p>
+                      </div>
+                    ) : (
+                      projects.map((project) => (
+                        <div
+                          key={project.id}
+                          className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                            currentProjectId === project.id
+                              ? 'ring-2 ring-brand-500 bg-brand-50'
+                              : 'hover:shadow-md'
+                          }`}
+                          onClick={() => switchProject(project.id)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-medium">{project.name}</h3>
+                              <p className="text-sm text-gray-600">{project.description}</p>
+                              <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                <span>{project.items.length} items</span>
+                                <span>{formatBDT(project.items.reduce((sum, item) => sum + item.results.totalCost, 0))}</span>
+                                <span>{new Date(project.updatedAt).toLocaleDateString()}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              {currentProjectId === project.id && (
+                                <Badge variant="secondary" className="bg-brand-100 text-brand-700">
+                                  Active
+                                </Badge>
+                              )}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => switchProject(project.id)}>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    Open
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      const dataStr = JSON.stringify(project, null, 2);
+                                      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                                      const url = URL.createObjectURL(dataBlob);
+                                      const link = document.createElement('a');
+                                      link.href = url;
+                                      link.download = `${project.name.replace(/\s+/g, '_')}_estimate.json`;
+                                      link.click();
+                                      URL.revokeObjectURL(url);
+                                    }}
+                                  >
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Export
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => deleteProject(project.id)}
+                                    className="text-red-600"
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Clients Management */}
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <User className="h-5 w-5" />
+                      <span>Clients</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => setIsClientDialogOpen(true)}
+                      className="bg-brand-500 hover:bg-brand-600"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      New Client
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your client database
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {clients.length === 0 ? (
+                      <div className="text-center py-8">
+                        <User className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500">No clients yet</p>
+                        <p className="text-sm text-gray-400">Add clients to organize your projects</p>
+                      </div>
+                    ) : (
+                      clients.map((client) => (
+                        <div
+                          key={client.id}
+                          className="p-4 border rounded-lg hover:shadow-md transition-all"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-medium">{client.name}</h3>
+                              <p className="text-sm text-gray-600">{client.email}</p>
+                              <p className="text-sm text-gray-600">{client.phone}</p>
+                              <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                <span>{client.projects.length} projects</span>
+                                <span>{new Date(client.updatedAt).toLocaleDateString()}</span>
+                              </div>
+                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setNewClientName(client.name);
+                                    setNewClientEmail(client.email);
+                                    setNewClientPhone(client.phone);
+                                    setNewClientAddress(client.address);
+                                    setIsClientDialogOpen(true);
+                                  }}
+                                >
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => deleteClient(client.id)}
+                                  className="text-red-600"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Project Statistics */}
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <BarChart3 className="h-5 w-5" />
+                  <span>Project Statistics</span>
+                </CardTitle>
+                <CardDescription>
+                  Overview of all your projects and clients
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-brand-600">{projects.length}</div>
+                    <p className="text-sm text-gray-600">Total Projects</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-600">{clients.length}</div>
+                    <p className="text-sm text-gray-600">Total Clients</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-600">
+                      {projects.reduce((sum, p) => sum + p.items.length, 0)}
+                    </div>
+                    <p className="text-sm text-gray-600">Total Items</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-orange-600">
+                      {formatBDT(projects.reduce((sum, p) =>
+                        sum + p.items.reduce((itemSum, item) => itemSum + item.results.totalCost, 0), 0
+                      ))}
+                    </div>
+                    <p className="text-sm text-gray-600">Total Value</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
