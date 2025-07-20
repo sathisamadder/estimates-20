@@ -80,22 +80,29 @@ export function MobileLayout({
                   {/* Menu Header */}
                   <div className="p-6 border-b bg-gradient-to-r from-brand-500 to-brand-600">
                     <div className="flex items-center space-x-3">
-                                            <div className="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg">
-                                                <img
+                      <div className="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg">
+                        <img
                           src="https://cdn.builder.io/api/v1/image/assets%2F60f84872b4b14093aa9e83d9ad74d969%2F46361fbad51e408b89450daa00371588"
                           alt="ROY Logo"
                           className="w-7 h-7 object-contain bg-transparent"
-                          style={{ background: 'transparent', backdropFilter: 'none' }}
+                          style={{
+                            background: "transparent",
+                            backdropFilter: "none",
+                          }}
                           onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                            e.currentTarget.style.display = "none";
+                            e.currentTarget.nextElementSibling?.classList.remove(
+                              "hidden",
+                            );
                           }}
                         />
                         <Calculator className="h-6 w-6 text-white hidden" />
                       </div>
-                                            <div>
+                      <div>
                         <h2 className="font-bold text-white">ROY</h2>
-                        <p className="text-sm text-white/80">Construction Pro</p>
+                        <p className="text-sm text-white/80">
+                          Construction Pro
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -169,7 +176,7 @@ export function MobileLayout({
                           <Download className="h-5 w-5 mr-3" />
                           Export Data
                         </Button>
-                                                <Button
+                        <Button
                           variant="ghost"
                           className="w-full justify-start h-12 text-gray-700"
                           onClick={onPrint}
@@ -213,15 +220,17 @@ export function MobileLayout({
             </Sheet>
 
             <div className="flex items-center space-x-2">
-                            <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg">
-                                <img
+              <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg">
+                <img
                   src="https://cdn.builder.io/api/v1/image/assets%2F60f84872b4b14093aa9e83d9ad74d969%2F46361fbad51e408b89450daa00371588"
                   alt="ROY Logo"
                   className="w-5 h-5 object-contain bg-transparent"
-                  style={{ background: 'transparent', backdropFilter: 'none' }}
+                  style={{ background: "transparent", backdropFilter: "none" }}
                   onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.nextElementSibling?.classList.remove(
+                      "hidden",
+                    );
                   }}
                 />
                 <Calculator className="h-5 w-5 text-white hidden" />

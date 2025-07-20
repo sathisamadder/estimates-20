@@ -1,7 +1,7 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-import { getAnalytics } from 'firebase/analytics';
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { getAnalytics } from "firebase/analytics";
 
 // Firebase configuration - your actual project config
 const firebaseConfig = {
@@ -11,7 +11,7 @@ const firebaseConfig = {
   storageBucket: "tanemr-490d2.firebasestorage.app",
   messagingSenderId: "610909783295",
   appId: "1:610909783295:web:536b9161cf9d0838acb8ca",
-  measurementId: "G-5KH3F9FEV2"
+  measurementId: "G-5KH3F9FEV2",
 };
 
 // Initialize Firebase
@@ -24,6 +24,7 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 
 // Initialize Analytics
-export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+export const analytics =
+  typeof window !== "undefined" ? getAnalytics(app) : null;
 
 export default app;

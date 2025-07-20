@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { useDataManager, type Project, type ClientData } from "@/hooks/use-data-manager";
+import {
+  useDataManager,
+  type Project,
+  type ClientData,
+} from "@/hooks/use-data-manager";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -160,7 +164,7 @@ interface MaterialRates {
 export default function Index() {
   const isMobile = useIsMobile();
   const { currentUser, logout } = useAuth();
-    const {
+  const {
     projects,
     clients,
     currentProjectId,
@@ -179,11 +183,11 @@ export default function Index() {
     loadFromLocalStorage,
   } = useDataManager();
 
-    const [activeTab, setActiveTab] = useState("items");
+  const [activeTab, setActiveTab] = useState("items");
 
   // Get current project from data manager
   const currentProject = currentProjectId
-    ? projects.find(p => p.id === currentProjectId) || {
+    ? projects.find((p) => p.id === currentProjectId) || {
         id: "1",
         name: "Construction Project",
         description: "Professional estimation project",
@@ -257,13 +261,11 @@ export default function Index() {
     barDiameter: "20",
     clearCover: "1.5",
     stirrupDiameter: "8",
-        mixingRatio: "1:1.5:3",
+    mixingRatio: "1:1.5:3",
     // Quantity multiplication fields
     multiplyQuantity: "1",
     isMultipleUnits: false,
   });
-
-  
 
   // Format currency to BDT
   const formatBDT = (amount: number): string => {
@@ -450,7 +452,7 @@ export default function Index() {
     }
   }, [projects, clients, currentProjectId, saveToLocalStorage]);
 
-    // Update project when current project changes
+  // Update project when current project changes
   useEffect(() => {
     if (currentProjectId && currentProject.id === currentProjectId) {
       updateProject(currentProjectId, {
@@ -458,7 +460,12 @@ export default function Index() {
         customRates: currentProject.customRates,
       });
     }
-  }, [currentProject.items, currentProject.customRates, currentProjectId, updateProject]);
+  }, [
+    currentProject.items,
+    currentProject.customRates,
+    currentProjectId,
+    updateProject,
+  ]);
 
   // Load custom rates if available
   useEffect(() => {
@@ -498,7 +505,7 @@ export default function Index() {
       stirrupSpacing = "4",
       barDiameter = "20",
       clearCover = "1.5",
-            stirrupDiameter = "8",
+      stirrupDiameter = "8",
       mixingRatio = "1:1.5:3",
       multiplyQuantity = "1",
       isMultipleUnits = "false",
@@ -1050,8 +1057,9 @@ export default function Index() {
       brickCost +
       laborCost;
 
-        // Apply quantity multiplication if enabled
-    const multiplier = isMultipleUnits === "true" ? parseFloat(multiplyQuantity) || 1 : 1;
+    // Apply quantity multiplication if enabled
+    const multiplier =
+      isMultipleUnits === "true" ? parseFloat(multiplyQuantity) || 1 : 1;
 
     return {
       cement: Math.round(cement * multiplier * 100) / 100,
@@ -1060,15 +1068,34 @@ export default function Index() {
       reinforcement: Math.round(reinforcement * multiplier * 100) / 100,
       reinforcementDetails: {
         ...reinforcementDetails,
-        mainReinforcement: reinforcementDetails.mainReinforcement ? reinforcementDetails.mainReinforcement * multiplier : undefined,
-        distributionReinforcement: reinforcementDetails.distributionReinforcement ? reinforcementDetails.distributionReinforcement * multiplier : undefined,
-        stirrups: reinforcementDetails.stirrups ? reinforcementDetails.stirrups * multiplier : undefined,
-        spiralReinforcement: reinforcementDetails.spiralReinforcement ? reinforcementDetails.spiralReinforcement * multiplier : undefined,
-        extraTopReinforcement: reinforcementDetails.extraTopReinforcement ? reinforcementDetails.extraTopReinforcement * multiplier : undefined,
-        longDirection: reinforcementDetails.longDirection ? reinforcementDetails.longDirection * multiplier : undefined,
-        shortDirection: reinforcementDetails.shortDirection ? reinforcementDetails.shortDirection * multiplier : undefined,
-        topReinforcement: reinforcementDetails.topReinforcement ? reinforcementDetails.topReinforcement * multiplier : undefined,
-        bottomReinforcement: reinforcementDetails.bottomReinforcement ? reinforcementDetails.bottomReinforcement * multiplier : undefined,
+        mainReinforcement: reinforcementDetails.mainReinforcement
+          ? reinforcementDetails.mainReinforcement * multiplier
+          : undefined,
+        distributionReinforcement:
+          reinforcementDetails.distributionReinforcement
+            ? reinforcementDetails.distributionReinforcement * multiplier
+            : undefined,
+        stirrups: reinforcementDetails.stirrups
+          ? reinforcementDetails.stirrups * multiplier
+          : undefined,
+        spiralReinforcement: reinforcementDetails.spiralReinforcement
+          ? reinforcementDetails.spiralReinforcement * multiplier
+          : undefined,
+        extraTopReinforcement: reinforcementDetails.extraTopReinforcement
+          ? reinforcementDetails.extraTopReinforcement * multiplier
+          : undefined,
+        longDirection: reinforcementDetails.longDirection
+          ? reinforcementDetails.longDirection * multiplier
+          : undefined,
+        shortDirection: reinforcementDetails.shortDirection
+          ? reinforcementDetails.shortDirection * multiplier
+          : undefined,
+        topReinforcement: reinforcementDetails.topReinforcement
+          ? reinforcementDetails.topReinforcement * multiplier
+          : undefined,
+        bottomReinforcement: reinforcementDetails.bottomReinforcement
+          ? reinforcementDetails.bottomReinforcement * multiplier
+          : undefined,
       },
       volume: Math.round(volume * multiplier * 100) / 100,
       totalCost: Math.round(totalCost * multiplier),
@@ -1080,7 +1107,7 @@ export default function Index() {
   };
 
   const handleAddItem = () => {
-        const results = calculateEstimate(selectedType, {
+    const results = calculateEstimate(selectedType, {
       ...formData,
       isMultipleUnits: formData.isMultipleUnits.toString(),
     });
@@ -1095,9 +1122,9 @@ export default function Index() {
       description:
         formData.description ||
         `${itemTypeConfig[selectedType].name} ${itemId}`,
-            dimensions: {
+      dimensions: {
         ...formData,
-        isMultipleUnits: formData.isMultipleUnits.toString()
+        isMultipleUnits: formData.isMultipleUnits.toString(),
       },
       results,
       unit:
@@ -1111,9 +1138,9 @@ export default function Index() {
       updatedAt: new Date().toISOString(),
     };
 
-        if (editingItem) {
+    if (editingItem) {
       const updatedItems = currentProject.items.map((item) =>
-        item.id === editingItem.id ? newItem : item
+        item.id === editingItem.id ? newItem : item,
       );
       updateProject(currentProjectId!, { items: updatedItems });
     } else {
@@ -1124,7 +1151,7 @@ export default function Index() {
     resetForm();
   };
 
-    const handleSavePricingSettings = () => {
+  const handleSavePricingSettings = () => {
     setMaterialRates(tempRates);
     updateProject(currentProjectId!, { customRates: tempRates });
     setIsPricingDialogOpen(false);
@@ -1153,7 +1180,7 @@ export default function Index() {
       barDiameter: "20",
       clearCover: "1.5",
       stirrupDiameter: "8",
-            mixingRatio: "1:1.5:3",
+      mixingRatio: "1:1.5:3",
       multiplyQuantity: "1",
       isMultipleUnits: false,
     });
@@ -1186,15 +1213,17 @@ export default function Index() {
       barDiameter: item.dimensions.barDiameter || "20",
       clearCover: item.dimensions.clearCover || "1.5",
       stirrupDiameter: item.dimensions.stirrupDiameter || "8",
-            mixingRatio: item.dimensions.mixingRatio || "1:1.5:3",
+      mixingRatio: item.dimensions.mixingRatio || "1:1.5:3",
       multiplyQuantity: item.dimensions.multiplyQuantity || "1",
       isMultipleUnits: item.dimensions.isMultipleUnits === "true" || false,
     });
     setIsDialogOpen(true);
   };
 
-    const handleDeleteItem = (itemId: string) => {
-    const updatedItems = currentProject.items.filter((item) => item.id !== itemId);
+  const handleDeleteItem = (itemId: string) => {
+    const updatedItems = currentProject.items.filter(
+      (item) => item.id !== itemId,
+    );
     updateProject(currentProjectId!, { items: updatedItems });
   };
 
@@ -1209,11 +1238,11 @@ export default function Index() {
       updatedAt: new Date().toISOString(),
     };
 
-        const updatedItems = [...currentProject.items, duplicatedItem];
+    const updatedItems = [...currentProject.items, duplicatedItem];
     updateProject(currentProjectId!, { items: updatedItems });
   };
 
-    // Project Management Functions using data manager
+  // Project Management Functions using data manager
   const handleCreateNewProject = async () => {
     const newProject = await createProject({
       name: newProjectName || "New Project",
@@ -1802,7 +1831,7 @@ export default function Index() {
               "stair",
               "slab",
               "lift_core",
-                        ].includes(selectedType) && reinforcementFields}
+            ].includes(selectedType) && reinforcementFields}
           </div>
         )}
 
@@ -1815,7 +1844,10 @@ export default function Index() {
                 id="isMultipleUnits"
                 checked={formData.isMultipleUnits}
                 onChange={(e) =>
-                  setFormData({ ...formData, isMultipleUnits: e.target.checked })
+                  setFormData({
+                    ...formData,
+                    isMultipleUnits: e.target.checked,
+                  })
                 }
                 className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
               />
@@ -1828,7 +1860,10 @@ export default function Index() {
               <div className="bg-brand-50 p-4 rounded-lg border border-brand-200">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="multiplyQuantity" className="text-sm font-medium">
+                    <Label
+                      htmlFor="multiplyQuantity"
+                      className="text-sm font-medium"
+                    >
                       Number of Units
                     </Label>
                     <Input
@@ -1839,7 +1874,10 @@ export default function Index() {
                       placeholder="e.g., 5"
                       value={formData.multiplyQuantity}
                       onChange={(e) =>
-                        setFormData({ ...formData, multiplyQuantity: e.target.value })
+                        setFormData({
+                          ...formData,
+                          multiplyQuantity: e.target.value,
+                        })
                       }
                       className="h-10"
                     />
@@ -1847,7 +1885,10 @@ export default function Index() {
                   <div className="flex items-end">
                     <div className="text-sm text-gray-600">
                       <p className="font-medium">Example:</p>
-                      <p>For 5 identical {itemTypeConfig[selectedType].name.toLowerCase()}s,</p>
+                      <p>
+                        For 5 identical{" "}
+                        {itemTypeConfig[selectedType].name.toLowerCase()}s,
+                      </p>
                       <p>all materials will be multiplied by 5</p>
                     </div>
                   </div>
@@ -1856,7 +1897,9 @@ export default function Index() {
                 {parseFloat(formData.multiplyQuantity) > 1 && (
                   <div className="mt-3 p-3 bg-blue-50 rounded border border-blue-200">
                     <p className="text-sm text-blue-700 font-medium">
-                      📋 This will calculate materials for {formData.multiplyQuantity} × {itemTypeConfig[selectedType].name}
+                      📋 This will calculate materials for{" "}
+                      {formData.multiplyQuantity} ×{" "}
+                      {itemTypeConfig[selectedType].name}
                     </p>
                     <p className="text-xs text-blue-600 mt-1">
                       Total quantities will be automatically multiplied
@@ -1902,7 +1945,7 @@ export default function Index() {
         onTabChange={setActiveTab}
         onAddItem={() => setIsDialogOpen(true)}
         onOpenPricing={() => setIsPricingDialogOpen(true)}
-                onSave={() => {
+        onSave={() => {
           saveToLocalStorage();
           if (isFirebaseAvailable) {
             syncWithFirebase();
@@ -2494,21 +2537,23 @@ export default function Index() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-                            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl shadow-lg">
-                                <img
+              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl shadow-lg">
+                <img
                   src="https://cdn.builder.io/api/v1/image/assets%2F60f84872b4b14093aa9e83d9ad74d969%2F46361fbad51e408b89450daa00371588"
                   alt="ROY Logo"
                   className="w-8 h-8 object-contain bg-transparent"
-                  style={{ background: 'transparent', backdropFilter: 'none' }}
+                  style={{ background: "transparent", backdropFilter: "none" }}
                   onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.nextElementSibling?.classList.remove(
+                      "hidden",
+                    );
                   }}
                 />
                 <Calculator className="h-7 w-7 text-white hidden" />
               </div>
               <div>
-                                <h1 className="text-xl font-bold text-gray-900">
+                <h1 className="text-xl font-bold text-gray-900">
                   ROY - Professional Construction Estimator
                 </h1>
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
@@ -2550,7 +2595,7 @@ export default function Index() {
                 New Project
               </Button>
 
-                            <Button
+              <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
@@ -2560,7 +2605,7 @@ export default function Index() {
                   }
                 }}
                 disabled={isSyncing}
-                className={`${isFirebaseAvailable ? 'border-green-500 text-green-700' : 'border-orange-500 text-orange-700'}`}
+                className={`${isFirebaseAvailable ? "border-green-500 text-green-700" : "border-orange-500 text-orange-700"}`}
               >
                 {isSyncing ? (
                   <>
@@ -2570,7 +2615,7 @@ export default function Index() {
                 ) : (
                   <>
                     <Save className="h-4 w-4 mr-2" />
-                    {isFirebaseAvailable ? 'Save & Sync' : 'Save Local'}
+                    {isFirebaseAvailable ? "Save & Sync" : "Save Local"}
                   </>
                 )}
               </Button>
@@ -2581,7 +2626,7 @@ export default function Index() {
                 </div>
               )}
 
-                            <DropdownMenu>
+              <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
                     <Download className="h-4 w-4 mr-2" />
@@ -2609,8 +2654,18 @@ export default function Index() {
                   <DropdownMenuItem
                     onClick={() => {
                       // Export as CSV
-                      const headers = ['Item ID', 'Type', 'Description', 'Volume (cft)', 'Cement (bags)', 'Sand (cft)', 'Stone Chips (cft)', 'Steel (kg)', 'Cost (BDT)'];
-                      const rows = currentProject.items.map(item => [
+                      const headers = [
+                        "Item ID",
+                        "Type",
+                        "Description",
+                        "Volume (cft)",
+                        "Cement (bags)",
+                        "Sand (cft)",
+                        "Stone Chips (cft)",
+                        "Steel (kg)",
+                        "Cost (BDT)",
+                      ];
+                      const rows = currentProject.items.map((item) => [
                         item.itemId,
                         itemTypeConfig[item.type].name,
                         item.description,
@@ -2619,18 +2674,20 @@ export default function Index() {
                         item.results.sand,
                         item.results.stoneChips,
                         item.results.reinforcement,
-                        item.results.totalCost
+                        item.results.totalCost,
                       ]);
 
                       const csvContent = [headers, ...rows]
-                        .map(row => row.map(cell => `"${cell}"`).join(','))
-                        .join('\n');
+                        .map((row) => row.map((cell) => `"${cell}"`).join(","))
+                        .join("\n");
 
-                      const dataBlob = new Blob([csvContent], { type: 'text/csv' });
+                      const dataBlob = new Blob([csvContent], {
+                        type: "text/csv",
+                      });
                       const url = URL.createObjectURL(dataBlob);
-                      const link = document.createElement('a');
+                      const link = document.createElement("a");
                       link.href = url;
-                      link.download = `${currentProject.name.replace(/\s+/g, '_')}_estimate.csv`;
+                      link.download = `${currentProject.name.replace(/\s+/g, "_")}_estimate.csv`;
                       link.click();
                       URL.revokeObjectURL(url);
                     }}
@@ -2642,7 +2699,8 @@ export default function Index() {
                     onClick={() => {
                       // Export summary as text
                       const totals = getTotalEstimate();
-                      const summary = `Construction Estimate Summary\n
+                      const summary =
+                        `Construction Estimate Summary\n
 ` +
                         `Project: ${currentProject.name}\n` +
                         `Description: ${currentProject.description}\n` +
@@ -2657,11 +2715,13 @@ export default function Index() {
                         `TOTAL COST: ${formatBDT(totals.totalCost)}\n\n` +
                         `Generated on: ${new Date().toLocaleDateString()}`;
 
-                      const dataBlob = new Blob([summary], { type: 'text/plain' });
+                      const dataBlob = new Blob([summary], {
+                        type: "text/plain",
+                      });
                       const url = URL.createObjectURL(dataBlob);
-                      const link = document.createElement('a');
+                      const link = document.createElement("a");
                       link.href = url;
-                      link.download = `${currentProject.name.replace(/\s+/g, '_')}_summary.txt`;
+                      link.download = `${currentProject.name.replace(/\s+/g, "_")}_summary.txt`;
                       link.click();
                       URL.revokeObjectURL(url);
                     }}
@@ -2739,7 +2799,7 @@ export default function Index() {
                             createdAt: new Date().toISOString(),
                             updatedAt: new Date().toISOString(),
                           };
-                                                    createProject(newProject);
+                          createProject(newProject);
                           setCurrentProjectId(newProject.id);
                         }
                       } catch (error) {
@@ -2756,7 +2816,7 @@ export default function Index() {
                 }}
               />
 
-                            <Button
+              <Button
                 variant="outline"
                 size="sm"
                 onClick={() => document.getElementById("file-import")?.click()}
@@ -2769,7 +2829,7 @@ export default function Index() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
                     <User className="h-4 w-4 mr-2" />
-                    {currentUser?.email?.split('@')[0] || 'User'}
+                    {currentUser?.email?.split("@")[0] || "User"}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -4110,7 +4170,7 @@ export default function Index() {
                 <Calculator className="h-5 w-5 text-white" />
               </div>
               <div>
-                                <h3 className="font-semibold text-gray-900">
+                <h3 className="font-semibold text-gray-900">
                   ROY - Professional Construction Estimator
                 </h3>
                 <p className="text-sm text-gray-600">
@@ -4226,7 +4286,7 @@ export default function Index() {
               Cancel
             </Button>
             <Button
-                            onClick={handleCreateNewProject}
+              onClick={handleCreateNewProject}
               className="bg-brand-500 hover:bg-brand-600"
               disabled={!newProjectName}
             >
@@ -4298,7 +4358,7 @@ export default function Index() {
               Cancel
             </Button>
             <Button
-                            onClick={handleCreateNewClient}
+              onClick={handleCreateNewClient}
               className="bg-brand-500 hover:bg-brand-600"
               disabled={!newClientName}
             >

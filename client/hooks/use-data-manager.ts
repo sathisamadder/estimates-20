@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { DatabaseService } from '@/lib/database';
+import { useState, useEffect, useCallback } from "react";
+import { DatabaseService } from "@/lib/database";
 
 export interface Project {
   id: string;
@@ -62,16 +62,16 @@ export function useDataManager() {
         lastSaved: new Date().toISOString(),
         lastSynced,
       };
-      localStorage.setItem('construction-estimator-data', JSON.stringify(data));
+      localStorage.setItem("construction-estimator-data", JSON.stringify(data));
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error("Error saving to localStorage:", error);
     }
   }, [projects, clients, currentProjectId, lastSynced]);
 
   // Load from local storage
   const loadFromLocalStorage = useCallback(() => {
     try {
-      const savedData = localStorage.getItem('construction-estimator-data');
+      const savedData = localStorage.getItem("construction-estimator-data");
       if (savedData) {
         const data: LocalStorageData = JSON.parse(savedData);
         setProjects(data.projects || []);
@@ -80,14 +80,14 @@ export function useDataManager() {
         setLastSynced(data.lastSynced || null);
       }
     } catch (error) {
-      console.error('Error loading from localStorage:', error);
+      console.error("Error loading from localStorage:", error);
     }
   }, []);
 
   // Sync with Firebase
   const syncWithFirebase = useCallback(async () => {
     if (!isFirebaseAvailable || isSyncing) return;
-    
+
     setIsSyncing(true);
     try {
       // Load data from Firebase
@@ -97,8 +97,8 @@ export function useDataManager() {
       ]);
 
       // Convert Firebase data to local format
-      const convertedProjects: Project[] = firebaseProjects.map(fp => ({
-        id: fp.id || '',
+      const convertedProjects: Project[] = firebaseProjects.map((fp) => ({
+        id: fp.id || "",
         name: fp.name,
         description: fp.description,
         client: fp.client,
@@ -112,8 +112,8 @@ export function useDataManager() {
         firebaseId: fp.id,
       }));
 
-      const convertedClients: ClientData[] = firebaseClients.map(fc => ({
-        id: fc.id || '',
+      const convertedClients: ClientData[] = firebaseClients.map((fc) => ({
+        id: fc.id || "",
         name: fc.name,
         email: fc.email,
         phone: fc.phone,
@@ -128,14 +128,20 @@ export function useDataManager() {
       const mergedClients = [...convertedClients];
 
       // Add local-only items that haven't been synced
-      projects.forEach(localProject => {
-        if (!localProject.firebaseId && !mergedProjects.find(p => p.id === localProject.id)) {
+      projects.forEach((localProject) => {
+        if (
+          !localProject.firebaseId &&
+          !mergedProjects.find((p) => p.id === localProject.id)
+        ) {
           mergedProjects.push(localProject);
         }
       });
 
-      clients.forEach(localClient => {
-        if (!localClient.firebaseId && !mergedClients.find(c => c.id === localClient.id)) {
+      clients.forEach((localClient) => {
+        if (
+          !localClient.firebaseId &&
+          !mergedClients.find((c) => c.id === localClient.id)
+        ) {
           mergedClients.push(localClient);
         }
       });
@@ -146,12 +152,11 @@ export function useDataManager() {
 
       // Sync local-only data to Firebase
       await DatabaseService.syncLocalToFirebase(
-        projects.filter(p => !p.firebaseId),
-        clients.filter(c => !c.firebaseId)
+        projects.filter((p) => !p.firebaseId),
+        clients.filter((c) => !c.firebaseId),
       );
-
     } catch (error) {
-      console.error('Error syncing with Firebase:', error);
+      console.error("Error syncing with Firebase:", error);
     } finally {
       setIsSyncing(false);
     }
@@ -177,152 +182,191 @@ export function useDataManager() {
   }, [isFirebaseAvailable, syncWithFirebase]);
 
   // Project operations
-  const createProject = useCallback(async (projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'firebaseId'>) => {
-    const newProject: Project = {
-      ...projectData,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+  const createProject = useCallback(
+    async (
+      projectData: Omit<
+        Project,
+        "id" | "createdAt" | "updatedAt" | "firebaseId"
+      >,
+    ) => {
+      const newProject: Project = {
+        ...projectData,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-    setProjects(prev => [...prev, newProject]);
+      setProjects((prev) => [...prev, newProject]);
 
-    // Save to Firebase if available
-    if (isFirebaseAvailable) {
-      try {
-        const firebaseId = await DatabaseService.createProject({
-          name: newProject.name,
-          description: newProject.description,
-          client: newProject.client,
-          clientId: newProject.clientId,
-          location: newProject.location,
-          items: newProject.items,
-          totalBudget: newProject.totalBudget,
-          customRates: newProject.customRates,
-        });
-        
-        // Update local project with Firebase ID
-        setProjects(prev => prev.map(p => 
-          p.id === newProject.id ? { ...p, firebaseId } : p
-        ));
-      } catch (error) {
-        console.error('Error creating project in Firebase:', error);
+      // Save to Firebase if available
+      if (isFirebaseAvailable) {
+        try {
+          const firebaseId = await DatabaseService.createProject({
+            name: newProject.name,
+            description: newProject.description,
+            client: newProject.client,
+            clientId: newProject.clientId,
+            location: newProject.location,
+            items: newProject.items,
+            totalBudget: newProject.totalBudget,
+            customRates: newProject.customRates,
+          });
+
+          // Update local project with Firebase ID
+          setProjects((prev) =>
+            prev.map((p) =>
+              p.id === newProject.id ? { ...p, firebaseId } : p,
+            ),
+          );
+        } catch (error) {
+          console.error("Error creating project in Firebase:", error);
+        }
       }
-    }
 
-    return newProject;
-  }, [isFirebaseAvailable]);
+      return newProject;
+    },
+    [isFirebaseAvailable],
+  );
 
-    const updateProject = useCallback(async (id: string, updates: Partial<Project>) => {
-    const updatedProject = { ...updates, updatedAt: new Date().toISOString() } as Partial<Project>;
-    
-    setProjects(prev => prev.map(p => 
-      p.id === id ? { ...p, ...updatedProject } : p
-    ));
+  const updateProject = useCallback(
+    async (id: string, updates: Partial<Project>) => {
+      const updatedProject = {
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      } as Partial<Project>;
 
-    // Update in Firebase if available
-    const project = projects.find(p => p.id === id);
-    if (isFirebaseAvailable && project?.firebaseId) {
-      try {
-        await DatabaseService.updateProject(project.firebaseId, updatedProject);
-      } catch (error) {
-        console.error('Error updating project in Firebase:', error);
+      setProjects((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, ...updatedProject } : p)),
+      );
+
+      // Update in Firebase if available
+      const project = projects.find((p) => p.id === id);
+      if (isFirebaseAvailable && project?.firebaseId) {
+        try {
+          await DatabaseService.updateProject(
+            project.firebaseId,
+            updatedProject,
+          );
+        } catch (error) {
+          console.error("Error updating project in Firebase:", error);
+        }
       }
-    }
-  }, [isFirebaseAvailable, projects]);
+    },
+    [isFirebaseAvailable, projects],
+  );
 
-  const deleteProject = useCallback(async (id: string) => {
-    const project = projects.find(p => p.id === id);
-    
-    setProjects(prev => prev.filter(p => p.id !== id));
+  const deleteProject = useCallback(
+    async (id: string) => {
+      const project = projects.find((p) => p.id === id);
 
-    // Delete from Firebase if available
-    if (isFirebaseAvailable && project?.firebaseId) {
-      try {
-        await DatabaseService.deleteProject(project.firebaseId);
-      } catch (error) {
-        console.error('Error deleting project from Firebase:', error);
+      setProjects((prev) => prev.filter((p) => p.id !== id));
+
+      // Delete from Firebase if available
+      if (isFirebaseAvailable && project?.firebaseId) {
+        try {
+          await DatabaseService.deleteProject(project.firebaseId);
+        } catch (error) {
+          console.error("Error deleting project from Firebase:", error);
+        }
       }
-    }
-  }, [isFirebaseAvailable, projects]);
+    },
+    [isFirebaseAvailable, projects],
+  );
 
   // Client operations
-  const createClient = useCallback(async (clientData: Omit<ClientData, 'id' | 'createdAt' | 'updatedAt' | 'firebaseId'>) => {
-    const newClient: ClientData = {
-      ...clientData,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+  const createClient = useCallback(
+    async (
+      clientData: Omit<
+        ClientData,
+        "id" | "createdAt" | "updatedAt" | "firebaseId"
+      >,
+    ) => {
+      const newClient: ClientData = {
+        ...clientData,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-    setClients(prev => [...prev, newClient]);
+      setClients((prev) => [...prev, newClient]);
 
-    // Save to Firebase if available
-    if (isFirebaseAvailable) {
-      try {
-        const firebaseId = await DatabaseService.createClient({
-          name: newClient.name,
-          email: newClient.email,
-          phone: newClient.phone,
-          address: newClient.address,
-        });
-        
-        // Update local client with Firebase ID
-        setClients(prev => prev.map(c => 
-          c.id === newClient.id ? { ...c, firebaseId } : c
-        ));
-      } catch (error) {
-        console.error('Error creating client in Firebase:', error);
+      // Save to Firebase if available
+      if (isFirebaseAvailable) {
+        try {
+          const firebaseId = await DatabaseService.createClient({
+            name: newClient.name,
+            email: newClient.email,
+            phone: newClient.phone,
+            address: newClient.address,
+          });
+
+          // Update local client with Firebase ID
+          setClients((prev) =>
+            prev.map((c) => (c.id === newClient.id ? { ...c, firebaseId } : c)),
+          );
+        } catch (error) {
+          console.error("Error creating client in Firebase:", error);
+        }
       }
-    }
 
-    return newClient;
-  }, [isFirebaseAvailable]);
+      return newClient;
+    },
+    [isFirebaseAvailable],
+  );
 
-    const updateClient = useCallback(async (id: string, updates: Partial<ClientData>) => {
-    const updatedClient = { ...updates, updatedAt: new Date().toISOString() } as Partial<ClientData>;
-    
-    setClients(prev => prev.map(c => 
-      c.id === id ? { ...c, ...updatedClient } : c
-    ));
+  const updateClient = useCallback(
+    async (id: string, updates: Partial<ClientData>) => {
+      const updatedClient = {
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      } as Partial<ClientData>;
 
-    // Update in Firebase if available
-    const client = clients.find(c => c.id === id);
-    if (isFirebaseAvailable && client?.firebaseId) {
-      try {
-        await DatabaseService.updateClient(client.firebaseId, updatedClient);
-      } catch (error) {
-        console.error('Error updating client in Firebase:', error);
+      setClients((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, ...updatedClient } : c)),
+      );
+
+      // Update in Firebase if available
+      const client = clients.find((c) => c.id === id);
+      if (isFirebaseAvailable && client?.firebaseId) {
+        try {
+          await DatabaseService.updateClient(client.firebaseId, updatedClient);
+        } catch (error) {
+          console.error("Error updating client in Firebase:", error);
+        }
       }
-    }
-  }, [isFirebaseAvailable, clients]);
+    },
+    [isFirebaseAvailable, clients],
+  );
 
-  const deleteClient = useCallback(async (id: string) => {
-    const client = clients.find(c => c.id === id);
-    
-    setClients(prev => prev.filter(c => c.id !== id));
+  const deleteClient = useCallback(
+    async (id: string) => {
+      const client = clients.find((c) => c.id === id);
 
-    // Delete from Firebase if available
-    if (isFirebaseAvailable && client?.firebaseId) {
-      try {
-        await DatabaseService.deleteClient(client.firebaseId);
-      } catch (error) {
-        console.error('Error deleting client from Firebase:', error);
+      setClients((prev) => prev.filter((c) => c.id !== id));
+
+      // Delete from Firebase if available
+      if (isFirebaseAvailable && client?.firebaseId) {
+        try {
+          await DatabaseService.deleteClient(client.firebaseId);
+        } catch (error) {
+          console.error("Error deleting client from Firebase:", error);
+        }
       }
-    }
-  }, [isFirebaseAvailable, clients]);
+    },
+    [isFirebaseAvailable, clients],
+  );
 
   return {
     // Data
     projects,
     clients,
     currentProjectId,
-    
+
     // State
     isFirebaseAvailable,
     isSyncing,
     lastSynced,
-    
+
     // Actions
     setCurrentProjectId,
     createProject,
