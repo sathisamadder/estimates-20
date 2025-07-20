@@ -2690,10 +2690,36 @@ export default function Index() {
                 New Project
               </Button>
 
-              <Button variant="outline" size="sm" onClick={saveToLocalStorage}>
-                <Save className="h-4 w-4 mr-2" />
-                Save
+                            <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  saveToLocalStorage();
+                  if (isFirebaseAvailable) {
+                    syncWithFirebase();
+                  }
+                }}
+                disabled={isSyncing}
+                className={`${isFirebaseAvailable ? 'border-green-500 text-green-700' : 'border-orange-500 text-orange-700'}`}
+              >
+                {isSyncing ? (
+                  <>
+                    <div className="animate-spin h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full" />
+                    Syncing...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    {isFirebaseAvailable ? 'Save & Sync' : 'Save Local'}
+                  </>
+                )}
               </Button>
+
+              {lastSynced && (
+                <div className="text-xs text-gray-500">
+                  Last synced: {new Date(lastSynced).toLocaleTimeString()}
+                </div>
+              )}
 
               <Button
                 variant="outline"
