@@ -231,7 +231,7 @@ export default function Index() {
   const [isClientDialogOpen, setIsClientDialogOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectDescription, setNewProjectDescription] = useState("");
-  const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [selectedClientId, setSelectedClientId] = useState<string>("no-client");
   const [newClientName, setNewClientName] = useState("");
   const [newClientEmail, setNewClientEmail] = useState("");
   const [newClientPhone, setNewClientPhone] = useState("");
@@ -452,9 +452,13 @@ export default function Index() {
     }
   }, [projects, clients, currentProjectId, saveToLocalStorage]);
 
-  // Update project when current project changes
+  // Update project when current project changes (only if it's a real project, not a fallback)
   useEffect(() => {
-    if (currentProjectId && currentProject.id === currentProjectId) {
+    if (
+      currentProjectId &&
+      currentProject.id === currentProjectId &&
+      projects.find((p) => p.id === currentProjectId)
+    ) {
       updateProject(currentProjectId, {
         items: currentProject.items,
         customRates: currentProject.customRates,
@@ -465,6 +469,7 @@ export default function Index() {
     currentProject.customRates,
     currentProjectId,
     updateProject,
+    projects,
   ]);
 
   // Load custom rates if available
@@ -474,6 +479,28 @@ export default function Index() {
       setTempRates(currentProject.customRates);
     }
   }, [currentProject.customRates]);
+
+  // Ensure we have a valid project to work with
+  const ensureValidProject = async (): Promise<string> => {
+    let projectId = currentProjectId;
+
+    // If no current project exists, create a default one
+    if (!projectId || !projects.find((p) => p.id === projectId)) {
+      const defaultProject = await createProject({
+        name: "Construction Project",
+        description: "Professional estimation project",
+        client: "",
+        location: "",
+        items: [],
+        totalBudget: 0,
+        customRates: materialRates,
+      });
+      projectId = defaultProject.id;
+      setCurrentProjectId(projectId);
+    }
+
+    return projectId;
+  };
 
   // Generate next item ID based on type
   const generateItemId = (type: ItemType): string => {
@@ -1106,7 +1133,7 @@ export default function Index() {
     };
   };
 
-  const handleAddItem = () => {
+  const handleAddItem = async () => {
     const results = calculateEstimate(selectedType, {
       ...formData,
       isMultipleUnits: formData.isMultipleUnits.toString(),
@@ -1138,22 +1165,29 @@ export default function Index() {
       updatedAt: new Date().toISOString(),
     };
 
+    // Ensure we have a valid project to work with
+    const projectId = await ensureValidProject();
+
     if (editingItem) {
       const updatedItems = currentProject.items.map((item) =>
         item.id === editingItem.id ? newItem : item,
       );
-      updateProject(currentProjectId!, { items: updatedItems });
+      updateProject(projectId, { items: updatedItems });
     } else {
       const updatedItems = [...currentProject.items, newItem];
-      updateProject(currentProjectId!, { items: updatedItems });
+      updateProject(projectId, { items: updatedItems });
     }
 
     resetForm();
   };
 
-  const handleSavePricingSettings = () => {
+  const handleSavePricingSettings = async () => {
     setMaterialRates(tempRates);
-    updateProject(currentProjectId!, { customRates: tempRates });
+
+    // Ensure we have a valid project to work with
+    const projectId = await ensureValidProject();
+
+    updateProject(projectId, { customRates: tempRates });
     setIsPricingDialogOpen(false);
   };
 
@@ -1220,14 +1254,21 @@ export default function Index() {
     setIsDialogOpen(true);
   };
 
-  const handleDeleteItem = (itemId: string) => {
+  const handleDeleteItem = async (itemId: string) => {
+    // Ensure we have a valid project to work with
+    let projectId = currentProjectId;
+    if (!projectId || !projects.find((p) => p.id === projectId)) {
+      // If no project exists, there's nothing to delete from
+      return;
+    }
+
     const updatedItems = currentProject.items.filter(
       (item) => item.id !== itemId,
     );
-    updateProject(currentProjectId!, { items: updatedItems });
+    updateProject(projectId, { items: updatedItems });
   };
 
-  const handleDuplicateItem = (item: EstimateItem) => {
+  const handleDuplicateItem = async (item: EstimateItem) => {
     const newItemId = generateItemId(item.type);
     const duplicatedItem: EstimateItem = {
       ...item,
@@ -1238,8 +1279,11 @@ export default function Index() {
       updatedAt: new Date().toISOString(),
     };
 
+    // Ensure we have a valid project to work with
+    const projectId = await ensureValidProject();
+
     const updatedItems = [...currentProject.items, duplicatedItem];
-    updateProject(currentProjectId!, { items: updatedItems });
+    updateProject(projectId, { items: updatedItems });
   };
 
   // Project Management Functions using data manager
@@ -1247,9 +1291,10 @@ export default function Index() {
     const newProject = await createProject({
       name: newProjectName || "New Project",
       description: newProjectDescription || "",
-      client: selectedClientId
-        ? clients.find((c) => c.id === selectedClientId)?.name || ""
-        : "",
+      client:
+        selectedClientId && selectedClientId !== "no-client"
+          ? clients.find((c) => c.id === selectedClientId)?.name || ""
+          : "",
       clientId: selectedClientId,
       location: "",
       items: [],
@@ -1260,7 +1305,7 @@ export default function Index() {
     setCurrentProjectId(newProject.id);
     setNewProjectName("");
     setNewProjectDescription("");
-    setSelectedClientId("");
+    setSelectedClientId("no-client");
     setIsProjectDialogOpen(false);
   };
 
@@ -4425,7 +4470,7 @@ export default function Index() {
                   <SelectValue placeholder="Select a client" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">
+                  <SelectItem value="no-client">
                     <div className="flex items-center space-x-2">
                       <User className="h-4 w-4" />
                       <span>No Client</span>
@@ -4461,7 +4506,7 @@ export default function Index() {
                 setIsProjectDialogOpen(false);
                 setNewProjectName("");
                 setNewProjectDescription("");
-                setSelectedClientId("");
+                setSelectedClientId("no-client");
               }}
             >
               Cancel
