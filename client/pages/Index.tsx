@@ -2770,7 +2770,7 @@ export default function Index() {
                 }}
               />
 
-              <Button
+                            <Button
                 variant="outline"
                 size="sm"
                 onClick={() => document.getElementById("file-import")?.click()}
@@ -2778,6 +2778,26 @@ export default function Index() {
                 <Upload className="h-4 w-4 mr-2" />
                 Import
               </Button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <User className="h-4 w-4 mr-2" />
+                    {currentUser?.email?.split('@')[0] || 'User'}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => {
+                      logout().catch(console.error);
+                    }}
+                    className="text-red-600"
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Dialog
                 open={isPricingDialogOpen}
                 onOpenChange={setIsPricingDialogOpen}
