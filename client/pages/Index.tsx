@@ -4425,7 +4425,7 @@ export default function Index() {
                   <SelectValue placeholder="Select a client" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">
+                                    <SelectItem value="no-client">
                     <div className="flex items-center space-x-2">
                       <User className="h-4 w-4" />
                       <span>No Client</span>
