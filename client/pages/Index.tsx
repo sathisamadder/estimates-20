@@ -475,6 +475,28 @@ export default function Index() {
     }
   }, [currentProject.customRates]);
 
+    // Ensure we have a valid project to work with
+  const ensureValidProject = async (): Promise<string> => {
+    let projectId = currentProjectId;
+
+    // If no current project exists, create a default one
+    if (!projectId || !projects.find(p => p.id === projectId)) {
+      const defaultProject = await createProject({
+        name: "Construction Project",
+        description: "Professional estimation project",
+        client: "",
+        location: "",
+        items: [],
+        totalBudget: 0,
+        customRates: materialRates,
+      });
+      projectId = defaultProject.id;
+      setCurrentProjectId(projectId);
+    }
+
+    return projectId;
+  };
+
   // Generate next item ID based on type
   const generateItemId = (type: ItemType): string => {
     const config = itemTypeConfig[type];
