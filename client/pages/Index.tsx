@@ -1920,10 +1920,23 @@ export default function Index() {
     // Mobile layout wrapper
   if (isMobile) {
     return (
-      <MobileLayout
+            <MobileLayout
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onAddItem={() => setIsDialogOpen(true)}
+        onOpenPricing={() => setIsPricingDialogOpen(true)}
+        onSave={saveToLocalStorage}
+        onExport={() => {
+          const dataStr = JSON.stringify(currentProject, null, 2);
+          const dataBlob = new Blob([dataStr], {type: 'application/json'});
+          const url = URL.createObjectURL(dataBlob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${currentProject.name.replace(/\s+/g, '_')}_estimate.json`;
+          link.click();
+          URL.revokeObjectURL(url);
+        }}
+        onPrint={() => window.print()}
         projectName={currentProject.name}
         totalCost={formatBDT(totals.totalCost)}
         itemCount={currentProject.items.length}
