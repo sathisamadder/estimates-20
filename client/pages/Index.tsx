@@ -159,6 +159,7 @@ interface MaterialRates {
 
 export default function Index() {
   const isMobile = useIsMobile();
+  const { currentUser, logout } = useAuth();
   const {
     projects,
     clients,
