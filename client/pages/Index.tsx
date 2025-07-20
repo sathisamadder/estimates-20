@@ -1255,11 +1255,18 @@ export default function Index() {
     setIsDialogOpen(true);
   };
 
-  const handleDeleteItem = (itemId: string) => {
+    const handleDeleteItem = async (itemId: string) => {
+    // Ensure we have a valid project to work with
+    let projectId = currentProjectId;
+    if (!projectId || !projects.find(p => p.id === projectId)) {
+      // If no project exists, there's nothing to delete from
+      return;
+    }
+
     const updatedItems = currentProject.items.filter(
       (item) => item.id !== itemId,
     );
-    updateProject(currentProjectId!, { items: updatedItems });
+    updateProject(projectId, { items: updatedItems });
   };
 
   const handleDuplicateItem = (item: EstimateItem) => {
