@@ -200,18 +200,32 @@ export default function Index() {
     saveToLocalStorage,
   } = useDataManager();
 
-  const [activeTab, setActiveTab] = useState("items");
-  const [currentProject, setCurrentProject] = useState<Project>({
-    id: "1",
-    name: "Construction Project",
-    description: "Professional estimation project",
-    client: "",
-    location: "",
-    items: [],
-    totalBudget: 0,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  });
+    const [activeTab, setActiveTab] = useState("items");
+
+  // Get current project from data manager
+  const currentProject = currentProjectId
+    ? projects.find(p => p.id === currentProjectId) || {
+        id: "1",
+        name: "Construction Project",
+        description: "Professional estimation project",
+        client: "",
+        location: "",
+        items: [],
+        totalBudget: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+    : {
+        id: "1",
+        name: "Construction Project",
+        description: "Professional estimation project",
+        client: "",
+        location: "",
+        items: [],
+        totalBudget: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
   const [materialRates, setMaterialRates] = useState<MaterialRates>({
     cement: 450,
