@@ -3094,8 +3094,9 @@ export default function Index() {
                         </TableCell>
                       </TableRow>
                     )}
-                  </TableBody>
+                                    </TableBody>
                 </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
