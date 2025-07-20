@@ -1263,7 +1263,7 @@ export default function Index() {
     updateProject(projectId, { items: updatedItems });
   };
 
-    const handleDuplicateItem = async (item: EstimateItem) => {
+      const handleDuplicateItem = async (item: EstimateItem) => {
     const newItemId = generateItemId(item.type);
     const duplicatedItem: EstimateItem = {
       ...item,
@@ -1275,20 +1275,7 @@ export default function Index() {
     };
 
     // Ensure we have a valid project to work with
-    let projectId = currentProjectId;
-    if (!projectId || !projects.find(p => p.id === projectId)) {
-      const defaultProject = await createProject({
-        name: "Construction Project",
-        description: "Professional estimation project",
-        client: "",
-        location: "",
-        items: [],
-        totalBudget: 0,
-        customRates: materialRates,
-      });
-      projectId = defaultProject.id;
-      setCurrentProjectId(projectId);
-    }
+    const projectId = await ensureValidProject();
 
     const updatedItems = [...currentProject.items, duplicatedItem];
     updateProject(projectId, { items: updatedItems });
