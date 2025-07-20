@@ -15,6 +15,9 @@ import {
   Home,
   Plus,
   Search,
+  Save,
+  Download,
+  Printer,
 } from "lucide-react";
 
 interface MobileLayoutProps {
