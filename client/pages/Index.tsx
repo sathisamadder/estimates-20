@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { useDataManager, type Project, type ClientData } from "@/hooks/use-data-manager";
-import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -159,7 +158,6 @@ interface MaterialRates {
 
 export default function Index() {
   const isMobile = useIsMobile();
-  const { currentUser, logout } = useAuth();
   const {
     projects,
     clients,
@@ -2508,17 +2506,8 @@ export default function Index() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-                            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl shadow-lg">
-                <img
-                  src="https://cdn.builder.io/api/v1/image/assets%2F60f84872b4b14093aa9e83d9ad74d969%2F46361fbad51e408b89450daa00371588"
-                  alt="Construction Estimator Logo"
-                  className="w-8 h-8 object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                  }}
-                />
-                <Calculator className="h-7 w-7 text-white hidden" />
+              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl shadow-lg">
+                <Calculator className="h-7 w-7 text-white" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">
@@ -2770,7 +2759,7 @@ export default function Index() {
                 }}
               />
 
-                            <Button
+              <Button
                 variant="outline"
                 size="sm"
                 onClick={() => document.getElementById("file-import")?.click()}
@@ -2778,26 +2767,6 @@ export default function Index() {
                 <Upload className="h-4 w-4 mr-2" />
                 Import
               </Button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <User className="h-4 w-4 mr-2" />
-                    {currentUser?.email?.split('@')[0] || 'User'}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={() => {
-                      logout().catch(console.error);
-                    }}
-                    className="text-red-600"
-                  >
-                    <User className="mr-2 h-4 w-4" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
               <Dialog
                 open={isPricingDialogOpen}
                 onOpenChange={setIsPricingDialogOpen}

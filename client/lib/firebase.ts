@@ -1,17 +1,15 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
-import { getAnalytics } from 'firebase/analytics';
 
-// Firebase configuration using environment variables with fallback to actual config
+// Firebase configuration using environment variables
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyBYUY2Z2ZQrL0aFkFMmO3vxKHKjwmpt3Go",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "tanemr-490d2.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "tanemr-490d2",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "tanemr-490d2.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "610909783295",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:610909783295:web:536b9161cf9d0838acb8ca",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-5KH3F9FEV2"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "demo-api-key",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "demo-project.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "demo-project.appspot.com",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef123456"
 };
 
 // Initialize Firebase
@@ -22,9 +20,6 @@ export const db = getFirestore(app);
 
 // Initialize Auth
 export const auth = getAuth(app);
-
-// Initialize Analytics
-export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 
 // Connect to emulators in development
 if (import.meta.env.DEV && !import.meta.env.VITE_USE_FIREBASE_PROD) {
