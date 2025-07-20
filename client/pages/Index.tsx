@@ -452,9 +452,13 @@ export default function Index() {
     }
   }, [projects, clients, currentProjectId, saveToLocalStorage]);
 
-  // Update project when current project changes
+    // Update project when current project changes (only if it's a real project, not a fallback)
   useEffect(() => {
-    if (currentProjectId && currentProject.id === currentProjectId) {
+    if (
+      currentProjectId &&
+      currentProject.id === currentProjectId &&
+      projects.find(p => p.id === currentProjectId)
+    ) {
       updateProject(currentProjectId, {
         items: currentProject.items,
         customRates: currentProject.customRates,
@@ -465,6 +469,7 @@ export default function Index() {
     currentProject.customRates,
     currentProjectId,
     updateProject,
+    projects,
   ]);
 
   // Load custom rates if available
