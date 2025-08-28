@@ -64,21 +64,29 @@ export function MobileLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-amber-50">
+    <div className="min-h-screen relative gpt-background">
+      <div className="liquid-layer">
+        <div className="liquid-blob blob1"></div>
+        <div className="liquid-blob blob2"></div>
+        <div className="liquid-blob blob3"></div>
+      </div>
       {/* Mobile Header */}
-      <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-sm shadow-sm">
+      <header className="sticky top-0 z-50 border-b glass-light shadow-sm">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center space-x-3">
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-2">
+                <Button variant="ghost" size="sm" className="p-2 text-gray-900">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-80 p-0">
+              <SheetContent
+                side="left"
+                className="w-80 p-0 glass-light text-gray-900"
+              >
                 <div className="flex flex-col h-full">
                   {/* Menu Header */}
-                  <div className="p-6 border-b bg-gradient-to-r from-brand-500 to-brand-600">
+                  <div className="p-6 border-b border-white/20">
                     <div className="flex items-center space-x-3">
                       <div className="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg">
                         <img
@@ -108,14 +116,14 @@ export function MobileLayout({
                   </div>
 
                   {/* Project Info */}
-                  <div className="p-4 border-b bg-gray-50">
+                  <div className="p-4 border-b bg-white/60">
                     <div className="space-y-1">
                       <h3 className="font-medium text-gray-900 truncate">
                         {projectName}
                       </h3>
-                      <div className="flex items-center justify-between text-sm text-gray-600">
+                      <div className="flex items-center justify-between text-sm text-gray-700">
                         <span>{itemCount} items</span>
-                        <span className="font-medium text-brand-600">
+                        <span className="font-medium text-brand-200">
                           {totalCost}
                         </span>
                       </div>
@@ -135,8 +143,8 @@ export function MobileLayout({
                             }
                             className={`w-full justify-start h-12 ${
                               activeTab === item.id
-                                ? "bg-brand-50 text-brand-700 border-r-2 border-brand-500"
-                                : "text-gray-700 hover:bg-gray-100"
+                                ? "bg-white/70 text-gray-900 border-r-2 border-brand-300"
+                                : "text-gray-800 hover:bg-white/60"
                             }`}
                             onClick={() => {
                               onTabChange(item.id);
@@ -150,11 +158,11 @@ export function MobileLayout({
                       })}
                     </div>
 
-                    <div className="mt-6 pt-4 border-t">
+                    <div className="mt-6 pt-4 border-t border-white/20">
                       <div className="space-y-1">
                         <Button
                           variant="ghost"
-                          className="w-full justify-start h-12 text-gray-700"
+                          className="w-full justify-start h-12 text-gray-800 hover:bg-white/60"
                           onClick={onOpenPricing}
                         >
                           <Settings className="h-5 w-5 mr-3" />
@@ -162,7 +170,7 @@ export function MobileLayout({
                         </Button>
                         <Button
                           variant="ghost"
-                          className="w-full justify-start h-12 text-gray-700"
+                          className="w-full justify-start h-12 text-gray-800 hover:bg-white/60"
                           onClick={onSave}
                         >
                           <Save className="h-5 w-5 mr-3" />
@@ -170,7 +178,7 @@ export function MobileLayout({
                         </Button>
                         <Button
                           variant="ghost"
-                          className="w-full justify-start h-12 text-gray-700"
+                          className="w-full justify-start h-12 text-gray-800 hover:bg-white/60"
                           onClick={onExport}
                         >
                           <Download className="h-5 w-5 mr-3" />
@@ -178,20 +186,20 @@ export function MobileLayout({
                         </Button>
                         <Button
                           variant="ghost"
-                          className="w-full justify-start h-12 text-gray-700"
+                          className="w-full justify-start h-12 text-gray-800 hover:bg-white/60"
                           onClick={onPrint}
                         >
                           <Printer className="h-5 w-5 mr-3" />
                           Print Report
                         </Button>
 
-                        <div className="border-t pt-2 mt-2">
-                          <div className="p-2 text-xs text-gray-600 mb-2">
+                        <div className="border-t border-white/20 pt-2 mt-2">
+                          <div className="p-2 text-xs text-white/70 mb-2">
                             {currentUser?.email}
                           </div>
                           <Button
                             variant="ghost"
-                            className="w-full justify-start h-10 text-red-600 hover:bg-red-50"
+                            className="w-full justify-start h-10 text-red-300 hover:bg-red-500/10"
                             onClick={() => {
                               logout().catch(console.error);
                             }}
@@ -205,12 +213,12 @@ export function MobileLayout({
                   </ScrollArea>
 
                   {/* Footer */}
-                  <div className="p-4 border-t bg-gray-50">
+                  <div className="p-4 border-t bg-white/60">
                     <div className="text-center">
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-white/70">
                         Developed by ROY SHAON
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-white/60">
                         Professional Engineering
                       </p>
                     </div>
@@ -239,28 +247,29 @@ export function MobileLayout({
                 <h1 className="text-sm font-bold text-gray-900 truncate max-w-32">
                   {projectName}
                 </h1>
-                <p className="text-xs text-gray-600">{itemCount} items</p>
+                <p className="text-xs text-gray-700">{itemCount} items</p>
               </div>
             </div>
           </div>
 
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="sm" className="p-2">
+            <Button variant="ghost" size="sm" className="p-2 text-gray-900">
               <Search className="h-5 w-5" />
             </Button>
             <Button
               size="sm"
-              className="bg-brand-500 hover:bg-brand-600 px-3"
+              variant="ghost"
+              className="p-2 text-white"
               onClick={onAddItem}
+              aria-label="Add item"
             >
-              <Plus className="h-4 w-4 mr-1" />
-              Add
+              <Plus className="h-5 w-5" />
             </Button>
           </div>
         </div>
 
         {/* Mobile Tab Navigation */}
-        <div className="border-t bg-white">
+        <div className="border-t border-white/20 bg-white/10">
           <div className="overflow-x-auto">
             <div className="flex space-x-1 p-2 min-w-max">
               {navigationItems.map((item) => {
@@ -272,8 +281,8 @@ export function MobileLayout({
                     size="sm"
                     className={`flex-shrink-0 ${
                       activeTab === item.id
-                        ? "bg-brand-100 text-brand-700"
-                        : "text-gray-600"
+                        ? "bg-white/15 text-white"
+                        : "text-white/90 hover:bg-white/10"
                     }`}
                     onClick={() => onTabChange(item.id)}
                   >
@@ -288,11 +297,11 @@ export function MobileLayout({
       </header>
 
       {/* Content */}
-      <main className="pb-20">{children}</main>
+      <main className="pb-20 relative z-10">{children}</main>
 
-      {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-sm">
-        <div className="grid grid-cols-4 gap-1 p-2">
+      {/* Mobile Bottom Navigation - iOS dock */}
+      <div className="ios-dock">
+        <div className="ios-dock-inner">
           {navigationItems.map((item) => {
             const IconComponent = item.icon;
             return (
@@ -300,10 +309,10 @@ export function MobileLayout({
                 key={item.id}
                 variant="ghost"
                 size="sm"
-                className={`flex flex-col h-14 space-y-1 ${
+                className={`flex flex-col h-14 space-y-1 rounded-xl ${
                   activeTab === item.id
-                    ? "text-brand-600 bg-brand-50"
-                    : "text-gray-600"
+                    ? "bg-white/90 text-gray-900"
+                    : "text-gray-700 hover:bg-white/70"
                 }`}
                 onClick={() => onTabChange(item.id)}
               >
@@ -316,15 +325,6 @@ export function MobileLayout({
           })}
         </div>
       </div>
-
-      {/* Floating Action Button */}
-      <Button
-        size="lg"
-        className="fixed bottom-20 right-4 z-30 w-14 h-14 rounded-full bg-brand-500 hover:bg-brand-600 shadow-lg"
-        onClick={onAddItem}
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
     </div>
   );
 }

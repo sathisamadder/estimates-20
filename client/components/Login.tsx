@@ -47,8 +47,13 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-amber-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl">
+    <div className="min-h-screen gpt-background relative flex items-center justify-center p-4">
+      <div className="liquid-layer">
+        <div className="liquid-blob blob1"></div>
+        <div className="liquid-blob blob2"></div>
+        <div className="liquid-blob blob3"></div>
+      </div>
+      <Card className="w-full max-w-md shadow-xl glass-light bg-white/70 text-gray-900">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
             <div className="flex items-center justify-center w-16 h-16">
@@ -58,20 +63,19 @@ export function Login() {
                 className="w-10 h-10 object-contain bg-transparent"
                 style={{ background: "transparent", backdropFilter: "none" }}
                 onError={(e) => {
-                  // Fallback to calculator icon if image fails to load
                   e.currentTarget.style.display = "none";
                   e.currentTarget.nextElementSibling?.classList.remove(
                     "hidden",
                   );
                 }}
               />
-              <Calculator className="h-8 w-8 text-brand-500 hidden" />
+              <Calculator className="h-8 w-8 text-brand-200 hidden" />
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">
             ROY
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-gray-700">
             {isRegistering ? "Create your account" : "Sign in to your account"}
           </CardDescription>
         </CardHeader>
@@ -79,13 +83,15 @@ export function Login() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+              <div className="p-3 text-sm text-red-200 bg-red-500/10 border border-red-500/30 rounded-md">
                 {error}
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-gray-800">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -93,11 +99,14 @@ export function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="bg-white/80"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-gray-800">
+                Password
+              </Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -106,7 +115,7 @@ export function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="pr-10"
+                  className="pr-10 bg-white/80"
                 />
                 <button
                   type="button"
@@ -114,9 +123,9 @@ export function Login() {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-400" />
+                    <EyeOff className="h-4 w-4 text-gray-600" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-400" />
+                    <Eye className="h-4 w-4 text-gray-600" />
                   )}
                 </button>
               </div>
@@ -136,7 +145,7 @@ export function Login() {
             <div className="text-center">
               <button
                 type="button"
-                className="text-sm text-brand-600 hover:text-brand-700"
+                className="text-sm text-gray-800 hover:text-gray-900"
                 onClick={() => {
                   setIsRegistering(!isRegistering);
                   setError("");

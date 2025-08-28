@@ -231,6 +231,8 @@ export default function Index() {
   const [isClientDialogOpen, setIsClientDialogOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectDescription, setNewProjectDescription] = useState("");
+  const [newProjectLocation, setNewProjectLocation] = useState("");
+  const [newProjectFloors, setNewProjectFloors] = useState("1");
   const [selectedClientId, setSelectedClientId] = useState<string>("no-client");
   const [newClientName, setNewClientName] = useState("");
   const [newClientEmail, setNewClientEmail] = useState("");
@@ -444,6 +446,22 @@ export default function Index() {
   useEffect(() => {
     loadFromLocalStorage();
   }, [loadFromLocalStorage]);
+
+  // Prompt for basic project info first
+  useEffect(() => {
+    if (!isProjectDialogOpen) {
+      const needsBasics =
+        !currentProjectId ||
+        !currentProject.location ||
+        !currentProject.numberOfFloors;
+      if (needsBasics) setIsProjectDialogOpen(true);
+    }
+  }, [
+    currentProjectId,
+    currentProject.location,
+    currentProject.numberOfFloors,
+    isProjectDialogOpen,
+  ]);
 
   // Save data when it changes
   useEffect(() => {
@@ -1296,7 +1314,8 @@ export default function Index() {
           ? clients.find((c) => c.id === selectedClientId)?.name || ""
           : "",
       clientId: selectedClientId,
-      location: "",
+      location: newProjectLocation,
+      numberOfFloors: parseInt(newProjectFloors || "1", 10) || 1,
       items: [],
       totalBudget: 0,
       customRates: materialRates,
@@ -1971,6 +1990,17 @@ export default function Index() {
   });
 
   const totals = getTotalEstimate();
+  const floors = currentProject.numberOfFloors || 1;
+  const buildingTotals = {
+    cement: totals.cement * floors,
+    sand: totals.sand * floors,
+    stoneChips: totals.stoneChips * floors,
+    reinforcement: totals.reinforcement * floors,
+    totalCost: totals.totalCost * floors,
+    volume: totals.volume * floors,
+    brickQuantity: totals.brickQuantity * floors,
+    plasterArea: totals.plasterArea * floors,
+  };
   const categoryTotals = Object.entries(
     currentProject.items.reduce(
       (acc, item) => {
@@ -2008,7 +2038,7 @@ export default function Index() {
         }}
         onPrint={() => window.print()}
         projectName={currentProject.name}
-        totalCost={formatBDT(totals.totalCost)}
+        totalCost={formatBDT(buildingTotals.totalCost)}
         itemCount={currentProject.items.length}
       >
         <div className="container mx-auto px-4 py-6">
@@ -2742,19 +2772,20 @@ export default function Index() {
                       // Export summary as text
                       const totals = getTotalEstimate();
                       const summary =
-                        `Construction Estimate Summary\n
-` +
+                        `Construction Estimate Summary\n\n` +
                         `Project: ${currentProject.name}\n` +
                         `Description: ${currentProject.description}\n` +
                         `Client: ${currentProject.client}\n` +
-                        `Location: ${currentProject.location}\n\n` +
-                        `MATERIAL SUMMARY:\n` +
-                        `Cement: ${totals.cement.toFixed(2)} bags\n` +
-                        `Sand: ${totals.sand.toFixed(2)} cft\n` +
-                        `Stone Chips: ${totals.stoneChips.toFixed(2)} cft\n` +
-                        `Steel Reinforcement: ${totals.reinforcement.toFixed(2)} kg\n` +
-                        `Bricks: ${totals.brickQuantity} nos\n\n` +
-                        `TOTAL COST: ${formatBDT(totals.totalCost)}\n\n` +
+                        `Location: ${currentProject.location}\n` +
+                        `Floors: ${floors}\n\n` +
+                        `MATERIAL SUMMARY (All Floors):\n` +
+                        `Cement: ${buildingTotals.cement.toFixed(2)} bags\n` +
+                        `Sand: ${buildingTotals.sand.toFixed(2)} cft\n` +
+                        `Stone Chips: ${buildingTotals.stoneChips.toFixed(2)} cft\n` +
+                        `Steel Reinforcement: ${buildingTotals.reinforcement.toFixed(2)} kg\n` +
+                        `Bricks: ${buildingTotals.brickQuantity.toFixed(0)} nos\n\n` +
+                        `TOTAL COST: ${formatBDT(buildingTotals.totalCost)}\n` +
+                        `Per-floor Cost: ${formatBDT(totals.totalCost)}\n\n` +
                         `Generated on: ${new Date().toLocaleDateString()}`;
 
                       const dataBlob = new Blob([summary], {
@@ -3393,6 +3424,9 @@ export default function Index() {
                   <CardDescription>
                     Comprehensive material requirements analysis
                   </CardDescription>
+                  <div className="mt-2 text-sm">
+                    <Badge variant="outline">Floors: {floors}</Badge>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -3478,10 +3512,14 @@ export default function Index() {
                     })}
                     <Separator />
                     <div className="flex justify-between items-center text-lg font-bold bg-brand-50 p-3 rounded-lg border-2 border-brand-200">
-                      <span>Total Project Cost</span>
+                      <span>Total Project Cost (All Floors)</span>
                       <span className="text-brand-600">
-                        {formatBDT(totals.totalCost)}
+                        {formatBDT(buildingTotals.totalCost)}
                       </span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm font-medium p-3">
+                      <span>Per-floor Cost</span>
+                      <span>{formatBDT(totals.totalCost)}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -3503,30 +3541,32 @@ export default function Index() {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span>
-                        Cement ({totals.cement.toFixed(1)} bags @ BDT{" "}
+                        Cement ({buildingTotals.cement.toFixed(1)} bags @ BDT{" "}
                         {materialRates.cement})
                       </span>
                       <span className="font-medium">
-                        {formatBDT(totals.cement * materialRates.cement)}
+                        {formatBDT(
+                          buildingTotals.cement * materialRates.cement,
+                        )}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span>
-                        Sand ({totals.sand.toFixed(1)} cft @ BDT{" "}
+                        Sand ({buildingTotals.sand.toFixed(1)} cft @ BDT{" "}
                         {materialRates.sand})
                       </span>
                       <span className="font-medium">
-                        {formatBDT(totals.sand * materialRates.sand)}
+                        {formatBDT(buildingTotals.sand * materialRates.sand)}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span>
-                        Stone Chips ({totals.stoneChips.toFixed(1)} cft @ BDT{" "}
-                        {materialRates.stoneChips})
+                        Stone Chips ({buildingTotals.stoneChips.toFixed(1)} cft
+                        @ BDT {materialRates.stoneChips})
                       </span>
                       <span className="font-medium">
                         {formatBDT(
-                          totals.stoneChips * materialRates.stoneChips,
+                          buildingTotals.stoneChips * materialRates.stoneChips,
                         )}
                       </span>
                     </div>
@@ -3534,31 +3574,34 @@ export default function Index() {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span>
-                        Steel ({totals.reinforcement.toFixed(1)} kg @ BDT{" "}
-                        {materialRates.reinforcement})
+                        Steel ({buildingTotals.reinforcement.toFixed(1)} kg @
+                        BDT {materialRates.reinforcement})
                       </span>
                       <span className="font-medium">
                         {formatBDT(
-                          totals.reinforcement * materialRates.reinforcement,
+                          buildingTotals.reinforcement *
+                            materialRates.reinforcement,
                         )}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span>
-                        Bricks ({totals.brickQuantity} nos @ BDT{" "}
+                        Bricks ({buildingTotals.brickQuantity} nos @ BDT{" "}
                         {materialRates.brick})
                       </span>
                       <span className="font-medium">
-                        {formatBDT(totals.brickQuantity * materialRates.brick)}
+                        {formatBDT(
+                          buildingTotals.brickQuantity * materialRates.brick,
+                        )}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span>
-                        Labor ({totals.volume.toFixed(1)} cft @ BDT{" "}
+                        Labor ({buildingTotals.volume.toFixed(1)} cft @ BDT{" "}
                         {materialRates.labor})
                       </span>
                       <span className="font-medium">
-                        {formatBDT(totals.volume * materialRates.labor)}
+                        {formatBDT(buildingTotals.volume * materialRates.labor)}
                       </span>
                     </div>
                   </div>
@@ -4442,23 +4485,45 @@ export default function Index() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="project-name">Project Name</Label>
-              <Input
-                id="project-name"
-                placeholder="e.g., Residential Building"
-                value={newProjectName}
-                onChange={(e) => setNewProjectName(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="project-description">Description</Label>
-              <Textarea
-                id="project-description"
-                placeholder="Brief project description"
-                value={newProjectDescription}
-                onChange={(e) => setNewProjectDescription(e.target.value)}
-              />
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <Label htmlFor="project-name">Project Name</Label>
+                <Input
+                  id="project-name"
+                  placeholder="e.g., Residential Building"
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="project-location">Location</Label>
+                <Input
+                  id="project-location"
+                  placeholder="e.g., Dhaka, Bangladesh"
+                  value={newProjectLocation}
+                  onChange={(e) => setNewProjectLocation(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="project-floors">Number of Floors</Label>
+                <Input
+                  id="project-floors"
+                  type="number"
+                  min={1}
+                  placeholder="e.g., 4"
+                  value={newProjectFloors}
+                  onChange={(e) => setNewProjectFloors(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="project-description">Description</Label>
+                <Textarea
+                  id="project-description"
+                  placeholder="Brief project description"
+                  value={newProjectDescription}
+                  onChange={(e) => setNewProjectDescription(e.target.value)}
+                />
+              </div>
             </div>
             <div>
               <Label htmlFor="client-select">Client (Optional)</Label>
@@ -4506,6 +4571,8 @@ export default function Index() {
                 setIsProjectDialogOpen(false);
                 setNewProjectName("");
                 setNewProjectDescription("");
+                setNewProjectLocation("");
+                setNewProjectFloors("1");
                 setSelectedClientId("no-client");
               }}
             >

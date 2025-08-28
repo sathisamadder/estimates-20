@@ -8,6 +8,7 @@ export interface Project {
   client: string;
   clientId?: string;
   location: string;
+  numberOfFloors?: number;
   items: any[];
   totalBudget: number;
   customRates?: any;

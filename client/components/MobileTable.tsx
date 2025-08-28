@@ -174,7 +174,10 @@ export function MobileTable({
         const isExpanded = expandedItems.has(item.id);
 
         return (
-          <Card key={item.id} className="shadow-sm">
+          <Card
+            key={item.id}
+            className="shadow-sm glass border-white/20 bg-white/10 text-white"
+          >
             <CardContent className="p-4">
               {/* Header Row */}
               <div className="flex items-center justify-between mb-3">
@@ -202,7 +205,7 @@ export function MobileTable({
                     variant="ghost"
                     size="sm"
                     onClick={() => toggleExpanded(item.id)}
-                    className="p-1"
+                    className="p-1 text-white"
                   >
                     {isExpanded ? (
                       <ChevronUp className="h-4 w-4" />
@@ -213,7 +216,11 @@ export function MobileTable({
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="p-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="p-1 text-white"
+                      >
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -241,15 +248,15 @@ export function MobileTable({
               {/* Summary Row */}
               <div className="grid grid-cols-3 gap-4 text-sm">
                 <div>
-                  <p className="text-gray-500 text-xs">Reinforcement</p>
+                  <p className="text-white/70 text-xs">Reinforcement</p>
                   <div className="flex items-center space-x-1">
-                    <Activity className="h-3 w-3 text-green-600" />
+                    <Activity className="h-3 w-3 text-green-300" />
                     <span className="font-medium">{item.reinforcement} kg</span>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-gray-500 text-xs">Volume/Area</p>
+                  <p className="text-white/70 text-xs">Volume/Area</p>
                   <p className="font-medium">
                     {item.brickQuantity || item.plasterArea ? (
                       <>
@@ -262,8 +269,8 @@ export function MobileTable({
                 </div>
 
                 <div className="text-right">
-                  <p className="text-gray-500 text-xs">Total Cost</p>
-                  <p className="font-bold text-brand-600">
+                  <p className="text-white/70 text-xs">Total Cost</p>
+                  <p className="font-bold text-brand-200">
                     {formatBDT(item.totalCost)}
                   </p>
                 </div>
@@ -272,19 +279,19 @@ export function MobileTable({
               {/* Expanded Details */}
               {isExpanded && (
                 <>
-                  <Separator className="my-3" />
+                  <Separator className="my-3 bg-white/20" />
                   <div className="space-y-3 text-sm">
                     <div>
-                      <h4 className="font-medium text-gray-700 mb-2">
+                      <h4 className="font-medium text-white/90 mb-2">
                         Item Details
                       </h4>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
-                          <span className="text-gray-500">Type:</span>
+                          <span className="text-white/70">Type:</span>
                           <span className="ml-2 font-medium">{item.type}</span>
                         </div>
                         <div>
-                          <span className="text-gray-500">Category:</span>
+                          <span className="text-white/70">Category:</span>
                           <span className="ml-2 font-medium">
                             {item.category}
                           </span>
@@ -293,25 +300,25 @@ export function MobileTable({
                     </div>
 
                     <div>
-                      <h4 className="font-medium text-gray-700 mb-2">
+                      <h4 className="font-medium text-white/90 mb-2">
                         Measurements
                       </h4>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
-                          <span className="text-gray-500">Volume:</span>
+                          <span className="text-white/70">Volume:</span>
                           <span className="ml-2 font-medium">
                             {item.volume} cft
                           </span>
                         </div>
                         <div>
-                          <span className="text-gray-500">Steel:</span>
+                          <span className="text-white/70">Steel:</span>
                           <span className="ml-2 font-medium">
                             {item.reinforcement} kg
                           </span>
                         </div>
                         {item.brickQuantity && (
                           <div>
-                            <span className="text-gray-500">Bricks:</span>
+                            <span className="text-white/70">Bricks:</span>
                             <span className="ml-2 font-medium">
                               {item.brickQuantity} nos
                             </span>
@@ -319,7 +326,7 @@ export function MobileTable({
                         )}
                         {item.plasterArea && (
                           <div>
-                            <span className="text-gray-500">Area:</span>
+                            <span className="text-white/70">Area:</span>
                             <span className="ml-2 font-medium">
                               {item.plasterArea} sft
                             </span>
@@ -336,14 +343,14 @@ export function MobileTable({
       })}
 
       {items.length === 0 && (
-        <Card className="shadow-sm">
+        <Card className="shadow-sm glass border-white/20 bg-white/10 text-white">
           <CardContent className="p-8 text-center">
             <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <Activity className="h-8 w-8 text-gray-400" />
+              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4">
+                <Activity className="h-8 w-8 text-white/70" />
               </div>
-              <h3 className="font-medium text-gray-900 mb-2">No items found</h3>
-              <p className="text-sm text-gray-500 mb-4">
+              <h3 className="font-medium text-white mb-2">No items found</h3>
+              <p className="text-sm text-white/80 mb-4">
                 Start by adding construction items to your project
               </p>
               <Button size="sm" className="bg-brand-500 hover:bg-brand-600">
