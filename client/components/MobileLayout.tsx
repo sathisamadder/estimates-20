@@ -80,7 +80,10 @@ export function MobileLayout({
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-80 p-0 glass-light text-gray-900">
+              <SheetContent
+                side="left"
+                className="w-80 p-0 glass-light text-gray-900"
+              >
                 <div className="flex flex-col h-full">
                   {/* Menu Header */}
                   <div className="p-6 border-b border-white/20">
@@ -105,7 +108,9 @@ export function MobileLayout({
                       </div>
                       <div>
                         <h2 className="font-bold text-white">ROY</h2>
-                        <p className="text-sm text-white/80">Construction Pro</p>
+                        <p className="text-sm text-white/80">
+                          Construction Pro
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -113,10 +118,14 @@ export function MobileLayout({
                   {/* Project Info */}
                   <div className="p-4 border-b bg-white/60">
                     <div className="space-y-1">
-                      <h3 className="font-medium text-gray-900 truncate">{projectName}</h3>
+                      <h3 className="font-medium text-gray-900 truncate">
+                        {projectName}
+                      </h3>
                       <div className="flex items-center justify-between text-sm text-gray-700">
                         <span>{itemCount} items</span>
-                        <span className="font-medium text-brand-200">{totalCost}</span>
+                        <span className="font-medium text-brand-200">
+                          {totalCost}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -129,7 +138,9 @@ export function MobileLayout({
                         return (
                           <Button
                             key={item.id}
-                            variant={activeTab === item.id ? "secondary" : "ghost"}
+                            variant={
+                              activeTab === item.id ? "secondary" : "ghost"
+                            }
                             className={`w-full justify-start h-12 ${
                               activeTab === item.id
                                 ? "bg-white/70 text-gray-900 border-r-2 border-brand-300"
@@ -183,7 +194,9 @@ export function MobileLayout({
                         </Button>
 
                         <div className="border-t border-white/20 pt-2 mt-2">
-                          <div className="p-2 text-xs text-white/70 mb-2">{currentUser?.email}</div>
+                          <div className="p-2 text-xs text-white/70 mb-2">
+                            {currentUser?.email}
+                          </div>
                           <Button
                             variant="ghost"
                             className="w-full justify-start h-10 text-red-300 hover:bg-red-500/10"
@@ -202,8 +215,12 @@ export function MobileLayout({
                   {/* Footer */}
                   <div className="p-4 border-t bg-white/60">
                     <div className="text-center">
-                      <p className="text-xs text-white/70">Developed by ROY SHAON</p>
-                      <p className="text-xs text-white/60">Professional Engineering</p>
+                      <p className="text-xs text-white/70">
+                        Developed by ROY SHAON
+                      </p>
+                      <p className="text-xs text-white/60">
+                        Professional Engineering
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -227,7 +244,9 @@ export function MobileLayout({
                 <Calculator className="h-5 w-5 text-white hidden" />
               </div>
               <div>
-                <h1 className="text-sm font-bold text-gray-900 truncate max-w-32">{projectName}</h1>
+                <h1 className="text-sm font-bold text-gray-900 truncate max-w-32">
+                  {projectName}
+                </h1>
                 <p className="text-xs text-gray-700">{itemCount} items</p>
               </div>
             </div>
@@ -306,7 +325,6 @@ export function MobileLayout({
           })}
         </div>
       </div>
-
     </div>
   );
 }

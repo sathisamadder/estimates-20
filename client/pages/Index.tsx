@@ -450,10 +450,18 @@ export default function Index() {
   // Prompt for basic project info first
   useEffect(() => {
     if (!isProjectDialogOpen) {
-      const needsBasics = !currentProjectId || !currentProject.location || !currentProject.numberOfFloors;
+      const needsBasics =
+        !currentProjectId ||
+        !currentProject.location ||
+        !currentProject.numberOfFloors;
       if (needsBasics) setIsProjectDialogOpen(true);
     }
-  }, [currentProjectId, currentProject.location, currentProject.numberOfFloors, isProjectDialogOpen]);
+  }, [
+    currentProjectId,
+    currentProject.location,
+    currentProject.numberOfFloors,
+    isProjectDialogOpen,
+  ]);
 
   // Save data when it changes
   useEffect(() => {
@@ -3537,7 +3545,9 @@ export default function Index() {
                         {materialRates.cement})
                       </span>
                       <span className="font-medium">
-                        {formatBDT(buildingTotals.cement * materialRates.cement)}
+                        {formatBDT(
+                          buildingTotals.cement * materialRates.cement,
+                        )}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -3551,8 +3561,8 @@ export default function Index() {
                     </div>
                     <div className="flex justify-between">
                       <span>
-                        Stone Chips ({buildingTotals.stoneChips.toFixed(1)} cft @ BDT{" "}
-                        {materialRates.stoneChips})
+                        Stone Chips ({buildingTotals.stoneChips.toFixed(1)} cft
+                        @ BDT {materialRates.stoneChips})
                       </span>
                       <span className="font-medium">
                         {formatBDT(
@@ -3564,12 +3574,13 @@ export default function Index() {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span>
-                        Steel ({buildingTotals.reinforcement.toFixed(1)} kg @ BDT{" "}
-                        {materialRates.reinforcement})
+                        Steel ({buildingTotals.reinforcement.toFixed(1)} kg @
+                        BDT {materialRates.reinforcement})
                       </span>
                       <span className="font-medium">
                         {formatBDT(
-                          buildingTotals.reinforcement * materialRates.reinforcement,
+                          buildingTotals.reinforcement *
+                            materialRates.reinforcement,
                         )}
                       </span>
                     </div>
@@ -3579,7 +3590,9 @@ export default function Index() {
                         {materialRates.brick})
                       </span>
                       <span className="font-medium">
-                        {formatBDT(buildingTotals.brickQuantity * materialRates.brick)}
+                        {formatBDT(
+                          buildingTotals.brickQuantity * materialRates.brick,
+                        )}
                       </span>
                     </div>
                     <div className="flex justify-between">

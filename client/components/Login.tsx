@@ -72,7 +72,9 @@ export function Login() {
               <Calculator className="h-8 w-8 text-brand-200 hidden" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">ROY</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gray-900">
+            ROY
+          </CardTitle>
           <CardDescription className="text-gray-700">
             {isRegistering ? "Create your account" : "Sign in to your account"}
           </CardDescription>
@@ -87,7 +89,9 @@ export function Login() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-800">Email</Label>
+              <Label htmlFor="email" className="text-gray-800">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -100,7 +104,9 @@ export function Login() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-800">Password</Label>
+              <Label htmlFor="password" className="text-gray-800">
+                Password
+              </Label>
               <div className="relative">
                 <Input
                   id="password"

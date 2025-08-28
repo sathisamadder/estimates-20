@@ -174,7 +174,10 @@ export function MobileTable({
         const isExpanded = expandedItems.has(item.id);
 
         return (
-          <Card key={item.id} className="shadow-sm glass border-white/20 bg-white/10 text-white">
+          <Card
+            key={item.id}
+            className="shadow-sm glass border-white/20 bg-white/10 text-white"
+          >
             <CardContent className="p-4">
               {/* Header Row */}
               <div className="flex items-center justify-between mb-3">
@@ -213,7 +216,11 @@ export function MobileTable({
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="p-1 text-white">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="p-1 text-white"
+                      >
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -275,7 +282,9 @@ export function MobileTable({
                   <Separator className="my-3 bg-white/20" />
                   <div className="space-y-3 text-sm">
                     <div>
-                      <h4 className="font-medium text-white/90 mb-2">Item Details</h4>
+                      <h4 className="font-medium text-white/90 mb-2">
+                        Item Details
+                      </h4>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
                           <span className="text-white/70">Type:</span>
@@ -283,32 +292,44 @@ export function MobileTable({
                         </div>
                         <div>
                           <span className="text-white/70">Category:</span>
-                          <span className="ml-2 font-medium">{item.category}</span>
+                          <span className="ml-2 font-medium">
+                            {item.category}
+                          </span>
                         </div>
                       </div>
                     </div>
 
                     <div>
-                      <h4 className="font-medium text-white/90 mb-2">Measurements</h4>
+                      <h4 className="font-medium text-white/90 mb-2">
+                        Measurements
+                      </h4>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
                           <span className="text-white/70">Volume:</span>
-                          <span className="ml-2 font-medium">{item.volume} cft</span>
+                          <span className="ml-2 font-medium">
+                            {item.volume} cft
+                          </span>
                         </div>
                         <div>
                           <span className="text-white/70">Steel:</span>
-                          <span className="ml-2 font-medium">{item.reinforcement} kg</span>
+                          <span className="ml-2 font-medium">
+                            {item.reinforcement} kg
+                          </span>
                         </div>
                         {item.brickQuantity && (
                           <div>
                             <span className="text-white/70">Bricks:</span>
-                            <span className="ml-2 font-medium">{item.brickQuantity} nos</span>
+                            <span className="ml-2 font-medium">
+                              {item.brickQuantity} nos
+                            </span>
                           </div>
                         )}
                         {item.plasterArea && (
                           <div>
                             <span className="text-white/70">Area:</span>
-                            <span className="ml-2 font-medium">{item.plasterArea} sft</span>
+                            <span className="ml-2 font-medium">
+                              {item.plasterArea} sft
+                            </span>
                           </div>
                         )}
                       </div>
