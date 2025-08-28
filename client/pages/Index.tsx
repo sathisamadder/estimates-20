@@ -1974,6 +1974,17 @@ export default function Index() {
   });
 
   const totals = getTotalEstimate();
+  const floors = currentProject.numberOfFloors || 1;
+  const buildingTotals = {
+    cement: totals.cement * floors,
+    sand: totals.sand * floors,
+    stoneChips: totals.stoneChips * floors,
+    reinforcement: totals.reinforcement * floors,
+    totalCost: totals.totalCost * floors,
+    volume: totals.volume * floors,
+    brickQuantity: totals.brickQuantity * floors,
+    plasterArea: totals.plasterArea * floors,
+  };
   const categoryTotals = Object.entries(
     currentProject.items.reduce(
       (acc, item) => {
@@ -2011,7 +2022,7 @@ export default function Index() {
         }}
         onPrint={() => window.print()}
         projectName={currentProject.name}
-        totalCost={formatBDT(totals.totalCost)}
+        totalCost={formatBDT(buildingTotals.totalCost)}
         itemCount={currentProject.items.length}
       >
         <div className="container mx-auto px-4 py-6">
