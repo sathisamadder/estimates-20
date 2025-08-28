@@ -134,3 +134,80 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Modern GPT-style gradient background and glass utilities */
+@layer utilities {
+  .gpt-background {
+    background-color: #0b1220;
+    background-image:
+      radial-gradient(700px 400px at 10% -10%, rgba(59,130,246,0.18), transparent 60%),
+      radial-gradient(600px 500px at 90% 0%, rgba(168,85,247,0.20), transparent 60%),
+      radial-gradient(800px 600px at 50% 120%, rgba(34,211,238,0.20), transparent 60%),
+      radial-gradient(1000px 600px at -20% 60%, rgba(16,185,129,0.15), transparent 60%),
+      linear-gradient(180deg, #0b1220 0%, #0a0f1b 100%);
+  }
+
+  .glass {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.20);
+    box-shadow: 0 10px 30px rgba(2,8,23,0.25);
+    backdrop-filter: saturate(140%) blur(12px);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+  }
+
+  .glass-strong {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.28);
+    box-shadow: 0 20px 40px rgba(2,8,23,0.35);
+    backdrop-filter: saturate(160%) blur(16px);
+    -webkit-backdrop-filter: saturate(160%) blur(16px);
+  }
+
+  .liquid-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .liquid-blob {
+    position: absolute;
+    filter: blur(60px);
+    opacity: 0.6;
+    border-radius: 50%;
+    will-change: transform;
+    animation: float 18s ease-in-out infinite;
+    mix-blend-mode: screen;
+  }
+
+  .blob1 {
+    width: 36rem;
+    height: 36rem;
+    left: -10rem;
+    top: -8rem;
+    background: radial-gradient(closest-side, rgba(34,211,238,0.7), rgba(34,211,238,0.0) 70%);
+    animation-delay: 0s;
+  }
+  .blob2 {
+    width: 28rem;
+    height: 28rem;
+    right: -8rem;
+    top: 9rem;
+    background: radial-gradient(closest-side, rgba(168,85,247,0.6), rgba(168,85,247,0.0) 70%);
+    animation-delay: 3s;
+  }
+  .blob3 {
+    width: 32rem;
+    height: 32rem;
+    left: 22%;
+    bottom: -10rem;
+    background: radial-gradient(closest-side, rgba(16,185,129,0.55), rgba(16,185,129,0.0) 70%);
+    animation-delay: 6s;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(0, -20px, 0) scale(1.05); }
+  }
+}
