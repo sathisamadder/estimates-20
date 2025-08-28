@@ -239,11 +239,12 @@ export function MobileLayout({
             </Button>
             <Button
               size="sm"
-              className="bg-brand-500 hover:bg-brand-600 px-3"
+              variant="ghost"
+              className="p-2 text-white"
               onClick={onAddItem}
+              aria-label="Add item"
             >
-              <Plus className="h-4 w-4 mr-1" />
-              Add
+              <Plus className="h-5 w-5" />
             </Button>
           </div>
         </div>
@@ -306,14 +307,6 @@ export function MobileLayout({
         </div>
       </div>
 
-      {/* Floating Action Button */}
-      <Button
-        size="lg"
-        className="fixed bottom-20 right-4 z-30 w-14 h-14 rounded-full bg-brand-500 hover:bg-brand-600 shadow-lg"
-        onClick={onAddItem}
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
     </div>
   );
 }
