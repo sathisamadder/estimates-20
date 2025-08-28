@@ -447,6 +447,14 @@ export default function Index() {
     loadFromLocalStorage();
   }, [loadFromLocalStorage]);
 
+  // Prompt for basic project info first
+  useEffect(() => {
+    if (!isProjectDialogOpen) {
+      const needsBasics = !currentProjectId || !currentProject.location || !currentProject.numberOfFloors;
+      if (needsBasics) setIsProjectDialogOpen(true);
+    }
+  }, [currentProjectId, currentProject.location, currentProject.numberOfFloors, isProjectDialogOpen]);
+
   // Save data when it changes
   useEffect(() => {
     if (projects.length > 0 || clients.length > 0) {
