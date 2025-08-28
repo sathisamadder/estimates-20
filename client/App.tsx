@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { Login } from "@/components/Login";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Settings from "./pages/Settings";
 
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
