@@ -3525,30 +3525,30 @@ export default function Index() {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span>
-                        Cement ({totals.cement.toFixed(1)} bags @ BDT{" "}
+                        Cement ({buildingTotals.cement.toFixed(1)} bags @ BDT{" "}
                         {materialRates.cement})
                       </span>
                       <span className="font-medium">
-                        {formatBDT(totals.cement * materialRates.cement)}
+                        {formatBDT(buildingTotals.cement * materialRates.cement)}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span>
-                        Sand ({totals.sand.toFixed(1)} cft @ BDT{" "}
+                        Sand ({buildingTotals.sand.toFixed(1)} cft @ BDT{" "}
                         {materialRates.sand})
                       </span>
                       <span className="font-medium">
-                        {formatBDT(totals.sand * materialRates.sand)}
+                        {formatBDT(buildingTotals.sand * materialRates.sand)}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span>
-                        Stone Chips ({totals.stoneChips.toFixed(1)} cft @ BDT{" "}
+                        Stone Chips ({buildingTotals.stoneChips.toFixed(1)} cft @ BDT{" "}
                         {materialRates.stoneChips})
                       </span>
                       <span className="font-medium">
                         {formatBDT(
-                          totals.stoneChips * materialRates.stoneChips,
+                          buildingTotals.stoneChips * materialRates.stoneChips,
                         )}
                       </span>
                     </div>
@@ -3556,31 +3556,31 @@ export default function Index() {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span>
-                        Steel ({totals.reinforcement.toFixed(1)} kg @ BDT{" "}
+                        Steel ({buildingTotals.reinforcement.toFixed(1)} kg @ BDT{" "}
                         {materialRates.reinforcement})
                       </span>
                       <span className="font-medium">
                         {formatBDT(
-                          totals.reinforcement * materialRates.reinforcement,
+                          buildingTotals.reinforcement * materialRates.reinforcement,
                         )}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span>
-                        Bricks ({totals.brickQuantity} nos @ BDT{" "}
+                        Bricks ({buildingTotals.brickQuantity} nos @ BDT{" "}
                         {materialRates.brick})
                       </span>
                       <span className="font-medium">
-                        {formatBDT(totals.brickQuantity * materialRates.brick)}
+                        {formatBDT(buildingTotals.brickQuantity * materialRates.brick)}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span>
-                        Labor ({totals.volume.toFixed(1)} cft @ BDT{" "}
+                        Labor ({buildingTotals.volume.toFixed(1)} cft @ BDT{" "}
                         {materialRates.labor})
                       </span>
                       <span className="font-medium">
-                        {formatBDT(totals.volume * materialRates.labor)}
+                        {formatBDT(buildingTotals.volume * materialRates.labor)}
                       </span>
                     </div>
                   </div>
