@@ -40,7 +40,7 @@ const App = () => (
               path="/settings"
               element={
                 <ProtectedRoute>
-                  {require("./pages/Settings").default()}
+                  <Settings />
                 </ProtectedRoute>
               }
             />
