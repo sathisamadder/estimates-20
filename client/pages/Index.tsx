@@ -2745,19 +2745,20 @@ export default function Index() {
                       // Export summary as text
                       const totals = getTotalEstimate();
                       const summary =
-                        `Construction Estimate Summary\n
-` +
+                        `Construction Estimate Summary\n\n` +
                         `Project: ${currentProject.name}\n` +
                         `Description: ${currentProject.description}\n` +
                         `Client: ${currentProject.client}\n` +
-                        `Location: ${currentProject.location}\n\n` +
-                        `MATERIAL SUMMARY:\n` +
-                        `Cement: ${totals.cement.toFixed(2)} bags\n` +
-                        `Sand: ${totals.sand.toFixed(2)} cft\n` +
-                        `Stone Chips: ${totals.stoneChips.toFixed(2)} cft\n` +
-                        `Steel Reinforcement: ${totals.reinforcement.toFixed(2)} kg\n` +
-                        `Bricks: ${totals.brickQuantity} nos\n\n` +
-                        `TOTAL COST: ${formatBDT(totals.totalCost)}\n\n` +
+                        `Location: ${currentProject.location}\n` +
+                        `Floors: ${floors}\n\n` +
+                        `MATERIAL SUMMARY (All Floors):\n` +
+                        `Cement: ${buildingTotals.cement.toFixed(2)} bags\n` +
+                        `Sand: ${buildingTotals.sand.toFixed(2)} cft\n` +
+                        `Stone Chips: ${buildingTotals.stoneChips.toFixed(2)} cft\n` +
+                        `Steel Reinforcement: ${buildingTotals.reinforcement.toFixed(2)} kg\n` +
+                        `Bricks: ${buildingTotals.brickQuantity.toFixed(0)} nos\n\n` +
+                        `TOTAL COST: ${formatBDT(buildingTotals.totalCost)}\n` +
+                        `Per-floor Cost: ${formatBDT(totals.totalCost)}\n\n` +
                         `Generated on: ${new Date().toLocaleDateString()}`;
 
                       const dataBlob = new Blob([summary], {
