@@ -53,7 +53,7 @@ export function Login() {
         <div className="liquid-blob blob2"></div>
         <div className="liquid-blob blob3"></div>
       </div>
-      <Card className="w-full max-w-md shadow-xl glass border-white/20 bg-white/10 text-white">
+      <Card className="w-full max-w-md shadow-xl glass-light bg-white/70 text-gray-900">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
             <div className="flex items-center justify-center w-16 h-16">
@@ -72,8 +72,8 @@ export function Login() {
               <Calculator className="h-8 w-8 text-brand-200 hidden" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-white">ROY</CardTitle>
-          <CardDescription className="text-white/80">
+          <CardTitle className="text-2xl font-bold text-gray-900">ROY</CardTitle>
+          <CardDescription className="text-gray-700">
             {isRegistering ? "Create your account" : "Sign in to your account"}
           </CardDescription>
         </CardHeader>
@@ -87,7 +87,7 @@ export function Login() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-white/90">Email</Label>
+              <Label htmlFor="email" className="text-gray-800">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -100,7 +100,7 @@ export function Login() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-white/90">Password</Label>
+              <Label htmlFor="password" className="text-gray-800">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -139,7 +139,7 @@ export function Login() {
             <div className="text-center">
               <button
                 type="button"
-                className="text-sm text-white/90 hover:text-white"
+                className="text-sm text-gray-800 hover:text-gray-900"
                 onClick={() => {
                   setIsRegistering(!isRegistering);
                   setError("");
