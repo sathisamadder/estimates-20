@@ -1,20 +1,4 @@
-import {
-  Building2,
-  Layers,
-  Square,
-  Circle,
-  Zap,
-  Home,
-  Hammer,
-  Wrench,
-  Paintbrush,
-  Truck,
-  Foundation,
-  Pillar,
-  Beam,
-  Stairs,
-  Roof,
-} from "lucide-react";
+import { Building2, Layers, Square, Circle, Zap, Home, Hammer, Wrench, Paintbrush, Truck, Radiation as Foundation, Pill as Pillar, Bean as Beam, Stars as Stairs, Book as Roof } from "lucide-react";
 import { ConstructionType } from "@/types/construction";
 
 export const constructionTypes: ConstructionType[] = [
